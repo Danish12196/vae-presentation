@@ -29,7 +29,7 @@ All share one conv trunk: conv 32-64-128-256 (stride 2, BatchNorm, LeakyReLU) do
 | dae_128 | denoising AE (input noise sigma 0 to 0.5, clean target) | 128 | denoising demo |
 | sparse_l1 | ReLU code + L1 penalty | 1024 | sparse demo |
 | sparse_none | same, no penalty | 1024 | sparse comparison |
-| cae_64 | contractive (penalise code change under small input noise) | 64 | contractive demo, compared with ae_64 |
+| cae_64 | contractive (penalise code change under small input noise, relative to the code spread; weight 100) | 64 | contractive demo, compared with ae_64 |
 | vae_2d_b0, vae_2d_b0.1, vae_2d_b1, vae_2d_b4 | VAE, beta 0/0.1/1/4 | 2 | KL slider; vae_2d_b1 also draws the Part 5 map |
 | vae_128 | VAE, beta 1 | 128 | generation, interpolation, reparameterization |
 | ae_128 | plain AE | 128 | AE vs VAE sampling and interpolation |

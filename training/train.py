@@ -54,7 +54,7 @@ RUN_LIST = [
     Run("dae_128", "dae", 128, purpose="denoising demo"),
     Run("sparse_l1", "sparse", 1024, l1=0.5, purpose="sparse demo (ReLU code + L1)"),
     Run("sparse_none", "sparse", 1024, l1=0.0, purpose="sparse comparison (no penalty)"),
-    Run("cae_64", "contractive", 64, contractive=0.05, purpose="contractive demo vs ae_64"),
+    Run("cae_64", "contractive", 64, contractive=100.0, purpose="contractive demo vs ae_64"),
     Run("vae_2d_b0", "vae", 2, beta=0.0, purpose="KL slider, beta 0"),
     Run("vae_2d_b0.1", "vae", 2, beta=0.1, purpose="KL slider, beta 0.1"),
     Run("vae_2d_b1", "vae", 2, beta=1.0, purpose="KL slider, beta 1; Part 5 map"),
@@ -97,6 +97,9 @@ def autoencoder_loss(run, model, x, kl_weight):
         z, z_nudged = model.encode(torch.cat([x, x + eps * torch.randn_like(x)])).chunk(2)
         recon = reconstruction_loss(model.decode(z), x)
         jac = ((z_nudged - z) ** 2).sum(1).mean() / eps ** 2
+        # Measured relative to how spread out the codes are; otherwise the network just
+        # shrinks the whole code (the decoder scales it back up) without becoming any steadier.
+        jac = jac / z.var(0).sum()
         return recon + run.contractive * jac, {"recon": recon, "jacobian": jac}
 
     recon = reconstruction_loss(model(x)[0], x)  # plain AE: just rebuild the input
