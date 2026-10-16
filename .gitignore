@@ -1,0 +1,13 @@
+# Training data and run outputs (large, regenerable)
+training/data/
+training/runs/
+*.pt
+
+# Python
+__pycache__/
+.venv/
+
+# Node
+node_modules/
+
+# Note: site/models and site/data are committed on purpose (exported models are deployed).
