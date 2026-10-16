@@ -1,0 +1,410 @@
+/* Reusable pieces for the demos. Colours come from tokens.css; --accent follows the slide. */
+
+/* ---------------------------------------------------------------- buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 10px 24px;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-small);
+  cursor: pointer;
+  transition: background-color var(--t-fast) linear, transform var(--t-fast) var(--ease);
+}
+.btn:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn.primary {
+  background: var(--accent);
+  color: var(--bg);
+}
+.btn.primary:hover {
+  background: color-mix(in srgb, var(--accent) 85%, white);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------------------------------------------------------------- cards and callouts */
+
+.card {
+  background: var(--bg-raised);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: calc(var(--gap) * 1.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.card h3 {
+  color: var(--accent);
+}
+
+.callout {
+  border-left: 6px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-raised));
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+  padding: 14px 22px;
+  font-size: var(--fs-small);
+}
+.callout strong {
+  color: var(--accent);
+}
+
+/* A slightly tilted label for the one joke per slide. */
+.sticker {
+  display: inline-block;
+  padding: 8px 18px;
+  background: var(--sunflower);
+  color: var(--bg);
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: var(--fs-small);
+  border-radius: 12px;
+  transform: rotate(-3deg);
+  box-shadow: 4px 4px 0 color-mix(in srgb, black 40%, transparent);
+}
+.sticker.tilt-right {
+  transform: rotate(3deg);
+}
+
+/* Speech bubble next to the mascot. */
+.speech {
+  position: relative;
+  padding: 16px 24px;
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 22px;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-h3);
+  max-width: 14ch;
+}
+.speech::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  border: 10px solid transparent;
+  border-right: 16px solid var(--text);
+  transform: translateY(-50%);
+}
+@media (max-width: 760px) {
+  .speech::before {
+    left: 50%;
+    top: -24px;
+    border: 10px solid transparent;
+    border-bottom: 16px solid var(--text);
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------------------------------------------------------------- cat canvas */
+
+/* 64x64 images drawn at native size and scaled up crisply, with a soft glow frame. */
+.cat-canvas {
+  display: block;
+  width: var(--cat-size, 256px);
+  height: var(--cat-size, 256px);
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+  border-radius: 14px;
+  background: var(--bg-sunken);
+  border: 3px solid color-mix(in srgb, var(--accent) 70%, white);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent),
+    0 0 36px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.cat-canvas.small {
+  --cat-size: 96px;
+  border-width: 2px;
+  border-radius: 10px;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+@media (max-width: 760px) {
+  .cat-canvas {
+    --cat-size: min(60vw, 220px);
+  }
+  .cat-canvas.small {
+    --cat-size: 64px;
+  }
+}
+
+/* ---------------------------------------------------------------- big slider */
+
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 640px;
+}
+.slider-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  font-size: var(--fs-small);
+}
+.slider-value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent);
+  font-size: var(--fs-body);
+}
+.slider input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;              /* big touch target */
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;        /* dragging the slider never scrolls the page */
+}
+.slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--bg-sunken) var(--fill, 0%));
+  border: 2px solid var(--line);
+}
+.slider input[type="range"]::-moz-range-track {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--bg-sunken) var(--fill, 0%));
+  border: 2px solid var(--line);
+}
+.slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 34px;
+  height: 34px;
+  margin-top: -13px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 5px solid var(--accent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.slider input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 5px solid var(--accent);
+}
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+}
+
+/* ---------------------------------------------------------------- toggle switch */
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  font-size: var(--fs-small);
+  user-select: none;
+}
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.toggle-track {
+  position: relative;
+  flex-shrink: 0;
+  width: 68px;
+  height: 38px;
+  border-radius: 19px;
+  background: var(--bg-sunken);
+  border: 2px solid var(--line);
+  transition: background-color var(--t-fast) linear;
+}
+.toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--text-soft);
+  transition: transform var(--t-fast) var(--ease), background-color var(--t-fast) linear;
+}
+.toggle input:checked + .toggle-track {
+  background: color-mix(in srgb, var(--accent) 35%, var(--bg-sunken));
+  border-color: var(--accent);
+}
+.toggle input:checked + .toggle-track::after {
+  transform: translateX(30px);
+  background: var(--accent);
+}
+.toggle input:focus-visible + .toggle-track {
+  outline: 3px solid var(--sunflower);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------- tabs */
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--bg-sunken);
+  border: 2px solid var(--line);
+  width: fit-content;
+  max-width: 100%;
+}
+.tab {
+  padding: 8px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-soft);
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-small);
+  cursor: pointer;
+  transition: background-color var(--t-fast) linear, color var(--t-fast) linear;
+}
+.tab:hover {
+  color: var(--text);
+}
+.tab[aria-selected="true"] {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ---------------------------------------------------------------- probability bars */
+
+.prob-bars {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px 16px;
+  width: 100%;
+  max-width: 560px;
+  font-size: var(--fs-small);
+}
+.prob-label {
+  font-family: var(--font-head);
+  font-weight: 600;
+}
+.prob-track {
+  height: 24px;
+  border-radius: 12px;
+  background: var(--bg-sunken);
+  border: 2px solid var(--line);
+  overflow: hidden;
+}
+.prob-fill {
+  height: 100%;
+  width: 0;
+  background: var(--bar-colour, var(--accent));
+  transition: width var(--t-med) var(--ease);
+}
+.prob-value {
+  font-family: var(--font-mono);
+  min-width: 4.5ch;
+  text-align: right;
+}
+.prob-bars .top .prob-label,
+.prob-bars .top.prob-value {
+  color: var(--bar-colour, var(--accent));
+}
+
+/* ---------------------------------------------------------------- readout */
+
+.readout {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.readout-label {
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-soft);
+}
+.readout-value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- cat picker */
+
+.cat-picker {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.cat-pick {
+  padding: 0;
+  border: 3px solid transparent;
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+  transition: border-color var(--t-fast) linear, transform var(--t-fast) var(--ease);
+}
+.cat-pick canvas {
+  display: block;
+  width: 64px;
+  height: 64px;
+  border-radius: 9px;
+  image-rendering: pixelated;
+}
+.cat-pick:hover {
+  transform: translateY(-3px);
+}
+.cat-pick[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+@media (max-width: 760px) {
+  .cat-pick canvas {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ---------------------------------------------------------------- "still training" card */
+
+.training-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  max-width: 560px;
+}
+.training-card .mascot {
+  width: 120px;
+  flex-shrink: 0;
+}
+.training-card code {
+  color: var(--accent);
+}
+
+/* Anything a finger drags inside a demo (canvases, maps) must not scroll the page. */
+.interactive {
+  touch-action: none;
+}

@@ -1,0 +1,290 @@
+{
+ "version": "6398ebafd7dc",
+ "total_bytes": 72791440,
+ "files": [
+  {
+   "path": "css/base.css",
+   "bytes": 8648
+  },
+  {
+   "path": "css/components.css",
+   "bytes": 10048
+  },
+  {
+   "path": "css/fonts.css",
+   "bytes": 3664
+  },
+  {
+   "path": "css/tokens.css",
+   "bytes": 1773
+  },
+  {
+   "path": "data/animals.json",
+   "bytes": 177
+  },
+  {
+   "path": "data/animals.png",
+   "bytes": 145108
+  },
+  {
+   "path": "data/anomaly.json",
+   "bytes": 3360
+  },
+  {
+   "path": "data/cls_dream.json",
+   "bytes": 210
+  },
+  {
+   "path": "data/cls_dream.png",
+   "bytes": 253782
+  },
+  {
+   "path": "data/files.json",
+   "bytes": 2185
+  },
+  {
+   "path": "data/latent_maps.json",
+   "bytes": 188050
+  },
+  {
+   "path": "data/map_thumbs.jpg",
+   "bytes": 979463
+  },
+  {
+   "path": "data/not_cats.json",
+   "bytes": 420
+  },
+  {
+   "path": "data/not_cats.png",
+   "bytes": 34632
+  },
+  {
+   "path": "data/pca.json",
+   "bytes": 1798
+  },
+  {
+   "path": "data/pca_k16.png",
+   "bytes": 276844
+  },
+  {
+   "path": "data/pca_k2.png",
+   "bytes": 218459
+  },
+  {
+   "path": "data/pca_k256.png",
+   "bytes": 439516
+  },
+  {
+   "path": "data/pca_k64.png",
+   "bytes": 353394
+  },
+  {
+   "path": "data/showcase.json",
+   "bytes": 269
+  },
+  {
+   "path": "data/showcase.png",
+   "bytes": 560517
+  },
+  {
+   "path": "data/sparse_codes.json",
+   "bytes": 574525
+  },
+  {
+   "path": "img/favicon.svg",
+   "bytes": 575
+  },
+  {
+   "path": "index.html",
+   "bytes": 12874
+  },
+  {
+   "path": "js/loader.js",
+   "bytes": 3569
+  },
+  {
+   "path": "js/main.js",
+   "bytes": 8141
+  },
+  {
+   "path": "js/mascot.js",
+   "bytes": 6986
+  },
+  {
+   "path": "js/models.js",
+   "bytes": 12048
+  },
+  {
+   "path": "js/offline.js",
+   "bytes": 2135
+  },
+  {
+   "path": "js/ui.js",
+   "bytes": 6615
+  },
+  {
+   "path": "models/ae_128.decoder.onnx",
+   "bytes": 2446506
+  },
+  {
+   "path": "models/ae_128.encoder.onnx",
+   "bytes": 2431744
+  },
+  {
+   "path": "models/ae_16.decoder.onnx",
+   "bytes": 1528999
+  },
+  {
+   "path": "models/ae_16.encoder.onnx",
+   "bytes": 1514010
+  },
+  {
+   "path": "models/ae_2.decoder.onnx",
+   "bytes": 1414311
+  },
+  {
+   "path": "models/ae_2.encoder.onnx",
+   "bytes": 2795361
+  },
+  {
+   "path": "models/ae_256.decoder.onnx",
+   "bytes": 3495084
+  },
+  {
+   "path": "models/ae_256.encoder.onnx",
+   "bytes": 3480578
+  },
+  {
+   "path": "models/ae_64.decoder.onnx",
+   "bytes": 1922215
+  },
+  {
+   "path": "models/ae_64.encoder.onnx",
+   "bytes": 1907324
+  },
+  {
+   "path": "models/cae_64.decoder.onnx",
+   "bytes": 1922215
+  },
+  {
+   "path": "models/cae_64.encoder.onnx",
+   "bytes": 1907324
+  },
+  {
+   "path": "models/cnn_cls.onnx",
+   "bytes": 2811735
+  },
+  {
+   "path": "models/dae_128.decoder.onnx",
+   "bytes": 2446506
+  },
+  {
+   "path": "models/dae_128.encoder.onnx",
+   "bytes": 4860256
+  },
+  {
+   "path": "models/manifest.json",
+   "bytes": 39165
+  },
+  {
+   "path": "models/vae_128.decoder.onnx",
+   "bytes": 2446506
+  },
+  {
+   "path": "models/vae_128.encoder.onnx",
+   "bytes": 3480977
+  },
+  {
+   "path": "models/vae_2d_b0.1.decoder.onnx",
+   "bytes": 1414311
+  },
+  {
+   "path": "models/vae_2d_b0.1.encoder.onnx",
+   "bytes": 1416078
+  },
+  {
+   "path": "models/vae_2d_b0.decoder.onnx",
+   "bytes": 1414311
+  },
+  {
+   "path": "models/vae_2d_b0.encoder.onnx",
+   "bytes": 1416078
+  },
+  {
+   "path": "models/vae_2d_b1.decoder.onnx",
+   "bytes": 1414311
+  },
+  {
+   "path": "models/vae_2d_b1.encoder.onnx",
+   "bytes": 1416078
+  },
+  {
+   "path": "models/vae_2d_b4.decoder.onnx",
+   "bytes": 1414311
+  },
+  {
+   "path": "models/vae_2d_b4.encoder.onnx",
+   "bytes": 1416078
+  },
+  {
+   "path": "vendor/fonts/fredoka-latin-500-normal.woff2",
+   "bytes": 16248
+  },
+  {
+   "path": "vendor/fonts/fredoka-latin-600-normal.woff2",
+   "bytes": 16468
+  },
+  {
+   "path": "vendor/fonts/fredoka-latin-700-normal.woff2",
+   "bytes": 15900
+  },
+  {
+   "path": "vendor/fonts/inter-greek-400-normal.woff2",
+   "bytes": 7776
+  },
+  {
+   "path": "vendor/fonts/inter-greek-600-normal.woff2",
+   "bytes": 7944
+  },
+  {
+   "path": "vendor/fonts/inter-greek-700-normal.woff2",
+   "bytes": 7920
+  },
+  {
+   "path": "vendor/fonts/inter-latin-400-normal.woff2",
+   "bytes": 23664
+  },
+  {
+   "path": "vendor/fonts/inter-latin-600-normal.woff2",
+   "bytes": 24452
+  },
+  {
+   "path": "vendor/fonts/inter-latin-700-normal.woff2",
+   "bytes": 24356
+  },
+  {
+   "path": "vendor/fonts/jetbrains-mono-greek-400-normal.woff2",
+   "bytes": 4228
+  },
+  {
+   "path": "vendor/fonts/jetbrains-mono-greek-700-normal.woff2",
+   "bytes": 4300
+  },
+  {
+   "path": "vendor/fonts/jetbrains-mono-latin-400-normal.woff2",
+   "bytes": 21168
+  },
+  {
+   "path": "vendor/fonts/jetbrains-mono-latin-700-normal.woff2",
+   "bytes": 21908
+  },
+  {
+   "path": "vendor/ort/ort-wasm-simd-threaded.wasm",
+   "bytes": 14239897
+  },
+  {
+   "path": "vendor/ort/ort.wasm.bundle.min.js",
+   "bytes": 73054
+  }
+ ]
+}

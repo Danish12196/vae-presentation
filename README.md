@@ -10,3 +10,16 @@ Live at **https://autoencoders.danishali.dev**
 - **`site/`** is a fully static site: plain HTML, CSS and JavaScript modules, no build step and no backend. The exported models run in the viewer's browser with onnxruntime-web, and a service worker keeps it working offline.
 
 See [SPEC.md](SPEC.md) for the full design.
+
+## Run it locally
+
+```bash
+python -m http.server 8000 --directory site
+```
+
+Then open http://localhost:8000 (any static file server works; there is no build step).
+The offline service worker is off on localhost so your edits show up on reload; open
+http://localhost:8000/?sw=on to test offline mode, and `?sw=off` to turn it off again.
+
+After changing anything in `site/` (or re-running `training/export.py`), run
+`python tools/stamp_site.py` so the service worker caches the new files.

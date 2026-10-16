@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14112b" />
+    <meta name="description" content="An interactive presentation about autoencoders and variational autoencoders, with small models trained on cat faces running live in your browser." />
+    <title>Autoencoders &amp; VAEs: teaching a network to imagine cats</title>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <script type="module" src="js/main.js"></script>
+  </head>
+  <body>
+    <!-- Presentation chrome: progress bar, part name, slide number -->
+    <div class="topbar" aria-hidden="true">
+      <div class="progress"><div class="progress-fill"></div></div>
+      <span class="topbar-part"></span>
+      <span class="topbar-right">
+        <span class="offline-tick" title="Every file is cached: this page works without internet">✓ available offline</span>
+        <span class="slide-count"></span>
+      </span>
+    </div>
+
+    <nav class="nav-buttons" aria-label="Slides">
+      <button type="button" data-nav="prev" aria-label="Previous slide">↑</button>
+      <button type="button" data-nav="next" aria-label="Next slide">↓</button>
+    </nav>
+
+    <main id="deck">
+      <section class="slide title-slide" id="s01" data-part="1" data-title="Autoencoders & VAEs" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 1 · From classification to generation</p>
+        </header>
+        <div class="slide-body" data-demo>
+          <div data-mascot="happy" data-animate></div>
+          <h1>Autoencoders &amp; VAEs<span class="sub">teaching a network to imagine cats</span></h1>
+        </div>
+      </section>
+
+      <section class="slide" id="s02" data-part="1" data-title="Discriminative vs generative" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 1 · From classification to generation</p>
+          <h2>Discriminative vs generative</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s03" data-part="1" data-title="Encoder and decoder" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 1 · From classification to generation</p>
+          <h2>Encoder and decoder</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s04" data-part="1" data-title="The identity trap" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 1 · From classification to generation</p>
+          <h2>The identity trap</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="photocopier"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s05" data-part="2" data-title="The bottleneck" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>The bottleneck</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="happy"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s06" data-part="2" data-title="Reconstruction loss" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>Reconstruction loss</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s07" data-part="2" data-title="PCA vs autoencoder" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>PCA vs autoencoder</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="confused"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s08" data-part="2" data-title="What autoencoders are good for" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>What autoencoders are good for</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="happy"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s09" data-part="3" data-title="Sparse, denoising, contractive, convolutional" data-accent="mint">
+        <header class="slide-head">
+          <p class="part-label">Part 3 · Other types of autoencoders</p>
+          <h2>Sparse, denoising, contractive, convolutional</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s10" data-part="4" data-title="Holes in the latent space" data-accent="sky">
+        <header class="slide-head">
+          <p class="part-label">Part 4 · Why autoencoders can't generate</p>
+          <h2>Holes in the latent space</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="monster"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s11" data-part="5" data-title="Encode a cloud, not a point" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Encode a cloud, not a point</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="happy"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s12" data-part="5" data-title="Loss = reconstruction + KL" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Loss = reconstruction + KL</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s13" data-part="5" data-title="Turning the KL dial" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Turning the KL dial</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="sleepy"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s14" data-part="5" data-title="The reparameterization trick" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>The reparameterization trick</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="shocked"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s15" data-part="5" data-title="Generating cats" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Generating cats</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="happy"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s16" data-part="5" data-title="Interpolation" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Interpolation</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="happy"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s17" data-part="6" data-title="Why VAE cats are blurry" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <h2>Why VAE cats are blurry</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="confused"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s18" data-part="6" data-title="Extensions: β-VAE, VQ-VAE, Stable Diffusion" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <h2>Extensions: β-VAE, VQ-VAE, Stable Diffusion</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="shocked"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s19" data-part="6" data-title="VAE vs GAN vs diffusion" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <h2>VAE vs GAN vs diffusion</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s20" data-part="6" data-title="Wrap-up" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <h2>Wrap-up</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="happy"></div><p class="speech">demo coming soon</p></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s21" data-part="6" data-title="Questions?" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <h2>Questions?</h2>
+        </header>
+        <div class="slide-body" data-demo>
+          <div class="coming-soon"><div data-mascot="confused"></div><p class="speech">Any questions?</p></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Keyboard help, toggled with ? -->
+    <div class="overlay" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <div class="help-card">
+        <h2 id="help-title">Keyboard</h2>
+        <dl>
+          <dt><kbd>PgDn</kbd> <kbd>↓</kbd> <kbd>→</kbd> <kbd>Space</kbd></dt><dd>next slide</dd>
+          <dt><kbd>PgUp</kbd> <kbd>↑</kbd> <kbd>←</kbd> <kbd>⇧ Space</kbd></dt><dd>previous slide</dd>
+          <dt><kbd>Home</kbd> <kbd>End</kbd></dt><dd>first / last slide</dd>
+          <dt><kbd>F</kbd></dt><dd>fullscreen</dd>
+          <dt><kbd>?</kbd></dt><dd>this help</dd>
+          <dt><kbd>Esc</kbd></dt><dd>close</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- First-visit loading screen: downloads the models and data, then warms up every model -->
+    <div class="overlay loader" id="loader" role="status" aria-live="polite">
+      <div class="loader-card">
+        <div data-mascot="sleepy" data-animate></div>
+        <h2>Waking up the cats</h2>
+        <div class="loader-bar"><div class="loader-fill"></div></div>
+        <p class="loader-text">getting ready…</p>
+        <p class="loader-error" hidden></p>
+      </div>
+    </div>
+  </body>
+</html>
