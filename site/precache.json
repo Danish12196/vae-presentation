@@ -1,6 +1,6 @@
 {
- "version": "e8f9eebba200",
- "total_bytes": 72481876,
+ "version": "705ea4472cec",
+ "total_bytes": 72519362,
  "files": [
   {
    "path": "css/base.css",
@@ -33,6 +33,10 @@
   {
    "path": "css/part5.css",
    "bytes": 12489
+  },
+  {
+   "path": "css/part6.css",
+   "bytes": 13437
   },
   {
    "path": "css/tokens.css",
@@ -124,7 +128,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 29146
+   "bytes": 35071
   },
   {
    "path": "js/latentmap.js",
@@ -136,7 +140,7 @@
   },
   {
    "path": "js/main.js",
-   "bytes": 8407
+   "bytes": 9512
   },
   {
    "path": "js/mascot.js",
@@ -217,6 +221,26 @@
   {
    "path": "js/slides/s16.js",
    "bytes": 3164
+  },
+  {
+   "path": "js/slides/s17.js",
+   "bytes": 3805
+  },
+  {
+   "path": "js/slides/s18.js",
+   "bytes": 5379
+  },
+  {
+   "path": "js/slides/s19.js",
+   "bytes": 4632
+  },
+  {
+   "path": "js/slides/s20.js",
+   "bytes": 1523
+  },
+  {
+   "path": "js/slides/s21.js",
+   "bytes": 1680
   },
   {
    "path": "js/state.js",

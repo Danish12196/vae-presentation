@@ -2,8 +2,12 @@
 //
 // Each slide can have a module js/slides/sNN.js exporting:
 //   init(sectionEl)   once, when the slide first comes near the screen
-//   enter()           every time it becomes the current slide (optional)
+//   enter(info)       every time it becomes the current slide (optional); info is
+//                     { direction: 1 | -1, byKey } where byKey means the presenter used
+//                     the keys or the prev/next buttons (rather than scrolling or swiping)
 //   leave()           every time it stops being current, e.g. to pause animations (optional)
+//   step(dir)         optional: return true to use a next/previous press inside the slide
+//                     (e.g. reveal its next row) instead of moving to another slide
 
 import { mountAll } from "./mascot.js";
 import { runLoader } from "./loader.js";
@@ -21,6 +25,7 @@ let current = -1;     // the slide on screen
 let target = 0;       // where key presses are heading (runs ahead of `current` during a scroll)
 let autoScrolling = false;
 let autoScrollTimer = 0;
+let keyTarget = -1;    // the slide a key press or nav button is heading for (-1: none)
 
 // ---------------------------------------------------------------- moving between slides
 
@@ -31,8 +36,16 @@ function goTo(index, { instant = false } = {}) {
   autoScrollTimer = setTimeout(() => (autoScrolling = false), 1000); // fallback for browsers without scrollend
   slides[target].scrollIntoView({ behavior: instant || reducedMotion.matches ? "instant" : "smooth", block: "start" });
 }
-const next = () => goTo(target + 1);
-const prev = () => goTo(target - 1);
+/** One step forward or back: the current slide may use it first (see step(dir) above). */
+function step(dir) {
+  if (target === current && ready.get(slides[current].id)?.step?.(dir)) return;
+  goTo(target + dir);
+  keyTarget = target;
+}
+const next = () => step(1);
+const prev = () => step(-1);
+
+for (const type of ["wheel", "touchstart"]) addEventListener(type, () => (keyTarget = -1), { passive: true });
 
 addEventListener("scrollend", () => {
   autoScrolling = false;
@@ -63,8 +76,10 @@ function setCurrent(index) {
   navButtons.querySelector('[data-nav="next"]').disabled = index === slides.length - 1;
   history.replaceState(null, "", `#${slide.id}`);
 
+  const info = { direction: previous < 0 || index > previous ? 1 : -1, byKey: index === keyTarget };
+  if (index === keyTarget) keyTarget = -1;
   if (previous >= 0) callHook(slides[previous], "leave");
-  callHook(slide, "enter");
+  callHook(slide, "enter", info);
 }
 
 function indexFromHash() {
@@ -176,12 +191,14 @@ wake();
 // ---------------------------------------------------------------- slide modules
 
 const modules = new Map(); // slide id -> Promise<module | null>
+const ready = new Map();   // slide id -> module, once its init has finished
 
 function loadModule(slide) {
   if (!modules.has(slide.id)) {
     const promise = import(`./slides/${slide.id}.js`)
       .then(async (mod) => {
         await mod.init?.(slide);
+        ready.set(slide.id, mod);
         return mod;
       })
       .catch((err) => {
@@ -196,12 +213,12 @@ function loadModule(slide) {
   return modules.get(slide.id);
 }
 
-async function callHook(slide, hook) {
+async function callHook(slide, hook, arg) {
   if (!modulesStarted) return;
   const mod = await loadModule(slide);
   // Only enter if it is still the current slide by the time the module is ready.
   if (hook === "enter" && slides[current] !== slide) return;
-  mod?.[hook]?.();
+  mod?.[hook]?.(arg);
 }
 
 let modulesStarted = false;
@@ -215,7 +232,7 @@ function startModules() {
     { rootMargin: "100% 0px" },
   );
   slides.forEach((s) => nearObserver.observe(s));
-  if (current >= 0) callHook(slides[current], "enter");
+  if (current >= 0) callHook(slides[current], "enter", { direction: 1, byKey: false });
 }
 
 // ---------------------------------------------------------------- start

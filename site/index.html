@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/part3.css" />
     <link rel="stylesheet" href="css/part4.css" />
     <link rel="stylesheet" href="css/part5.css" />
+    <link rel="stylesheet" href="css/part6.css" />
     <script type="module" src="js/main.js"></script>
   </head>
   <body>
@@ -443,18 +444,69 @@
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Why VAE cats are blurry</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="confused"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s17-body" data-demo>
+          <div class="panel s17-left">
+            <div class="s17-pair">
+              <figure class="loupe-host"><canvas class="cat-canvas s17-orig interactive" width="64" height="64" aria-label="Original cat"></canvas><canvas class="loupe" width="120" height="120" aria-hidden="true"></canvas><figcaption>original</figcaption></figure>
+              <figure class="loupe-host s17-recon-fig"><canvas class="cat-canvas s17-recon interactive" width="64" height="64" aria-label="VAE reconstruction"></canvas><canvas class="loupe" width="120" height="120" aria-hidden="true"></canvas><figcaption>VAE reconstruction</figcaption></figure>
+            </div>
+            <div class="s17-picker"></div>
+          </div>
+          <div class="panel s17-right">
+            <h3 class="s17-title">the averaging problem</h3>
+            <div class="s17-avg-row">
+              <figure><canvas class="cat-canvas s17-avg" width="64" height="64" aria-label="Pixel average of the sharp cats"></canvas><figcaption class="s17-avg-label">average</figcaption></figure>
+              <div class="s17-strip" aria-label="The sharp cats being averaged"></div>
+            </div>
+            <div class="s17-slider"></div>
+          </div>
         </div>
+        <p class="slide-caption">MSE's best guess is the average, and an average of sharp cats is a blurry cat</p>
       </section>
 
-      <section class="slide" id="s18" data-part="6" data-title="Extensions: β-VAE, VQ-VAE, Stable Diffusion" data-accent="coral">
+      <section class="slide" id="s18" data-part="6" data-title="Extensions" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
-          <h2>Extensions: β-VAE, VQ-VAE, Stable Diffusion</h2>
+          <h2>Extensions</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="shocked"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s18-body" data-demo>
+          <div class="s18-top">
+            <article class="card ext beta">
+              <h3>β-VAE</h3>
+              <p>a bigger KL weight: a tidier latent space, blurrier cats</p>
+              <button type="button" class="btn" data-goto="s13">remember this?</button>
+            </article>
+            <article class="card ext vq">
+              <h3>VQ-VAE <span class="tag">illustration</span></h3>
+              <div class="vq-row">
+                <canvas class="vq-codebook" width="4" height="4" aria-label="A codebook of 16 colours"></canvas>
+                <span class="arrow" aria-hidden="true">→</span>
+                <canvas class="cat-canvas small vq-mosaic" width="16" height="16" aria-label="A cat rebuilt from the 16 codes"></canvas>
+              </div>
+              <p>discrete codes instead of a cloud. Used in the first DALL-E.</p>
+            </article>
+          </div>
+          <article class="card ext sd">
+            <h3>Stable Diffusion</h3>
+            <div class="sd-flow" aria-label="Stable Diffusion: photo, VAE encoder, latent, denoising steps, VAE decoder, image">
+              <div class="sd-node photo"><span class="sd-box big"></span><span class="mono">512×512×3</span><span class="mono soft">786,432</span></div>
+              <span class="sd-arrow">VAE encoder →</span>
+              <div class="sd-node latent"><span class="sd-box small"></span><span class="mono">64×64×4</span><span class="mono soft">16,384 · 48× smaller</span></div>
+              <span class="sd-arrow">→</span>
+              <div class="sd-node steps"><canvas class="sd-step" width="64" height="64"></canvas><canvas class="sd-step" width="64" height="64"></canvas><canvas class="sd-step" width="64" height="64"></canvas><span class="mono soft">denoising</span></div>
+              <span class="sd-arrow">→ VAE decoder</span>
+              <div class="sd-node out"><canvas class="cat-canvas small sd-final" width="64" height="64" aria-label="The final image"></canvas><span class="mono soft">image</span></div>
+            </div>
+            <div class="sd-foot">
+            <p class="sd-caption">the VAE compresses; diffusion does the imagining</p>
+            <div class="sd-tiny">
+              <span class="sd-tiny-label">same idea, tiny scale:</span>
+              <canvas class="cat-canvas small sd-tiny-in" width="64" height="64" aria-label="Our cat"></canvas>
+              <span class="mono">12,288 → 128 → 12,288</span>
+              <figure class="sd-tiny-fig"><canvas class="cat-canvas small sd-tiny-out" width="64" height="64" aria-label="Our VAE's round trip"></canvas></figure>
+            </div>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -463,8 +515,24 @@
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>VAE vs GAN vs diffusion</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s19-body" data-demo>
+          <div class="s19-top">
+            <table class="cmp-table">
+              <thead><tr><th></th><th>VAE</th><th>GAN</th><th>Diffusion</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div class="trilemma">
+              <svg class="tri" viewBox="0 0 320 280" role="img" aria-label="Quality, variety, speed: each model gets two"></svg>
+              <div class="tri-models"></div>
+            </div>
+          </div>
+          <div class="gary">
+            <div class="gary-mascot"><div data-mascot="happy"></div><span class="sticker">Gary (a GAN)</span></div>
+            <button type="button" class="btn primary" data-gary>generate 9 cats</button>
+            <figure class="gary-grid-fig"><canvas class="gary-grid" width="204" height="204" aria-label="Gary's nine cats"></canvas><figcaption>Gary (illustration)</figcaption></figure>
+            <figure class="gary-grid-fig vae"><canvas class="gary-grid" width="204" height="204" aria-label="Nine VAE cats"></canvas><figcaption>VAE</figcaption></figure>
+            <p class="gary-caption">mode collapse: one cat that fools the critic, again and again</p>
+          </div>
         </div>
       </section>
 
@@ -473,8 +541,14 @@
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Wrap-up</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="happy"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s20-body" data-demo>
+          <ol class="wrap-rows">
+            <li class="wrap-row" data-step="1"><span class="wrap-model">Plain encoder-decoder</span><span class="wrap-arrow">→</span><span class="wrap-result">copies the input</span><span class="wrap-mascot" data-mascot="photocopier"></span></li>
+            <li class="wrap-row" data-step="2"><span class="wrap-model">Autoencoder</span><span class="wrap-arrow">→</span><span class="wrap-result">learns features, but its space has gaps</span><span class="wrap-mascot" data-mascot="monster"></span></li>
+            <li class="wrap-row" data-step="3"><span class="wrap-model">VAE</span><span class="wrap-arrow">→</span><span class="wrap-result">smooth latent space: generates cats</span><span class="wrap-mascot" data-mascot="happy"></span></li>
+          </ol>
+          <p class="wrap-cnn" data-step="4">and the CNN classifier? It recognises cats, but can't make them.</p>
+          <div class="wrap-dots" aria-hidden="true"></div>
         </div>
       </section>
 
@@ -483,8 +557,18 @@
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Questions?</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="confused"></div><p class="speech">Any questions?</p></div>
+        <div class="float-cats" aria-hidden="true"></div>
+        <div class="slide-body s21-body" data-demo>
+          <div class="s21-hero">
+            <div class="s21-mascot" data-mascot="thinking" data-animate></div>
+            <p class="s21-big">Questions?</p>
+          </div>
+          <div class="credits">
+            <p>Cat faces: <a href="https://github.com/fferlito/Cat-faces-dataset" target="_blank" rel="noopener">fferlito/Cat-faces-dataset</a> on GitHub</p>
+            <p>AFHQ: Choi et al., StarGAN v2 (CVPR 2020)</p>
+            <p>Built with PyTorch and ONNX Runtime Web</p>
+            <p><a href="https://autoencoders.danishali.dev" target="_blank" rel="noopener">autoencoders.danishali.dev</a> · <a href="https://github.com/Danish12196/vae-presentation" target="_blank" rel="noopener">github.com/Danish12196/vae-presentation</a></p>
+          </div>
         </div>
       </section>
     </main>
