@@ -300,16 +300,42 @@ export async function loadDream() {
   return { ...meta, sprite, frame: (c, f) => sprite.get(c * meta.cols + f) };
 }
 
+/** n samples from N(0, 1) (Box-Muller), e.g. a random latent code for a VAE. */
+export function randn(n) {
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i += 2) {
+    const r = Math.sqrt(-2 * Math.log(1 - Math.random()));
+    const a = 2 * Math.PI * Math.random();
+    out[i] = r * Math.cos(a);
+    if (i + 1 < n) out[i + 1] = r * Math.sin(a);
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------- missing models
 
-/** The friendly card a demo shows when its model hasn't been trained or exported yet. */
-export function renderTraining(el, modelName) {
+/**
+ * The friendly card a demo shows when its model hasn't been trained or exported yet.
+ * compact: a small version that fits inside a diagram or a single panel slot.
+ */
+export function renderTraining(el, modelName, { compact = false } = {}) {
   el.innerHTML = `
-    <div class="card training-card">
+    <div class="card training-card${compact ? " compact" : ""}">
       ${mascot({ expression: "sleepy" })}
       <div>
         <h3>This cat is still training</h3>
-        <p>The <code>${modelName}</code> model isn't exported yet. Check back after its next nap.</p>
+        ${compact ? `<p><code>${modelName}</code></p>` : `<p>The <code>${modelName}</code> model isn't exported yet. Check back after its next nap.</p>`}
       </div>
     </div>`;
+}
+
+/** Run fn(); if a model is missing, show the training card in el instead. Returns fn's result or null. */
+export async function withModel(el, fn, options) {
+  try {
+    return await fn();
+  } catch (err) {
+    if (!(err instanceof ModelMissing)) throw err;
+    renderTraining(el, err.model, options);
+    return null;
+  }
 }

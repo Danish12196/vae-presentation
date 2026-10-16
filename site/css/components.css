@@ -408,3 +408,68 @@
 .interactive {
   touch-action: none;
 }
+
+.training-card.compact {
+  gap: 10px;
+  padding: 12px 16px;
+  max-width: 260px;
+  font-size: var(--fs-label);
+}
+.training-card.compact .mascot {
+  width: 56px;
+}
+.training-card.compact h3 {
+  font-size: var(--fs-small);
+}
+
+/* ---------------------------------------------------------------- flip switch (two named sides) */
+
+.flip {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-small);
+  user-select: none;
+}
+.flip-side {
+  border: 0;
+  background: none;
+  padding: 4px 2px;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: color var(--t-fast) linear;
+}
+.flip-side.on {
+  color: var(--accent);
+}
+.flip .toggle-track {
+  width: 84px;
+  height: 44px;
+  border-radius: 22px;
+}
+.flip .toggle-track::after {
+  width: 32px;
+  height: 32px;
+}
+.flip .toggle input:checked + .toggle-track::after {
+  transform: translateX(40px);
+}
+/* Both sides are "on" states, so the track keeps the accent colour either way. */
+.flip .toggle-track,
+.flip .toggle input:checked + .toggle-track {
+  background: color-mix(in srgb, var(--accent) 30%, var(--bg-sunken));
+  border-color: var(--accent);
+}
+.flip .toggle-track::after {
+  background: var(--accent);
+}
+
+/* A grid of images to choose from (cats, dogs, wild animals). */
+.image-picker {
+  display: grid;
+  grid-template-columns: repeat(var(--picker-cols, 4), auto);
+  gap: 8px;
+  justify-content: center;
+}

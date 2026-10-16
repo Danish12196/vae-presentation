@@ -14,10 +14,12 @@ See [SPEC.md](SPEC.md) for the full design.
 ## Run it locally
 
 ```bash
-python -m http.server 8000 --directory site
+python tools/serve.py
 ```
 
-Then open http://localhost:8000 (any static file server works; there is no build step).
+Then open http://localhost:8000. Any static file server works (there is no build step), e.g.
+`python -m http.server 8000 --directory site`, but `tools/serve.py` turns off browser caching
+so edited slide modules show up on a normal reload.
 The offline service worker is off on localhost so your edits show up on reload; open
 http://localhost:8000/?sw=on to test offline mode, and `?sw=off` to turn it off again.
 

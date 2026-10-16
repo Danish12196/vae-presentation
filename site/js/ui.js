@@ -14,35 +14,111 @@ const h = (tag, attrs = {}, ...children) => {
   return el;
 };
 
-/** A strip of showcase cats to choose from. onPick(index) runs on every choice. */
-export async function catPicker(el, { count = 8, start = 0, selected = 0, onPick = () => {} } = {}) {
-  await loadShowcase();
-  const strip = h("div", { class: "cat-picker", role: "group", "aria-label": "Pick a cat" });
-  const buttons = [];
-  for (let i = start; i < start + count; i++) {
+/** A grid of images to choose from: items = [{ image: ImageData, label }]. onPick(index, item). */
+export function imagePicker(el, { items, selected = 0, columns = items.length, onPick = () => {} } = {}) {
+  const grid = h("div", { class: "cat-picker image-picker", role: "group", "aria-label": "Pick an image" });
+  grid.style.setProperty("--picker-cols", columns);
+  const buttons = items.map((item, i) => {
     const canvas = h("canvas", { width: 64, height: 64 });
-    drawCat(canvas, getShowcaseCat(i));
-    const button = h("button", { type: "button", class: "cat-pick", "aria-label": `Cat ${i + 1}`, "aria-pressed": "false" }, canvas);
+    drawCat(canvas, item.image);
+    const button = h("button", { type: "button", class: "cat-pick", "aria-label": item.label ?? `Image ${i + 1}`, "aria-pressed": "false" }, canvas);
     button.addEventListener("click", () => pick(i));
-    buttons.push(button);
-    strip.append(button);
-  }
-  el.append(strip);
+    return button;
+  });
+  grid.append(...buttons);
+  el.append(grid);
 
   let current = selected;
   function pick(i, notify = true) {
     current = i;
-    buttons.forEach((b, j) => b.setAttribute("aria-pressed", String(j + start === i)));
-    if (notify) onPick(i);
+    buttons.forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
+    if (notify) onPick(i, items[i]);
   }
   pick(selected, false);
   return {
-    el: strip,
+    el: grid,
     get value() {
       return current;
     },
     set: pick,
   };
+}
+
+/** A strip of showcase cats to choose from. onPick(index) runs on every choice. */
+export async function catPicker(el, { count = 8, start = 0, selected = 0, onPick = () => {} } = {}) {
+  await loadShowcase();
+  const items = Array.from({ length: count }, (_, i) => ({ image: getShowcaseCat(start + i), label: `Cat ${start + i + 1}` }));
+  const picker = imagePicker(el, { items, selected: selected - start, onPick: (i) => onPick(start + i) });
+  return {
+    el: picker.el,
+    get value() {
+      return start + picker.value;
+    },
+    set: (i, notify) => picker.set(i - start, notify),
+  };
+}
+
+/**
+ * A switch between two named states, e.g. "Discriminative" / "Generative".
+ * value false = left, true = right. Clicking either name also flips it.
+ */
+export function flipSwitch(el, { left, right, value = false, label = `${left} or ${right}`, onChange = () => {} } = {}) {
+  const input = h("input", { type: "checkbox", role: "switch", "aria-label": label });
+  const leftEl = h("button", { type: "button", class: "flip-side", tabindex: "-1" }, left);
+  const rightEl = h("button", { type: "button", class: "flip-side", tabindex: "-1" }, right);
+  const wrap = h("div", { class: "flip" }, leftEl, h("label", { class: "toggle" }, input, h("span", { class: "toggle-track" })), rightEl);
+  el.append(wrap);
+
+  const set = (v, notify = true) => {
+    input.checked = v;
+    leftEl.classList.toggle("on", !v);
+    rightEl.classList.toggle("on", v);
+    if (notify) onChange(v);
+  };
+  input.addEventListener("change", () => set(input.checked));
+  leftEl.addEventListener("click", () => input.checked && set(false));
+  rightEl.addEventListener("click", () => !input.checked && set(true));
+  set(value, false);
+  return {
+    el: wrap,
+    get value() {
+      return input.checked;
+    },
+    set,
+  };
+}
+
+/**
+ * Draw `image` appearing out of random noise over `ms` milliseconds.
+ * Resolves when done; pass an AbortSignal to stop early (it then jumps to the final image).
+ */
+export function revealFromNoise(canvas, image, { ms = 1200, signal } = {}) {
+  drawCat(canvas, image);
+  const target = canvas.getContext("2d").getImageData(0, 0, 64, 64);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
+  const noise = new Uint8ClampedArray(target.data.length).map(() => Math.random() * 255);
+  const frame = new ImageData(64, 64);
+  const ctx = canvas.getContext("2d");
+  return new Promise((resolve) => {
+    const start = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / ms);
+      const k = t * t * (3 - 2 * t); // smoothstep
+      if (signal?.aborted || t >= 1) {
+        ctx.putImageData(target, 0, 0);
+        return resolve();
+      }
+      for (let i = 0; i < frame.data.length; i += 4) {
+        frame.data[i] = noise[i] + (target.data[i] - noise[i]) * k;
+        frame.data[i + 1] = noise[i + 1] + (target.data[i + 1] - noise[i + 1]) * k;
+        frame.data[i + 2] = noise[i + 2] + (target.data[i + 2] - noise[i + 2]) * k;
+        frame.data[i + 3] = 255;
+      }
+      ctx.putImageData(frame, 0, 0);
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
 }
 
 /** A big slider with a label and a live value. format(v) turns the value into text. */

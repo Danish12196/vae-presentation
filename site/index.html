@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/tokens.css" />
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/part1.css" />
     <script type="module" src="js/main.js"></script>
   </head>
   <body>
@@ -31,13 +32,17 @@
 
     <main id="deck">
       <section class="slide title-slide" id="s01" data-part="1" data-title="Autoencoders & VAEs" data-accent="coral">
+        <!-- Drifting mosaic of held-out cats; js/slides/s01.js swaps in cats freshly made by vae_128 -->
+        <div class="mosaic" aria-hidden="true"><div class="mosaic-drift"><canvas class="mosaic-canvas"></canvas></div></div>
         <header class="slide-head">
           <p class="part-label">Part 1 · From classification to generation</p>
         </header>
         <div class="slide-body" data-demo>
-          <div data-mascot="happy" data-animate></div>
+          <div class="title-mascot" data-mascot="happy" data-animate></div>
           <h1>Autoencoders &amp; VAEs<span class="sub">teaching a network to imagine cats</span></h1>
+          <p class="byline">Danish · MAAI901 · 16 October 2026</p>
         </div>
+        <p class="scroll-hint">scroll, swipe or use the arrow keys <span aria-hidden="true">↓</span></p>
       </section>
 
       <section class="slide" id="s02" data-part="1" data-title="Discriminative vs generative" data-accent="coral">
@@ -45,8 +50,26 @@
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>Discriminative vs generative</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s02-body" data-demo>
+          <div class="panel s02-picker"></div>
+          <div class="panel s02-main">
+            <div class="s02-switch"></div>
+            <div class="flow">
+              <div class="flow-slot flow-image"><canvas class="cat-canvas" width="64" height="64" aria-label="The picked image"></canvas></div>
+              <div class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 60 24"><path d="M2 12 H50 M40 3 L54 12 L40 21" /></svg></div>
+              <div class="flow-box"><span class="box-disc">CNN</span><span class="box-gen">?</span></div>
+              <div class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 60 24"><path d="M2 12 H50 M40 3 L54 12 L40 21" /></svg></div>
+              <div class="flow-slot flow-out">
+                <div class="flow-bars"></div>
+                <div class="flow-label">cat</div>
+              </div>
+            </div>
+            <p class="flow-caption mono"><span class="cap-disc">p(label | image)</span><span class="cap-gen">p(image)</span></p>
+            <div class="s02-actions">
+              <button type="button" class="btn" data-dream>ask the classifier to draw a cat</button>
+              <span class="sticker dream-sticker" hidden>knows a cat when it sees one. Cannot draw one.</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -55,8 +78,14 @@
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>Encoder and decoder</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body net-body" data-demo>
+          <div class="net-controls">
+            <button type="button" class="btn primary" data-next>next layer</button>
+            <div class="net-switch"></div>
+          </div>
+          <div class="net-stage"></div>
+          <p class="net-info mono" aria-live="polite"></p>
+          <p class="net-caption">same encoder, different ending</p>
         </div>
       </section>
 
@@ -65,8 +94,14 @@
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>The identity trap</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="photocopier"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body net-body s04-body" data-demo>
+          <div class="net-controls"><div class="s04-toggle"></div></div>
+          <div class="net-stage"></div>
+          <div class="s04-bottom">
+            <div class="s04-mascot"><div data-mascot="happy"></div><span class="sticker stamp" hidden>Photocopier Cat</span></div>
+            <div class="s04-readouts"></div>
+          </div>
+          <p class="net-caption">illustration: with no bottleneck, copying is the easiest solution</p>
         </div>
       </section>
 

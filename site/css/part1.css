@@ -1,0 +1,642 @@
+/* Part 1 slides: title mosaic (s01), discriminative vs generative (s02),
+   and the network diagram shared by s03 and s04. */
+
+/* Slide content sits above decorative backgrounds like the mosaic. */
+.slide > .slide-head,
+.slide > .slide-body {
+  position: relative;
+  z-index: 1;
+}
+
+/* ================================================================ s01 title */
+
+.mosaic {
+  --tile: 112px;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+/* Darken the middle so the title stays readable, keep the edges lively. */
+.mosaic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 60% at 50% 52%, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 70%, transparent) 60%, color-mix(in srgb, var(--bg) 45%, transparent) 100%);
+}
+.mosaic-drift {
+  animation: mosaic-bob 40s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+.mosaic-canvas {
+  display: block;
+  image-rendering: pixelated;
+  opacity: 0.85;
+  animation: mosaic-drift 150s linear infinite;
+  animation-play-state: paused;
+}
+.mosaic.running .mosaic-drift,
+.mosaic.running .mosaic-canvas {
+  animation-play-state: running;
+}
+@keyframes mosaic-drift {
+  to { transform: translateX(calc(-1 * var(--drift, 0px))); }
+}
+@keyframes mosaic-bob {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-1 * var(--drift-y, 0px))); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mosaic-drift,
+  .mosaic-canvas {
+    animation: none;
+  }
+}
+
+.title-slide .slide-body {
+  gap: calc(var(--gap) * 0.9);
+}
+.title-mascot .mascot {
+  width: min(30vh, 280px);
+  filter: drop-shadow(0 10px 30px color-mix(in srgb, black 50%, transparent));
+}
+.title-slide h1 {
+  text-shadow: 0 4px 24px var(--bg);
+}
+.byline {
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: var(--fs-small);
+  color: var(--text);
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+.scroll-hint {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 75%, transparent);
+}
+.scroll-hint span {
+  display: inline-block;
+  animation: hint-bounce 1.6s ease-in-out infinite;
+}
+@keyframes hint-bounce {
+  50% { transform: translateY(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint span {
+    animation: none;
+  }
+}
+
+/* ================================================================ s02 discriminative vs generative */
+
+.s02-body {
+  gap: calc(var(--gap) * 2.5);
+}
+.s02-picker {
+  flex: 0 0 auto;
+}
+.s02-picker .cat-pick canvas {
+  width: 84px;
+  height: 84px;
+}
+.s02-switch .flip {
+  font-size: var(--fs-body);
+}
+.s02-main {
+  flex: 0 1 auto;
+  gap: calc(var(--gap) * 1.1);
+}
+
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.flow-image .cat-canvas {
+  --cat-size: 280px;
+}
+.flow-arrow svg {
+  display: block;
+  width: 70px;
+  height: 28px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--t-med) var(--ease);
+}
+/* Generative: the arrows turn around and the story reads right to left. */
+.flow.generative .flow-arrow svg {
+  transform: rotate(180deg);
+}
+
+.flow-box {
+  display: grid;
+  place-items: center;
+  width: 180px;
+  height: 180px;
+  border-radius: var(--radius);
+  border: 3px solid var(--accent);
+  background: var(--bg-raised);
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+}
+.flow-box > span {
+  grid-area: 1 / 1;
+  transition: opacity var(--t-med) linear, transform var(--t-med) var(--ease);
+}
+.flow-box .box-gen {
+  font-size: 72px;
+  color: var(--sunflower);
+}
+
+/* The output slot crossfades between the probability bars and the "cat" label. */
+.flow-slot {
+  display: grid;
+  place-items: center;
+}
+.flow-out {
+  width: 420px;
+}
+.flow-bars {
+  width: 100%;
+}
+.flow-bars .prob-bars {
+  max-width: none;
+}
+.flow-out > *,
+.flow-caption > span {
+  grid-area: 1 / 1;
+  transition: opacity var(--t-med) linear;
+}
+.flow-bars .prob-bars {
+  font-size: var(--fs-small);
+}
+.flow-label {
+  padding: 10px 34px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+}
+.flow-caption {
+  display: grid;
+  justify-items: center;
+  font-size: var(--fs-body);
+  color: var(--accent);
+}
+
+.box-gen,
+.flow-label,
+.cap-gen,
+.flow.generative ~ * .cap-disc {
+  opacity: 0;
+}
+.flow.generative .box-gen,
+.flow.generative .flow-label,
+.flow.generative ~ .flow-caption .cap-gen {
+  opacity: 1;
+}
+.flow.generative .box-disc,
+.flow.generative .flow-bars,
+.flow.generative ~ .flow-caption .cap-disc {
+  opacity: 0;
+}
+.flow.generative .box-gen {
+  transform: rotate(-8deg);
+}
+
+.s02-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+}
+/* Stamped beside the button, so the button never moves. */
+.dream-sticker {
+  position: absolute;
+  left: calc(100% + 20px);
+  width: max-content;
+  max-width: 22ch;
+  text-align: center;
+}
+/* In generative mode the picker isn't the input any more. */
+.s02-body:has(.flow.generative) .s02-picker {
+  opacity: 0.45;
+  transition: opacity var(--t-med) linear;
+}
+.dream-sticker:not([hidden]) {
+  animation: stamp-in 300ms var(--ease);
+}
+
+.flow-image .training-card,
+.flow-out .training-card {
+  grid-area: 1 / 1;
+}
+
+/* ================================================================ network diagram (s03, s04) */
+
+.net-body {
+  flex-direction: column;
+  gap: var(--gap);
+}
+.net-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--gap) * 1.5);
+  flex-wrap: wrap;
+}
+.net-controls .btn {
+  min-width: 190px;
+}
+.net-stage {
+  --u: 1.4;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-top: 2.2em;    /* room for the decoder note */
+  padding-bottom: 2.2em; /* room for the shape labels */
+}
+.net {
+  --net-gap: 30px;
+  display: flex;
+  align-items: center;
+  gap: var(--net-gap);
+  transition: gap var(--t-med) var(--ease);
+}
+.net-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--net-gap);
+  transition: gap var(--t-med) var(--ease);
+}
+.net-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 70px;
+  cursor: default;
+  outline: none;
+  transition: opacity var(--t-med) linear, transform var(--t-med) var(--ease);
+}
+/* A small arrow in front of every layer except the first. */
+.net-col::before {
+  content: "›";
+  position: absolute;
+  left: calc(var(--net-gap) / -2);
+  top: calc(50% - 0.95em);
+  transform: translateX(-50%);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text-soft);
+  transition: opacity var(--t-fast) linear;
+}
+.net-enc .net-col:first-child::before {
+  content: none;
+}
+.net-col.unbuilt {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+.layer.block {
+  width: calc(var(--w) * var(--u));
+  height: calc(var(--h) * var(--u));
+  border-radius: 6px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 85%, white), var(--accent));
+  box-shadow: 7px -7px 0 0 color-mix(in srgb, var(--accent) 45%, var(--bg));
+  transition: width var(--t-med) var(--ease), height var(--t-med) var(--ease), border-radius var(--t-med) linear, box-shadow var(--t-med) linear;
+}
+.layer.block.dec {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--sky) 80%, white), var(--sky));
+  box-shadow: 7px -7px 0 0 color-mix(in srgb, var(--sky) 45%, var(--bg));
+}
+.layer.block.vector {
+  background: linear-gradient(180deg, var(--sunflower), color-mix(in srgb, var(--sunflower) 60%, var(--bg)));
+  box-shadow: none;
+}
+.cat-canvas.layer {
+  --cat-size: calc(var(--h) * var(--u));
+}
+.layer.labels {
+  width: calc(var(--w) * var(--u));
+  display: grid;
+  place-items: center;
+}
+.layer.labels .prob-bars {
+  grid-template-columns: auto 1fr;
+  font-size: var(--fs-label);
+  gap: 8px 10px;
+}
+.layer.labels .prob-value {
+  display: none;
+}
+.layer.labels .prob-track {
+  height: 20px;
+}
+/* Labels hang below their block and never change the layout (the pipe in s04 relies on it). */
+.layer-shape {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.net-col.active .layer.block,
+.net-col:focus-visible .layer.block {
+  outline: 3px solid var(--text);
+  outline-offset: 3px;
+}
+.net-col.active .layer-shape {
+  color: var(--text);
+}
+
+.net-note {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-label);
+  color: var(--sky);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--t-med) linear;
+}
+.net-end.started .net-note {
+  opacity: 1;
+}
+.net-info {
+  min-height: 1.5em;
+  font-size: var(--fs-small);
+  color: var(--text);
+  text-align: center;
+}
+.net-caption {
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-body);
+  color: var(--accent);
+  text-align: center;
+}
+
+/* s04: every layer as wide as the input -> one straight pipe. */
+.net.wide {
+  --net-gap: 0px;
+}
+.net.wide .net-col::before {
+  opacity: 0;
+}
+.net.wide .layer.block {
+  border-radius: 0;
+  box-shadow: none;
+}
+/* Blocks touch, so only one label: under the middle of the pipe. */
+.net.wide .net-col:has(.block) {
+  min-width: 0;
+}
+.net.wide .net-group {
+  gap: 0;
+}
+.net.wide .net-col:has(.block) .layer-shape {
+  visibility: hidden;
+}
+.net.wide .net-enc .net-col:last-child .layer-shape {
+  visibility: visible;
+}
+
+/* ================================================================ s04 identity trap */
+
+.s04-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--gap) * 3.5);
+  flex-wrap: wrap;
+}
+.s04-mascot {
+  position: relative;
+  width: 150px;
+}
+.s04-mascot .mascot {
+  width: 100%;
+}
+.stamp {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  translate: -50% 0;
+  white-space: nowrap;
+  transform: rotate(-10deg);
+  background: var(--coral);
+  color: var(--text);
+}
+.stamp:not([hidden]) {
+  animation: stamp-in 320ms var(--ease);
+}
+@keyframes stamp-in {
+  from { transform: rotate(-24deg) scale(2.2); opacity: 0; }
+}
+.s04-readouts {
+  display: flex;
+  gap: calc(var(--gap) * 1.6);
+  flex-wrap: wrap;
+}
+.readout-text {
+  transition: opacity 150ms linear;
+}
+.readout-text.swap {
+  opacity: 0;
+}
+.readout-text.bad {
+  color: var(--coral);
+}
+
+/* ================================================================ 1366x768 and smaller laptops */
+
+@media (max-height: 820px), (max-width: 1500px) {
+  .net-stage {
+    --u: 0.8;
+  }
+  .net {
+    --net-gap: 24px;
+  }
+  .flow-image .cat-canvas {
+    --cat-size: 200px;
+  }
+  .flow-box {
+    width: 130px;
+    height: 130px;
+  }
+  .flow-out {
+    width: 330px;
+  }
+  .s02-picker .cat-pick canvas {
+    width: 64px;
+    height: 64px;
+  }
+  .s04-mascot {
+    width: 110px;
+  }
+  .mosaic {
+    --tile: 96px;
+  }
+}
+
+/* ================================================================ phones (portrait) */
+
+@media (max-width: 760px) {
+  .mosaic {
+    --tile: 72px;
+  }
+  .title-mascot .mascot {
+    width: 150px;
+  }
+  .scroll-hint {
+    white-space: normal;
+    text-align: center;
+    width: max-content;
+    max-width: 90%;
+  }
+
+  .s02-body {
+    gap: var(--gap);
+  }
+  .s02-picker .image-picker {
+    --picker-cols: 6 !important;
+  }
+  .flow {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  .flow-arrow svg {
+    transform: rotate(90deg);
+    width: 44px;
+  }
+  .flow.generative .flow-arrow svg {
+    transform: rotate(-90deg);
+  }
+  .flow-image .cat-canvas {
+    --cat-size: 150px;
+  }
+  .flow-box {
+    width: 92px;
+    height: 72px;
+  }
+  .flow-box .box-gen {
+    font-size: 48px;
+  }
+  .flow-out {
+    width: 100%;
+    max-width: 320px;
+  }
+  .s02-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .dream-sticker {
+    position: static;
+  }
+  .s02-picker .cat-pick canvas {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* The diagram runs top to bottom: block width follows the spatial size. */
+  .net-stage {
+    --u: 0.62;
+    padding-top: 0;
+  }
+  .net,
+  .net-group {
+    flex-direction: column;
+    --net-gap: 22px;
+  }
+  .net.wide,
+  .net.wide .net-group {
+    --net-gap: 0px;
+  }
+  .net-col {
+    flex-direction: row;
+    min-width: 0;
+    min-height: 0;
+    gap: 12px;
+  }
+  .net-col::before {
+    content: "›";
+    left: 50%;
+    top: calc(var(--net-gap) / -2);
+    transform: translate(-50%, -50%) rotate(90deg);
+    font-size: 24px;
+  }
+  .layer.block {
+    width: calc(var(--h) * var(--u));
+    height: calc(var(--w) * var(--u));
+  }
+  .layer.block.vector {
+    width: calc(var(--h) * var(--u));
+    height: 10px;
+  }
+  .layer-shape {
+    top: 50%;
+    left: calc(100% + 8px);
+    transform: translateY(-50%);
+    font-size: 13px;
+  }
+  .net-note {
+    position: static;
+    white-space: normal;
+    font-size: 13px;
+    max-width: 260px;
+    order: -1;
+  }
+  .net-end.started .net-note {
+    display: block;
+  }
+  .net-end:not(.started) .net-note {
+    display: none;
+  }
+  .net-info {
+    font-size: 14px;
+  }
+  .s04-mascot {
+    width: 96px;
+  }
+  /* No room beside the pipe: run its one label down the pipe itself. */
+  .net.wide .net-enc .net-col:last-child {
+    z-index: 2;
+  }
+  .net.wide .net-enc .net-col:last-child .layer-shape {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    color: var(--bg);
+    font-weight: 700;
+  }
+}
