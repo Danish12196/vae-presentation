@@ -8,19 +8,22 @@
 //   map.emptySpots(k)                               k far-apart points in regions with no data
 //   map.addLabel(z, element)                        a DOM label pinned to a latent point
 //   map.randomPoint()                               uniform random point in the view
+//   map.zoomTo(view) / map.home                     glide to { cx, cy, half }; home is the starting view
 //
 // The view is square with the same scale on both axes, centred on the data and
 // `extent` times as wide as it (measured between the 1st and 99th percentiles, so a few
 // outliers don't shrink everything else), so the empty regions around the data are visible.
 
-const DOT = 3.2;          // dot radius in CSS pixels
+import { loadJSON } from "./models.js";
+
+const DOT = 3.2;          // default dot radius in CSS pixels
 const MORPH_MS = 900;
 
 function percentile(sorted, q) {
   return sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))))];
 }
 
-export function latentMap(container, { points, colours, extent = 2, view = null, label = "Latent space map: click a point to decode it", onPick = () => {}, onHover = () => {} }) {
+export function latentMap(container, { points, colours, extent = 2, view = null, dot = DOT, label = "Latent space map: click a point to decode it", onPick = () => {}, onHover = () => {} }) {
   const wrap = document.createElement("div");
   wrap.className = "latent-map interactive";
   const canvas = document.createElement("canvas");
@@ -35,7 +38,8 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
 
   const api = { canvas, wrap, overlay: null, points, view: null };
   let crosshair = null;
-  let morph = null; // { from, to, start }
+  let morph = null;    // { from, to, start }: points gliding to a new set
+  let viewAnim = null; // { from, to, start }: the view gliding to a new centre and zoom
   let frame = 0;
 
   // ---------------------------------------------------------------- view and coordinates
@@ -49,6 +53,7 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
     return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, half };
   }
   api.view = view ?? fitView(points);
+  api.home = { ...api.view };
 
   const size = () => canvas.clientWidth;
   api.toScreen = ([x, y]) => {
@@ -122,8 +127,24 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
     ctx.fillText("z2", Math.min(s - 30, Math.max(8, ox + 8)), 20);
   }
 
+  function stepView(now) {
+    if (!viewAnim) return;
+    const t = Math.min(1, (now - viewAnim.start) / MORPH_MS);
+    const k = t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+    const { from, to } = viewAnim;
+    // Zoom geometrically, so zooming in and out feel equally fast.
+    api.view = {
+      cx: from.cx + (to.cx - from.cx) * k,
+      cy: from.cy + (to.cy - from.cy) * k,
+      half: from.half * (to.half / from.half) ** k,
+    };
+    placeLabels();
+    if (t >= 1) viewAnim = null;
+  }
+
   function draw() {
     const s = size();
+    stepView(performance.now());
     ctx.clearRect(0, 0, s, s);
     drawAxes();
     const pts = currentPoints();
@@ -131,16 +152,16 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
     ctx.strokeStyle = "rgba(255, 255, 255, 0.28)"; // a light rim so dark cats stay visible
     pts.forEach((p, i) => {
       const [x, y] = api.toScreen(p);
-      if (x < -DOT || y < -DOT || x > s + DOT || y > s + DOT) return;
+      if (x < -dot || y < -dot || x > s + dot || y > s + dot) return;
       ctx.beginPath();
-      ctx.arc(x, y, DOT, 0, Math.PI * 2);
+      ctx.arc(x, y, dot, 0, Math.PI * 2);
       ctx.fillStyle = colours[i];
       ctx.fill();
       ctx.stroke();
     });
     api.overlay?.(ctx, api);
     if (crosshair) drawCrosshair(crosshair);
-    if (morph) frame = requestAnimationFrame(draw);
+    if (morph || viewAnim) frame = requestAnimationFrame(draw);
   }
 
   function drawCrosshair(z) {
@@ -169,9 +190,22 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
     api.points = next;
     draw();
   };
+  api.zoomTo = (target) => {
+    cancelAnimationFrame(frame);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      api.view = { ...target };
+      placeLabels();
+    } else {
+      viewAnim = { from: { ...api.view }, to: { ...target }, start: performance.now() };
+    }
+    draw();
+  };
   api.stop = () => {
     cancelAnimationFrame(frame);
+    if (viewAnim) api.view = { ...viewAnim.to };
     morph = null;
+    viewAnim = null;
+    placeLabels();
     draw();
   };
 
@@ -263,3 +297,14 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
   new ResizeObserver(resize).observe(canvas);
   return api;
 }
+
+/** A map of one of the precomputed latent scatters in data/latent_maps.json (e.g. "vae_2d_b1"). */
+export async function loadLatentMap(container, key, options = {}) {
+  const data = await loadJSON("data/latent_maps.json");
+  const points = data.maps?.[key];
+  if (!points) throw new Error(`no latent map for ${key}`);
+  return latentMap(container, { points, colours: data.colours, ...options });
+}
+
+/** The fixed view used by every vae_2d_b1 map, so the same z sits in the same place on each slide. */
+export const VAE_VIEW = { cx: 0, cy: 0, half: 4.5 };

@@ -1,0 +1,692 @@
+/* Part 5: s11 core idea, s12 loss, s13 KL dial, s14 reparameterization, s15 generating, s16 interpolation. */
+
+.map-host {
+  position: relative;
+  flex: 0 0 auto;
+}
+.slide-caption {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-small);
+  color: var(--accent);
+}
+
+/* ================================================================ s11 core idea */
+
+.s11-body {
+  gap: calc(var(--gap) * 3);
+}
+.s11-map {
+  --map-size: min(64vh, 680px);
+}
+.s11-side {
+  flex: 0 1 520px;
+  gap: var(--gap);
+}
+.s11-now {
+  display: flex;
+  gap: 22px;
+}
+.s11-now .cat-canvas {
+  --cat-size: 200px;
+}
+.s11-row {
+  display: flex;
+  gap: 8px;
+  min-height: 76px;
+}
+.s11-row .cat-canvas.small {
+  --cat-size: 72px;
+}
+.s11-params {
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+}
+
+/* ================================================================ s12 loss */
+
+.s12-body {
+  flex-direction: column;
+  gap: var(--gap);
+}
+.loss-eq {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px 18px;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-h2);
+}
+.eq-op {
+  color: var(--text-soft);
+}
+.eq-term {
+  padding: 2px 18px;
+  border: 3px dashed currentColor;
+  border-radius: 16px;
+  background: transparent;
+  font: inherit;
+  cursor: help;
+  transition: background-color var(--t-fast) linear;
+}
+.eq-term.recon {
+  color: var(--coral);
+}
+.eq-term.kl {
+  color: var(--sky);
+}
+.eq-term.active {
+  border-style: solid;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+.eq-explain {
+  min-height: 1.5em;
+  font-size: var(--fs-body);
+  color: var(--text-soft);
+  text-align: center;
+}
+.eq-explain[data-term="recon"] {
+  color: var(--coral);
+}
+.eq-explain[data-term="kl"] {
+  color: var(--sky);
+}
+.gauss-wrap {
+  width: min(980px, 100%);
+}
+svg.gauss {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.g-axis {
+  stroke: var(--line);
+  stroke-width: 2;
+}
+.g-tick {
+  fill: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 18px;
+}
+.g-prior {
+  fill: none;
+  stroke: var(--text-soft);
+  stroke-width: 3;
+  stroke-dasharray: 8 7;
+}
+.g-prior-fill {
+  fill: color-mix(in srgb, var(--text) 8%, transparent);
+}
+.g-label {
+  fill: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 18px;
+}
+.g-q {
+  fill: none;
+  stroke: var(--lilac);
+  stroke-width: 4;
+}
+.g-q-fill {
+  fill: color-mix(in srgb, var(--lilac) 28%, transparent);
+}
+.g-handle {
+  fill: var(--text);
+  stroke: var(--lilac);
+  stroke-width: 5;
+  cursor: grab;
+  outline: none;
+}
+.g-handle.peak {
+  fill: var(--lilac);
+  stroke: var(--text);
+}
+.g-handle:focus-visible {
+  stroke: var(--sunflower);
+}
+.gauss-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--gap) * 2);
+  flex-wrap: wrap;
+}
+.gauss-params {
+  font-size: var(--fs-small);
+}
+
+/* ================================================================ s13 KL dial */
+
+.s13-body {
+  gap: calc(var(--gap) * 3);
+}
+.s13-map {
+  --map-size: min(66vh, 700px);
+}
+.s13-side {
+  flex: 0 1 520px;
+  gap: calc(var(--gap) * 1.6);
+  align-items: stretch;
+}
+/* The tug of war: the knot leans towards whichever term wins (--pull from -1 to 1). */
+.tug {
+  --pull: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+}
+.tug-team {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: var(--fs-small);
+}
+.tug-team.recon {
+  color: var(--coral);
+}
+.tug-team.kl {
+  color: var(--sky);
+}
+.tug-rope {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: repeating-linear-gradient(-45deg, #c9a46b 0 8px, #a07a42 8px 14px);
+}
+.tug-knot {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + var(--pull) * 45%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--lilac);
+  border: 3px solid var(--text);
+  transform: translate(-50%, -50%);
+  transition: left 700ms var(--ease);
+}
+
+/* ================================================================ s14 reparameterization */
+
+.s14-body {
+  flex-direction: column;
+  gap: var(--gap);
+}
+.graph-wrap {
+  width: min(1250px, 100%);
+}
+svg.rep-graph {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.g-node rect,
+.g-node polygon {
+  fill: var(--bg-raised);
+  stroke: var(--line);
+  stroke-width: 2.5;
+}
+.g-node text {
+  fill: var(--text);
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 24px;
+}
+.g-node.param rect {
+  stroke: var(--lilac);
+}
+.g-node.loss rect {
+  stroke: var(--coral);
+}
+.g-node.formula rect {
+  stroke: var(--mint);
+}
+.g-node.formula text {
+  font-family: var(--font-mono);
+  font-size: 20px;
+}
+.g-edge {
+  stroke: var(--text-soft);
+  stroke-width: 2.5;
+}
+#rep-arrow path {
+  fill: var(--text-soft);
+}
+.eps-edge {
+  stroke: var(--mint);
+  stroke-dasharray: 6 5;
+}
+.g-eps {
+  fill: var(--mint);
+  font-family: var(--font-mono);
+  font-size: 18px;
+}
+.dice-body {
+  fill: var(--text);
+}
+.dice-pip {
+  fill: var(--bg);
+}
+.grad-particle {
+  fill: var(--coral);
+  filter: drop-shadow(0 0 6px var(--coral));
+  transition: opacity 300ms linear;
+}
+.grad-particle.stuck,
+.grad-particle.arrived {
+  opacity: 0;
+}
+.block-x {
+  stroke: var(--coral);
+  stroke-width: 9;
+  stroke-linecap: round;
+  fill: none;
+}
+.block-label {
+  fill: var(--coral);
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 22px;
+}
+svg.rep-graph[data-mode="naive"] .reparam-only,
+svg.rep-graph[data-mode="reparam"] .naive-only {
+  display: none;
+}
+.s14-demo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--gap) * 2);
+}
+.s14-sliders {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, 260px));
+  gap: 6px 26px;
+  align-items: end;
+}
+.s14-sliders .btn {
+  justify-self: start;
+}
+.s14-out-fig .cat-canvas {
+  --cat-size: 190px;
+}
+.s14-map {
+  --map-size: 210px;
+}
+.s14-note {
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+}
+
+/* ================================================================ s15 generating */
+
+.s15-body {
+  gap: calc(var(--gap) * 2);
+}
+.gen-grids {
+  display: flex;
+  gap: calc(var(--gap) * 1.5);
+}
+.gen figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  min-height: 48px;
+  margin: 0 0 10px;
+  font-size: var(--fs-small);
+  color: var(--text);
+}
+.gen figcaption strong {
+  color: var(--accent);
+  font-family: var(--font-head);
+}
+.gen-ae figcaption strong {
+  color: var(--coral);
+}
+.gen .flip {
+  font-size: var(--fs-label);
+  gap: 8px;
+}
+.gen .flip .toggle-track {
+  width: 60px;
+  height: 34px;
+}
+.gen .flip .toggle-track::after {
+  width: 24px;
+  height: 24px;
+}
+.gen .flip .toggle input:checked + .toggle-track::after {
+  transform: translateX(26px);
+}
+.gen-canvas {
+  display: block;
+  width: 460px;
+  image-rendering: pixelated;
+  border-radius: 12px;
+  background: var(--bg-sunken);
+  border: 2px solid var(--line);
+}
+.gen-vae .gen-canvas {
+  border-color: var(--accent);
+}
+.s15-side {
+  flex: 0 0 auto;
+  gap: var(--gap);
+}
+.reroll {
+  gap: 12px;
+  font-size: var(--fs-body);
+  padding: 12px 30px;
+}
+.reroll .dice {
+  width: 30px;
+  height: 30px;
+}
+.reroll .dice rect {
+  fill: var(--bg);
+}
+.reroll .dice circle {
+  fill: var(--accent);
+}
+.reroll.rolling .dice {
+  animation: dice-roll 600ms var(--ease);
+}
+@keyframes dice-roll {
+  0% { transform: rotate(0) scale(1); }
+  50% { transform: rotate(200deg) scale(1.3); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reroll.rolling .dice {
+    animation: none;
+  }
+}
+.s15-map {
+  --map-size: 270px;
+}
+.s15-pick-fig .cat-canvas.small {
+  --cat-size: 110px;
+}
+
+/* ================================================================ s16 interpolation */
+
+.s16-body {
+  flex-direction: column;
+  gap: var(--gap);
+}
+.s16-pickers {
+  display: flex;
+  gap: calc(var(--gap) * 2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ab-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ab {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.ab-picker .image-picker {
+  --picker-cols: 8 !important;
+  gap: 4px;
+}
+.ab-picker .cat-pick canvas {
+  width: 46px;
+  height: 46px;
+}
+.interp-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.interp-row {
+  display: grid;
+  grid-template-columns: 110px auto;
+  align-items: center;
+  gap: 16px;
+}
+.row-label {
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-small);
+  text-align: right;
+}
+.interp-row[data-model="ae_128"] .row-label {
+  color: var(--coral);
+}
+.interp-row[data-model="vae_128"] .row-label {
+  color: var(--accent);
+}
+.strip-wrap {
+  position: relative;
+}
+.interp-strip {
+  display: block;
+  width: 760px;
+  image-rendering: pixelated;
+  border-radius: 8px;
+}
+.strip-marker {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--sunflower);
+  box-shadow: 0 0 10px var(--sunflower);
+  transform: translateX(-50%);
+  transition: left 120ms linear;
+}
+.s16-live {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--gap) * 2);
+}
+.s16-live .cat-canvas {
+  --cat-size: 200px;
+}
+.s16-live figure[data-model="ae_128"] .cat-canvas {
+  border-color: var(--coral);
+}
+.s16-slider {
+  width: 380px;
+}
+
+/* ================================================================ 1366x768 and smaller laptops */
+
+@media (max-height: 820px), (max-width: 1500px) {
+  .s11-body,
+  .s13-body {
+    gap: calc(var(--gap) * 2);
+  }
+  .s11-map {
+    --map-size: min(62vh, 520px);
+  }
+  .s11-now .cat-canvas {
+    --cat-size: 150px;
+  }
+  .s11-row .cat-canvas.small {
+    --cat-size: 58px;
+  }
+  .loss-eq {
+    font-size: 46px;
+  }
+  .gauss-wrap {
+    width: min(760px, 100%);
+  }
+  .s13-map {
+    --map-size: min(62vh, 520px);
+  }
+  .graph-wrap {
+    width: min(900px, 100%);
+  }
+  .s14-out-fig .cat-canvas {
+    --cat-size: 140px;
+  }
+  .s14-map {
+    --map-size: 160px;
+  }
+  .gen-canvas {
+    width: 360px;
+  }
+  .s15-map {
+    --map-size: 210px;
+  }
+  .s15-pick-fig .cat-canvas.small {
+    --cat-size: 84px;
+  }
+  .interp-strip {
+    width: 600px;
+  }
+  .s16-live .cat-canvas {
+    --cat-size: 150px;
+  }
+  .ab-picker .cat-pick canvas {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ================================================================ phones (portrait) */
+
+@media (max-width: 760px) {
+  .s11-body,
+  .s13-body,
+  .s15-body {
+    gap: var(--gap);
+    align-items: center;
+  }
+  .s11-map,
+  .s13-map {
+    --map-size: min(92vw, 420px);
+  }
+  .s11-side,
+  .s13-side {
+    flex-basis: auto;
+    width: 100%;
+  }
+  .s11-now .cat-canvas {
+    --cat-size: 120px;
+  }
+  .s11-row .cat-canvas.small {
+    --cat-size: 46px;
+  }
+  .loss-eq {
+    font-size: 26px;
+    gap: 8px;
+  }
+  .eq-term {
+    padding: 2px 10px;
+    border-width: 2px;
+  }
+  .eq-explain {
+    font-size: var(--fs-small);
+  }
+  .tug {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tug-rope {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .tug-team.kl {
+    text-align: right;
+  }
+  .s14-demo {
+    flex-direction: column;
+    gap: var(--gap);
+  }
+  .s14-sliders {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  .s14-map {
+    --map-size: 200px;
+  }
+  .gen-grids {
+    flex-direction: column;
+    gap: var(--gap);
+    width: 100%;
+  }
+  .gen-canvas {
+    width: 100%;
+  }
+  .s15-side {
+    width: 100%;
+  }
+  .s16-pickers {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  .ab-picker .cat-pick canvas {
+    width: 30px;
+    height: 30px;
+  }
+  .ab {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+  .interp-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .row-label {
+    text-align: left;
+  }
+  .interp-strip {
+    width: 100%;
+  }
+  .s16-live {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .s16-live .cat-canvas {
+    --cat-size: 120px;
+  }
+  .s16-slider {
+    order: 3;
+    width: 100%;
+  }
+}
+
+/* s11's side panel is narrow: its picker wraps to two rows of four. */
+.s11-picker .image-picker {
+  --picker-cols: 4 !important;
+}
+.s11-picker .cat-pick canvas {
+  width: 56px;
+  height: 56px;
+}
+@media (max-width: 760px) {
+  .s11-picker .image-picker {
+    --picker-cols: 8 !important;
+  }
+  .s11-picker .cat-pick canvas {
+    width: 34px;
+    height: 34px;
+  }
+}

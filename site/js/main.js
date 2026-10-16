@@ -80,7 +80,7 @@ addEventListener("hashchange", () => {
 
 const TYPING = 'input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable]';
 const ACTIVATES_ON_SPACE = 'button, a[href], summary, input[type="checkbox"], input[type="radio"], [role="tab"]';
-const USES_ARROWS = 'input[type="range"], [role="tab"]';
+const USES_ARROWS = 'input[type="range"], [role="tab"], [role="slider"]';
 
 addEventListener("keydown", (e) => {
   if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -135,7 +135,7 @@ document.addEventListener(
   () =>
     setTimeout(() => {
       const a = document.activeElement;
-      if (a && a !== document.body && a.matches('input[type="range"], button, [role="tab"], input[type="checkbox"], select')) a.blur();
+      if (a && a !== document.body && a.matches('input[type="range"], button, [role="tab"], [role="slider"], input[type="checkbox"], select')) a.blur();
     }),
   true,
 );
