@@ -10,6 +10,7 @@ A 25-minute class presentation (MAAI901 Deep Learning for Visual Data) on autoen
 
 ## Architecture
 - training/ (desktop, RTX 4070 Ti, run once): PyTorch dataset loaders, models, train.py and export.py. All heavy work happens here: training, and precomputing anything slow (PCA, latent maps, classifier visualisations, statistics). Exports go to site/models and site/data.
+- Training outputs: training/runs/<name>/model.pt (run config, state_dict, per-epoch loss history) plus epoch_XXX.png previews; cnn_cls also writes metrics.json. `--quick` smoke tests write to training/runs/quick/ so they never count as finished runs for `--skip-existing`.
 - site/: fully static HTML, CSS and vanilla JavaScript ES modules. No build step, no framework, no backend. onnxruntime-web is vendored into site/vendor and runs the small models in the viewer's browser (WASM by default, WebGPU when available).
 - The browser only runs small encoders, decoders and the classifier on 64x64 images. Each call should take under ~50 ms on a mid-range phone; anything slower is precomputed.
 - A service worker caches every file after the first visit, so the site keeps working offline (classroom Wi-Fi can fail).

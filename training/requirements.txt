@@ -1,0 +1,8 @@
+# Install PyTorch first, with CUDA, from https://pytorch.org/get-started/locally/
+numpy
+pillow
+onnx
+onnxruntime
+onnxconverter-common
+huggingface_hub
+datasets
