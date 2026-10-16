@@ -5,6 +5,7 @@ wild animals for the classifier). See `../SPEC.md` for the full design.
 
 | file | what it does |
 | --- | --- |
+| `export.py` | writes the ONNX models and precomputed demo data into `site/` |
 | `data.py` | downloads and caches the datasets, the fixed 512 held-out cats, `CatDataset` |
 | `models.py` | shared conv trunk, decoder, AE, VAE, classifier, the two losses |
 | `train.py` | the list of runs, one loss per model kind, the training loop |
@@ -47,6 +48,17 @@ test metrics go to `runs/cnn_cls/metrics.json`.
 
 Other options: `--list` shows all runs, `--only <names...>` trains a subset,
 `--epochs N` overrides the epoch count, `--workers N` sets DataLoader workers.
+
+## Export for the website
+
+```bat
+python export.py
+```
+
+Writes the ONNX models and `manifest.json` to `site/models/`, and the demo data
+(sprites, PCA, latent maps, anomaly statistics, ...) to `site/data/`. Untrained
+models are skipped. It checks every ONNX file against PyTorch, prints a table,
+and stores the biggest models' weights in float16 until the site fits in 60 MB.
 
 ## The models
 

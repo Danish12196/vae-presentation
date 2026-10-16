@@ -1,0 +1,1 @@
+{"tile":64,"cols":9,"count":27,"classes":["cat","dog","wild"],"frame_steps":[0,1,4,9,20,43,93,199,200],"layout":"one row per class: 8 frames, then the final image","confidence":{"cat":1.0,"dog":1.0,"wild":1.0}}

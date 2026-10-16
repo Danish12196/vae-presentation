@@ -14,7 +14,8 @@ A 25-minute class presentation (MAAI901 Deep Learning for Visual Data) on autoen
 - site/: fully static HTML, CSS and vanilla JavaScript ES modules. No build step, no framework, no backend. onnxruntime-web is vendored into site/vendor and runs the small models in the viewer's browser (WASM by default, WebGPU when available).
 - The browser only runs small encoders, decoders and the classifier on 64x64 images. Each call should take under ~50 ms on a mid-range phone; anything slower is precomputed.
 - A service worker caches every file after the first visit, so the site keeps working offline (classroom Wi-Fi can fail).
-- Size budget: total download under 60 MB, every single file under 25 MB (static host limits). Export in float16 where needed.
+- Size budget: total download under 60 MB, every single file under 25 MB (static host limits). export.py stores the biggest models' weights as float16 (cast back to float32 inside the graph, so every onnxruntime-web backend runs them) until everything fits, but only where the float16 file still matches PyTorch within 1e-2.
+- Exports (training/export.py): site/models/<name>.encoder.onnx and .decoder.onnx (cnn_cls.onnx for the classifier), opset 17, dynamic batch; site/models/manifest.json; site/data/ holds the showcase sprite (the 64 held-out demo cats), animals, cls_dream, PCA reconstructions, latent maps (thumbnails as JPEG: 1 MB instead of 4.7 MB as PNG), anomaly statistics, not-cats, sparse codes, and files.json listing every file with its size.
 - site/models/manifest.json lists every model, its latent size and files. Any demo whose model is missing shows a friendly "this cat is still training" card instead of breaking.
 
 ## Datasets
@@ -27,8 +28,8 @@ All share one conv trunk: conv 32-64-128-256 (stride 2, BatchNorm, LeakyReLU) do
 | cnn_cls | CNN classifier, 3 classes (cat, dog, wild) | - | live classification (s02, s03), "ask the classifier to draw a cat" (s02), judging generated cats (s10, s15) |
 | ae_2, ae_16, ae_64, ae_256 | plain AE | 2/16/64/256 | bottleneck slider; ae_2 also draws the Part 4 latent map; ae_64 runs the anomaly detector |
 | dae_128 | denoising AE (input noise sigma 0 to 0.5, clean target) | 128 | denoising demo |
-| sparse_l1 | ReLU code + L1 penalty | 1024 | sparse demo |
-| sparse_none | same, no penalty | 1024 | sparse comparison |
+| sparse_l1 | ReLU code + L1 penalty | 1024 | sparse demo (codes precomputed for the 64 showcase cats; the two sparse models are 39 MB, too big to ship) |
+| sparse_none | same, no penalty | 1024 | sparse comparison (precomputed, as above) |
 | cae_64 | contractive (penalise code change under small input noise, relative to the code spread; weight 100) | 64 | contractive demo, compared with ae_64 |
 | vae_2d_b0, vae_2d_b0.1, vae_2d_b1, vae_2d_b4 | VAE, beta 0/0.1/1/4 | 2 | KL slider; vae_2d_b1 also draws the Part 5 map |
 | vae_128 | VAE, beta 1 | 128 | generation, interpolation, reparameterization |
