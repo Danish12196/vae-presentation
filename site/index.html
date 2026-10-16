@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/part1.css" />
+    <link rel="stylesheet" href="css/part2.css" />
     <script type="module" src="js/main.js"></script>
   </head>
   <body>
@@ -110,8 +111,28 @@
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>The bottleneck</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="happy"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s05-body" data-demo>
+          <div class="bn-row">
+            <figure class="bn-img"><canvas class="cat-canvas" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
+            <div class="bn-diagram" aria-hidden="true">
+              <div class="bn-enc"></div>
+              <div class="bn-z"><span class="mono">z</span></div>
+              <div class="bn-dec"></div>
+            </div>
+            <figure class="bn-img bn-out">
+              <canvas class="cat-canvas" width="64" height="64" aria-label="Reconstruction"></canvas>
+              <figcaption>output</figcaption>
+              <div class="bn-copier" hidden><div data-mascot="photocopier"></div><span class="sticker tilt-right">Photocopier Cat is back</span></div>
+            </figure>
+          </div>
+          <div class="bn-controls">
+            <div class="bn-slider"></div>
+            <div class="bn-readouts">
+              <p class="bn-numbers mono">12,288 numbers → <strong class="bn-k">2</strong> numbers</p>
+              <p class="bn-ratio"></p>
+            </div>
+          </div>
+          <div class="bn-picker"></div>
         </div>
       </section>
 
@@ -120,8 +141,26 @@
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>Reconstruction loss</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s06-body" data-demo>
+          <div class="panel s06-left">
+            <div class="loss-row">
+              <figure><canvas class="cat-canvas" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
+              <figure class="loss-out"><canvas class="cat-canvas" width="64" height="64" aria-label="Reconstruction"></canvas><figcaption>output</figcaption></figure>
+              <figure><canvas class="cat-canvas heat" width="64" height="64" aria-label="Squared error per pixel"></canvas><figcaption>squared error</figcaption><div class="legend"></div></figure>
+            </div>
+            <div class="s06-picker"></div>
+          </div>
+          <div class="panel s06-right">
+            <div class="loss-tabs"></div>
+            <div class="loss-readouts"></div>
+            <div class="formula-toggle"></div>
+            <p class="formula" hidden></p>
+            <div class="labels-used">
+              <span class="readout-label">labels used</span>
+              <span class="labels-count mono">0</span>
+              <span class="sticker">human annotators harmed: 0</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -130,8 +169,14 @@
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>PCA vs autoencoder</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="confused"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s07-body" data-demo>
+          <div class="pca-grid" role="table" aria-label="Original, PCA and autoencoder reconstructions"></div>
+          <div class="panel s07-side">
+            <div class="k-tabs"></div>
+            <p class="pca-key">numbers: squared error, <span class="better-key">lower wins</span></p>
+            <p class="pca-avg mono" aria-live="polite"></p>
+            <p class="callout"><strong>linear layers + MSE = PCA.</strong> Add nonlinearity = deep autoencoder = nonlinear PCA.</p>
+          </div>
         </div>
       </section>
 
@@ -140,8 +185,40 @@
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>What autoencoders are good for</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="happy"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s08-body" data-demo>
+          <div class="uses">
+            <article class="card use">
+              <div class="use-vis use-compress" aria-hidden="true"><span class="sq big mono">12,288</span><span class="arrow">→</span><span class="sq small mono">64</span></div>
+              <h3>Compression</h3>
+            </article>
+            <article class="card use">
+              <div class="use-vis use-denoise"><canvas width="64" height="64" aria-label="Noisy cat"></canvas><span class="arrow" aria-hidden="true">→</span><canvas width="64" height="64" aria-label="Clean cat"></canvas></div>
+              <h3>Denoising</h3>
+            </article>
+            <article class="card use">
+              <div class="use-vis use-features" aria-hidden="true"><span class="box">encoder</span><span class="arrow">→</span><span class="z mono">z</span><span class="arrow">→</span><span class="box other">your model</span></div>
+              <h3>Feature extraction</h3>
+            </article>
+          </div>
+          <article class="card anomaly">
+            <h3>Anomaly detection <span class="live-pill">live</span></h3>
+            <div class="anomaly-main">
+              <div class="draw-col">
+                <canvas class="cat-canvas draw interactive" width="64" height="64" aria-label="Drawing canvas: draw on the cat"></canvas>
+                <div class="draw-tools"></div>
+              </div>
+              <div class="recon-col">
+                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="ae_64 reconstruction"></canvas><figcaption>rebuilt</figcaption></figure>
+                <figure><canvas class="cat-canvas small heat" width="64" height="64" aria-label="Error heatmap"></canvas><figcaption>error</figcaption></figure>
+              </div>
+              <div class="verdict-col">
+                <div class="anomaly-hist"></div>
+                <div class="verdict"><span class="verdict-chip"></span><span class="verdict-reason"></span></div>
+              </div>
+            </div>
+            <div class="anomaly-picker"></div>
+            <p class="anomaly-caption">trained on normal cats only. Same idea spots defects on a factory line.</p>
+          </article>
         </div>
       </section>
 

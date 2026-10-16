@@ -1,6 +1,6 @@
 {
- "version": "63c003451905",
- "total_bytes": 72834985,
+ "version": "8ad160a9bdcc",
+ "total_bytes": 72875028,
  "files": [
   {
    "path": "css/base.css",
@@ -8,7 +8,7 @@
   },
   {
    "path": "css/components.css",
-   "bytes": 11554
+   "bytes": 11975
   },
   {
    "path": "css/fonts.css",
@@ -17,6 +17,10 @@
   {
    "path": "css/part1.css",
    "bytes": 14340
+  },
+  {
+   "path": "css/part2.css",
+   "bytes": 12600
   },
   {
    "path": "css/tokens.css",
@@ -100,7 +104,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 15153
+   "bytes": 19829
   },
   {
    "path": "js/loader.js",
@@ -116,7 +120,7 @@
   },
   {
    "path": "js/models.js",
-   "bytes": 12969
+   "bytes": 14449
   },
   {
    "path": "js/netdiagram.js",
@@ -143,12 +147,32 @@
    "bytes": 3081
   },
   {
+   "path": "js/slides/s05.js",
+   "bytes": 2231
+  },
+  {
+   "path": "js/slides/s06.js",
+   "bytes": 3124
+  },
+  {
+   "path": "js/slides/s07.js",
+   "bytes": 3385
+  },
+  {
+   "path": "js/slides/s08.js",
+   "bytes": 7757
+  },
+  {
    "path": "js/state.js",
    "bytes": 768
   },
   {
    "path": "js/ui.js",
    "bytes": 10092
+  },
+  {
+   "path": "js/viz.js",
+   "bytes": 4369
   },
   {
    "path": "models/ae_128.decoder.onnx",

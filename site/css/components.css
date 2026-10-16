@@ -473,3 +473,27 @@
   gap: 8px;
   justify-content: center;
 }
+
+/* A slot whose model is missing: the canvas stays (keeps the layout), the card covers it. */
+.is-missing {
+  position: relative;
+}
+.is-missing > canvas {
+  visibility: hidden;
+}
+.missing {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+.missing .training-card.compact {
+  max-width: 100%;
+}
+
+@media (max-width: 760px) {
+  .tab {
+    padding: 6px 12px;
+  }
+}

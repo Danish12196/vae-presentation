@@ -1,0 +1,645 @@
+/* Part 2 slides: bottleneck (s05), reconstruction loss (s06), PCA vs autoencoder (s07),
+   uses and the live anomaly detector (s08). Shared bits first. */
+
+figure {
+  margin: 0;
+}
+figure > figcaption {
+  margin-top: 8px;
+  text-align: center;
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+}
+
+/* Error heatmap legend (viz.js) */
+.heat-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text-soft);
+}
+.heat-bar {
+  width: 110px;
+  height: 10px;
+  border-radius: 5px;
+}
+
+/* Histogram (viz.js) */
+.histogram {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.hist-bar {
+  fill: color-mix(in srgb, var(--text) 32%, transparent);
+}
+.hist-axis {
+  stroke: var(--line);
+  stroke-width: 2;
+}
+.hist-tick {
+  fill: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+.hist-line {
+  stroke: var(--sunflower);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+.hist-line-label {
+  fill: var(--sunflower);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+.hist-marker {
+  transition: transform var(--t-med) var(--ease), opacity var(--t-fast) linear;
+}
+.hist-marker line {
+  stroke: var(--coral);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.hist-marker circle {
+  fill: var(--coral);
+}
+.hist-marker-label {
+  fill: var(--coral);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* ================================================================ s05 bottleneck */
+
+.s05-body {
+  flex-direction: column;
+  gap: var(--gap);
+}
+.bn-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+}
+.bn-img .cat-canvas {
+  --cat-size: 300px;
+}
+.bn-out {
+  position: relative;
+}
+
+/* The network drawn as a funnel: its middle narrows with the slider (--open from 0 to 1). */
+.bn-diagram {
+  --open: 0.06;
+  display: flex;
+  align-items: center;
+  width: 280px;
+  height: 220px;
+}
+.bn-enc,
+.bn-dec {
+  flex: 1;
+  height: 100%;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, var(--bg)), var(--accent));
+  transition: clip-path var(--t-med) var(--ease);
+}
+.bn-enc {
+  clip-path: polygon(0 0, 100% calc(50% - var(--open) * 50%), 100% calc(50% + var(--open) * 50%), 0 100%);
+}
+.bn-dec {
+  background: linear-gradient(270deg, color-mix(in srgb, var(--sky) 55%, var(--bg)), var(--sky));
+  clip-path: polygon(0 calc(50% - var(--open) * 50%), 100% 0, 100% 100%, 0 calc(50% + var(--open) * 50%));
+}
+.bn-z {
+  position: relative;
+  width: 44px;
+  height: calc(var(--open) * 100%);
+  min-height: 6px;
+  margin: 0 4px;
+  border-radius: 4px;
+  background: var(--lilac);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--lilac) 60%, transparent);
+  transition: height var(--t-med) var(--ease);
+}
+.bn-z span {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--lilac);
+}
+
+.bn-copier {
+  position: absolute;
+  right: -165px;
+  bottom: -20px;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.bn-copier .mascot {
+  width: 120px;
+}
+.bn-copier .sticker {
+  font-size: var(--fs-label);
+  text-align: center;
+  margin-top: -14px;
+}
+.bn-copier:not([hidden]) {
+  animation: stamp-in 320ms var(--ease);
+}
+
+.bn-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--gap) * 2.5);
+  width: 100%;
+}
+.bn-slider {
+  width: min(560px, 100%);
+}
+.bn-readouts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bn-numbers {
+  font-size: var(--fs-body);
+}
+.bn-numbers strong {
+  color: var(--accent);
+}
+.bn-ratio {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+  color: var(--accent);
+}
+
+/* ================================================================ s06 reconstruction loss */
+
+.s06-body {
+  gap: calc(var(--gap) * 2.5);
+}
+.s06-left {
+  flex: 0 1 auto;
+}
+.loss-row {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+.loss-row .cat-canvas {
+  --cat-size: 240px;
+}
+.s06-right {
+  flex: 0 1 520px;
+  align-items: flex-start;
+}
+.loss-readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 36px;
+}
+.readout {
+  transition: opacity var(--t-fast) linear;
+}
+.readout.dim {
+  opacity: 0.35;
+}
+.formula {
+  padding: 12px 18px;
+  border-radius: var(--radius-small);
+  background: var(--bg-sunken);
+  border: 2px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+.labels-used {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.labels-count {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.labels-count.pulse {
+  animation: count-pulse 500ms var(--ease);
+}
+@keyframes count-pulse {
+  40% { transform: scale(1.3); }
+}
+
+/* ================================================================ s07 PCA vs autoencoder */
+
+.s07-body {
+  gap: calc(var(--gap) * 3);
+}
+.pca-grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 6px 34px;
+  justify-items: center;
+}
+.pca-head {
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-small);
+  color: var(--accent);
+}
+.pca-cell .cat-canvas {
+  --cat-size: 132px;
+}
+.pca-cell figcaption {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+}
+.pca-cell.better figcaption,
+.better-key {
+  color: var(--mint);
+  font-weight: 700;
+}
+.pca-cell.better .cat-canvas {
+  border-color: var(--mint);
+}
+.s07-side {
+  flex: 0 1 460px;
+  align-items: flex-start;
+}
+.pca-key {
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+}
+.pca-avg {
+  font-size: var(--fs-small);
+  min-height: 1.5em;
+}
+
+/* ================================================================ s08 uses + anomaly detector */
+
+.s08-body {
+  align-items: stretch;
+  gap: calc(var(--gap) * 1.2);
+}
+.uses {
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  justify-content: center;
+}
+.card.use {
+  padding: 16px 20px;
+  gap: 10px;
+}
+.card.use h3 {
+  font-size: var(--fs-small);
+}
+.use-vis {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 72px;
+}
+.use-vis .arrow {
+  color: var(--text-soft);
+  font-size: 22px;
+}
+.use-compress .sq {
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  font-size: 13px;
+}
+.use-compress .sq.big {
+  width: 72px;
+  height: 72px;
+}
+.use-compress .sq.small {
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
+}
+.use-denoise canvas {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  image-rendering: pixelated;
+}
+.use-features .box {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 2px solid var(--accent);
+  font-size: 13px;
+  font-family: var(--font-head);
+  font-weight: 600;
+}
+.use-features .box.other {
+  border-color: var(--sky);
+}
+.use-features .z {
+  color: var(--lilac);
+  font-weight: 700;
+}
+
+.card.anomaly {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-color: var(--accent);
+  gap: 14px;
+}
+.live-pill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--mint);
+  color: var(--bg);
+  font-size: 14px;
+  vertical-align: middle;
+}
+.anomaly-main {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 28px;
+  align-items: center;
+}
+.draw-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.cat-canvas.draw {
+  --cat-size: 260px;
+  cursor: crosshair;
+}
+.draw-tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  background: var(--swatch);
+  cursor: pointer;
+}
+.swatch[aria-pressed="true"] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px var(--accent);
+}
+.btn.tool {
+  min-height: 38px;
+  padding: 4px 14px;
+  font-size: var(--fs-label);
+}
+.recon-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.recon-col .cat-canvas.small {
+  --cat-size: 110px;
+}
+.verdict-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.verdict {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  min-height: 48px;
+}
+.verdict-chip {
+  padding: 6px 20px;
+  border-radius: 999px;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  color: var(--bg);
+  background: var(--mint);
+}
+.verdict-chip:empty {
+  display: none;
+}
+.verdict-chip[data-level="warn"] {
+  background: var(--sunflower);
+}
+.verdict-chip[data-level="bad"] {
+  background: var(--coral);
+  animation: count-pulse 500ms var(--ease);
+}
+.verdict-reason {
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+}
+.anomaly-picker .cat-pick canvas {
+  width: 52px;
+  height: 52px;
+}
+.anomaly-caption {
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+}
+
+/* ================================================================ 1366x768 and smaller laptops */
+
+@media (max-height: 820px), (max-width: 1500px) {
+  .bn-img .cat-canvas {
+    --cat-size: 220px;
+  }
+  .bn-diagram {
+    width: 220px;
+    height: 170px;
+  }
+  .bn-copier {
+    right: -140px;
+    width: 125px;
+  }
+  .bn-copier .mascot {
+    width: 96px;
+  }
+  .loss-row .cat-canvas {
+    --cat-size: 170px;
+  }
+  .pca-cell .cat-canvas {
+    --cat-size: 92px;
+  }
+  .uses {
+    flex-basis: 250px;
+  }
+  .use-vis {
+    min-height: 56px;
+  }
+  .use-compress .sq.big,
+  .use-denoise canvas {
+    width: 56px;
+    height: 56px;
+  }
+  .cat-canvas.draw {
+    --cat-size: 190px;
+  }
+  .recon-col .cat-canvas.small {
+    --cat-size: 84px;
+  }
+  .anomaly-picker .cat-pick canvas {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+/* ================================================================ phones (portrait) */
+
+@media (max-width: 760px) {
+  .bn-row {
+    gap: 10px;
+  }
+  .bn-img .cat-canvas {
+    --cat-size: 112px;
+  }
+  .bn-diagram {
+    width: 84px;
+    height: 100px;
+  }
+  .bn-z {
+    width: 16px;
+    margin: 0 2px;
+  }
+  .bn-copier {
+    position: static;
+    width: 112px;
+    margin-top: 6px;
+  }
+  /* No room for the mascot beside a phone-sized cat: just the sticker. */
+  .bn-copier .mascot {
+    display: none;
+  }
+  .bn-copier .sticker {
+    margin-top: 0;
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .bn-picker .image-picker,
+  .s06-picker .image-picker {
+    --picker-cols: 4 !important;
+  }
+  .bn-controls {
+    flex-direction: column;
+    gap: var(--gap);
+  }
+  .bn-readouts {
+    align-items: center;
+  }
+
+  .loss-row {
+    gap: 10px;
+    justify-content: center;
+  }
+  .loss-row .cat-canvas {
+    --cat-size: 100px;
+  }
+  .heat-bar {
+    width: 50px;
+  }
+  .s06-right {
+    flex-basis: auto;
+    align-items: stretch;
+  }
+  .loss-readouts {
+    gap: 12px 22px;
+  }
+
+  .s07-body {
+    gap: var(--gap);
+  }
+  .pca-grid {
+    gap: 4px 16px;
+    align-self: center;
+  }
+  .pca-cell .cat-canvas {
+    --cat-size: 76px;
+  }
+  .s07-side {
+    flex-basis: auto;
+  }
+
+  .uses {
+    flex-basis: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .card.use {
+    padding: 8px;
+    align-items: center;
+    text-align: center;
+  }
+  .card.use h3 {
+    font-size: 13px;
+  }
+  .use-vis {
+    min-height: 40px;
+    gap: 4px;
+    justify-content: center;
+  }
+  .use-vis .arrow {
+    font-size: 14px;
+  }
+  .use-compress .sq.big,
+  .use-denoise canvas {
+    width: 34px;
+    height: 34px;
+  }
+  .use-compress .sq {
+    font-size: 8px;
+  }
+  .use-compress .sq.small {
+    width: 18px;
+    height: 18px;
+    font-size: 7px;
+  }
+  .use-features .box {
+    padding: 2px 4px;
+    font-size: 9px;
+  }
+  .anomaly-main {
+    grid-template-columns: auto auto;
+    gap: 14px;
+    justify-content: center;
+  }
+  .verdict-col {
+    grid-column: 1 / -1;
+  }
+  .cat-canvas.draw {
+    --cat-size: 190px;
+  }
+  .recon-col .cat-canvas.small {
+    --cat-size: 76px;
+  }
+  .anomaly-picker .image-picker {
+    --picker-cols: 6 !important;
+  }
+}

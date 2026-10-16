@@ -8,7 +8,7 @@
 //
 // VERSION is rewritten by tools/stamp_site.py whenever any site file changes.
 
-const VERSION = "63c003451905";
+const VERSION = "8ad160a9bdcc";
 const CACHE = `cats-${VERSION}`;
 const BIG = /^(models|data)\/|\.wasm$/;
 

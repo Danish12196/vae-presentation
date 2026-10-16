@@ -124,6 +124,22 @@ export async function decode(name, z) {
   return out.image;
 }
 
+/** Encode then decode with an autoencoder: the reconstruction as an image tensor [B, 3, 64, 64]. */
+export async function reconstruct(name, imgs) {
+  const codes = await encode(name, imgs);
+  return decode(name, codes.z ?? codes.mu); // VAEs: decode the mean
+}
+
+/** Summed squared error between an image and a reconstruction (same measure as the training loss). */
+export function squaredError(image, recon, index = 0) {
+  const x = toTensor(image).data;
+  const y = recon instanceof ort.Tensor ? recon.data : recon;
+  const base = index * x.length;
+  let sum = 0;
+  for (let i = 0; i < x.length; i++) sum += (x[i] - y[base + i]) ** 2;
+  return sum;
+}
+
 export async function classify(imgs) {
   const entry = await getModel("cnn_cls");
   const { logits } = await run("cnn_cls", "model", { image: asImageTensor(imgs) });
@@ -327,6 +343,30 @@ export function renderTraining(el, modelName, { compact = false } = {}) {
         ${compact ? `<p><code>${modelName}</code></p>` : `<p>The <code>${modelName}</code> model isn't exported yet. Check back after its next nap.</p>`}
       </div>
     </div>`;
+}
+
+/**
+ * Run fn() for one slot of a demo (a figure holding a canvas). If a model is missing, a compact
+ * training card covers the slot; the next successful run removes it again. Returns fn's result or null.
+ */
+export async function inSlot(slot, fn) {
+  try {
+    const result = await fn();
+    slot.querySelector(":scope > .missing")?.remove();
+    slot.classList.remove("is-missing");
+    return result;
+  } catch (err) {
+    if (!(err instanceof ModelMissing)) throw err;
+    let holder = slot.querySelector(":scope > .missing");
+    if (!holder) {
+      holder = document.createElement("div");
+      holder.className = "missing";
+      slot.append(holder);
+    }
+    renderTraining(holder, err.model, { compact: true });
+    slot.classList.add("is-missing");
+    return null;
+  }
 }
 
 /** Run fn(); if a model is missing, show the training card in el instead. Returns fn's result or null. */
