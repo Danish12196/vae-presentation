@@ -237,6 +237,7 @@ def export_dream(cls_model, classes, device, steps=200, frames=8):
     but the result is still a psychedelic mess: knowing a cat is not drawing one.
     """
     torch.manual_seed(SEED)
+    rng = np.random.default_rng(SEED)
     # Snapshots spaced geometrically: most of the change happens in the first few steps.
     snap_at = (np.geomspace(1, steps, frames).round().astype(int) - 1).tolist()
     blur = torch.tensor([1., 2., 1.], device=device)
@@ -250,7 +251,7 @@ def export_dream(cls_model, classes, device, steps=200, frames=8):
         for step in range(steps):
             if step in snap_at:
                 shots.append(torch.sigmoid(p).detach())
-            dx, dy = np.random.randint(-2, 3, size=2)
+            dx, dy = rng.integers(-2, 3, size=2)
             x = torch.roll(torch.sigmoid(p), (int(dy), int(dx)), dims=(2, 3))  # jitter
             loss = -cls_model(x)[0, c]
             opt.zero_grad()
@@ -303,11 +304,26 @@ def export_latent_maps(loaded, map_cats, device):
 
 
 def export_anomaly(ae64, held_out, device):
-    """How badly ae_64 rebuilds normal (held-out) cats; anything far above this is 'not a cat'."""
+    """How well ae_64 rebuilds normal (held-out) cats. Returns the (low, high) flag thresholds.
+
+    Two-sided: an error above the 95th percentile means "I can't rebuild this, it's not a cat",
+    and one below the 1st percentile means "suspiciously easy": flat or blurry images
+    are simpler than any real cat face.
+    """
     errors = recon_errors(ae64, to_tensor(held_out, device)).cpu().numpy()
+    p1, p95, p99 = (float(np.percentile(errors, q)) for q in (1, 95, 99))
     write_json(OUT / "anomaly.json", {"model": "ae_64", "errors": rounded(errors, 2),
-                                      "p95": float(np.percentile(errors, 95)),
-                                      "p99": float(np.percentile(errors, 99))})
+                                      "p1": p1, "p95": p95, "p99": p99,
+                                      "flag": "error < p1 (too easy) or error > p95 (can't rebuild)"})
+    return p1, p95
+
+
+def verdict(error, low, high):
+    if error > high:
+        return "anomaly: can't rebuild it"
+    if error < low:
+        return "anomaly: suspiciously easy"
+    return "passes as a cat"
 
 
 def not_cats(held_out):
@@ -329,12 +345,22 @@ def not_cats(held_out):
     return list(images), np.stack([np.asarray(v, dtype=np.uint8) for v in images.values()])
 
 
-def export_not_cats(held_out, ae64, device):
+def export_not_cats(held_out, ae64, thresholds, device):
+    """The not-cats, ae_64's error on each, and its verdict.
+
+    Any that pass as a cat are the honest blind spot: an upside-down or colour-inverted
+    cat still has fur, eyes and a face-like layout, so ae_64 rebuilds it about as well
+    as a normal cat. Low reconstruction error doesn't mean "the right kind of cat".
+    """
     labels, images = not_cats(held_out)
     meta = save_sprite(images, OUT / "not_cats.png", cols=6)
-    errors = recon_errors(ae64, to_tensor(images, device)).cpu().numpy() if ae64 else None
-    write_json(OUT / "not_cats.json", {**meta, "labels": labels,
-                                       "ae_64_errors": None if errors is None else rounded(errors, 2)})
+    out = {**meta, "labels": labels}
+    if ae64 is not None:
+        errors = recon_errors(ae64, to_tensor(images, device)).cpu().numpy()
+        out["ae_64_errors"] = rounded(errors, 2)
+        out["verdicts"] = [verdict(e, *thresholds) for e in errors]
+        out["blind_spots"] = [l for l, v in zip(labels, out["verdicts"]) if v == "passes as a cat"]
+    write_json(OUT / "not_cats.json", out)
 
 
 def export_sparse_codes(loaded, held_out, device):
@@ -394,6 +420,8 @@ def write_file_list():
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    torch.backends.cudnn.deterministic = True  # same files every time we export
+    torch.backends.cudnn.benchmark = False
     MODELS.mkdir(parents=True, exist_ok=True)
     OUT.mkdir(parents=True, exist_ok=True)
 
@@ -405,9 +433,8 @@ def main():
     print("exporting demo data ...")
     export_showcase(held_out)
     export_pca(train_cats, held_out, device)
-    export_not_cats(held_out, model("ae_64"), device)
-    if "ae_64" in loaded:
-        export_anomaly(model("ae_64"), held_out, device)
+    thresholds = export_anomaly(model("ae_64"), held_out, device) if "ae_64" in loaded else None
+    export_not_cats(held_out, model("ae_64"), thresholds, device)
     if "cnn_cls" in loaded:
         export_animals(train_cats)
         export_dream(model("cnn_cls"), loaded["cnn_cls"][2]["classes"], device)

@@ -46,7 +46,7 @@ Part 2: Autoencoders
 5. Bottleneck: live slider over ae_2/16/64/256 on a held-out cat, showing 12,288 numbers -> k numbers and the compression ratio. Pick any of 8 held-out cats.
 6. Reconstruction loss: input, output and a pixel heatmap of squared error; live MSE and BCE values; a counter "labels used: 0".
 7. PCA vs autoencoder: the same cats reconstructed by PCA and by the AE at the same k, side by side. Callout: a linear AE with MSE learns the PCA subspace.
-8. Uses: four cards (compression, denoising, feature extraction, anomaly detection). The anomaly card is live: draw on a cat or pick a "not a cat" image; reconstruction error is placed on a histogram of normal cats and flags anomalies.
+8. Uses: four cards (compression, denoising, feature extraction, anomaly detection). The anomaly card is live: draw on a cat or pick a "not a cat" image; reconstruction error is placed on a histogram of normal cats and flags anomalies on both sides: above the 95th percentile ("can't rebuild it": noise, stripes) and below the 1st percentile ("suspiciously easy": the beige wall, the fur zoom). The upside-down and colour-inverted cats pass as normal cats; the card shows them as the honest blind spot (low reconstruction error means "looks like cat-ish fur and faces", not "a proper cat").
 Part 3: Other types of autoencoders
 9. Four tabs. Sparse: 1024 neurons as a 32x32 grid lighting up, with a penalty on/off toggle and "% of neurons on". Denoising: a noise slider, noisy input -> clean output. Contractive: a "jiggle" slider; bars show how far the code moves for ae_64 vs cae_64 (normalised by each model's code spread). Convolutional: recap of the architecture we have been using.
 Part 4: Why autoencoders can't generate
