@@ -1,6 +1,6 @@
 {
- "version": "8ad160a9bdcc",
- "total_bytes": 72875028,
+ "version": "74fb007f397e",
+ "total_bytes": 72412729,
  "files": [
   {
    "path": "css/base.css",
@@ -21,6 +21,10 @@
   {
    "path": "css/part2.css",
    "bytes": 12600
+  },
+  {
+   "path": "css/part3.css",
+   "bytes": 4606
   },
   {
    "path": "css/tokens.css",
@@ -48,7 +52,7 @@
   },
   {
    "path": "data/files.json",
-   "bytes": 2185
+   "bytes": 2289
   },
   {
    "path": "data/latent_maps.json",
@@ -96,7 +100,15 @@
   },
   {
    "path": "data/sparse_codes.json",
-   "bytes": 574525
+   "bytes": 664087
+  },
+  {
+   "path": "data/sparse_l1_recon.png",
+   "bytes": 386343
+  },
+  {
+   "path": "data/sparse_none_recon.png",
+   "bytes": 439915
   },
   {
    "path": "img/favicon.svg",
@@ -104,7 +116,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 19829
+   "bytes": 23178
   },
   {
    "path": "js/loader.js",
@@ -163,6 +175,10 @@
    "bytes": 7757
   },
   {
+   "path": "js/slides/s09.js",
+   "bytes": 9889
+  },
+  {
    "path": "js/state.js",
    "bytes": 768
   },
@@ -196,7 +212,7 @@
   },
   {
    "path": "models/ae_2.encoder.onnx",
-   "bytes": 2795361
+   "bytes": 1399294
   },
   {
    "path": "models/ae_256.decoder.onnx",

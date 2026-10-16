@@ -1,0 +1,252 @@
+/* Part 3: one slide (s09) with four tabs: sparse, denoising, contractive, convolutional. */
+
+.s09-body {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: calc(var(--gap) * 1.2);
+}
+.s09-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  flex-wrap: wrap;
+}
+.s09-tabs .tab {
+  font-size: var(--fs-body);
+  padding: 10px 28px;
+}
+.s09-picker .cat-pick canvas {
+  width: 56px;
+  height: 56px;
+}
+
+/* Every tab's panel gets the same height, so switching tabs doesn't make the slide jump. */
+.s09-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--gap) * 1.2);
+  min-height: 560px;
+}
+.s09-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+}
+.s09-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+.s09-figs {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.s09-figs .cat-canvas.small {
+  --cat-size: 120px;
+}
+.s09-figs.big .cat-canvas {
+  --cat-size: 250px;
+}
+.s09-figs figure.current .cat-canvas {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--mint) 35%, transparent), 0 0 28px color-mix(in srgb, var(--mint) 45%, transparent);
+}
+.s09-figs figure.current figcaption {
+  color: var(--mint);
+  font-weight: 700;
+}
+.s09-caption {
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: var(--fs-body);
+  color: var(--accent);
+  text-align: center;
+}
+
+/* Sparse */
+.sp-grid {
+  display: block;
+  width: 360px;
+  height: 360px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+}
+.sp-avg {
+  max-width: 34ch;
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+}
+
+/* Denoising */
+.dn-slider,
+.ct-slider {
+  width: min(560px, 100%);
+}
+
+/* Contractive */
+.ct-input {
+  --cat-size: 220px;
+}
+.ct-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 440px;
+}
+.ct-title {
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-soft);
+}
+.ct-row {
+  display: grid;
+  grid-template-columns: 170px 1fr 56px;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-small);
+}
+.ct-track {
+  height: 24px;
+  border-radius: 12px;
+  background: var(--bg-sunken);
+  border: 2px solid var(--line);
+  overflow: hidden;
+}
+.ct-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--coral);
+  transition: width 200ms var(--ease);
+}
+.ct-row:last-child .ct-fill {
+  background: var(--mint);
+}
+.ct-value {
+  text-align: right;
+}
+
+/* Convolutional */
+.cv-stage.net-stage {
+  --u: 1.05;
+  padding-top: 0;
+}
+.cv-notes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--gap) * 1.5);
+  flex-wrap: wrap;
+}
+.cv-note {
+  font-size: var(--fs-small);
+  color: var(--text-soft);
+}
+
+/* ================================================================ 1366x768 and smaller laptops */
+
+@media (max-height: 820px), (max-width: 1500px) {
+  .s09-body {
+    gap: var(--gap);
+  }
+  .s09-tabs .tab {
+    font-size: var(--fs-small);
+    padding: 8px 20px;
+  }
+  .s09-picker .cat-pick canvas {
+    width: 44px;
+    height: 44px;
+  }
+  .s09-panel {
+    min-height: 420px;
+    gap: var(--gap);
+  }
+  .sp-grid {
+    width: 270px;
+    height: 270px;
+  }
+  .s09-figs .cat-canvas.small {
+    --cat-size: 92px;
+  }
+  .s09-figs.big .cat-canvas {
+    --cat-size: 190px;
+  }
+  .ct-input {
+    --cat-size: 170px;
+  }
+  .ct-bars {
+    width: 380px;
+  }
+  .cv-stage.net-stage {
+    --u: 0.78;
+  }
+}
+
+/* ================================================================ phones (portrait) */
+
+@media (max-width: 760px) {
+  .s09-top {
+    flex-direction: column;
+    align-items: center;
+  }
+  .s09-tabs .tabs {
+    justify-content: center;
+    border-radius: 24px;
+  }
+  .s09-tabs .tab {
+    font-size: 15px;
+    padding: 6px 12px;
+  }
+  .s09-picker .image-picker {
+    --picker-cols: 8 !important;
+    gap: 4px;
+  }
+  .s09-picker .cat-pick canvas {
+    width: 36px;
+    height: 36px;
+  }
+  .s09-panel {
+    min-height: 0;
+  }
+  .s09-row {
+    flex-direction: column;
+    gap: var(--gap);
+  }
+  .s09-side {
+    align-items: center;
+  }
+  .sp-grid {
+    width: min(300px, 80vw);
+    height: min(300px, 80vw);
+  }
+  .sp-avg {
+    text-align: center;
+  }
+  .s09-figs {
+    gap: 10px;
+  }
+  .s09-figs .cat-canvas.small {
+    --cat-size: 84px;
+  }
+  .s09-figs.big .cat-canvas {
+    --cat-size: 100px;
+  }
+  .ct-bars {
+    width: 100%;
+  }
+  .ct-row {
+    grid-template-columns: 110px 1fr 44px;
+    font-size: 14px;
+  }
+  .ct-input {
+    --cat-size: 150px;
+  }
+}

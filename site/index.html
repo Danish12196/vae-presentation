@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/components.css" />
     <link rel="stylesheet" href="css/part1.css" />
     <link rel="stylesheet" href="css/part2.css" />
+    <link rel="stylesheet" href="css/part3.css" />
     <script type="module" src="js/main.js"></script>
   </head>
   <body>
@@ -222,13 +223,66 @@
         </div>
       </section>
 
-      <section class="slide" id="s09" data-part="3" data-title="Sparse, denoising, contractive, convolutional" data-accent="mint">
+      <section class="slide" id="s09" data-part="3" data-title="Other kinds of autoencoders" data-accent="mint">
         <header class="slide-head">
           <p class="part-label">Part 3 · Other types of autoencoders</p>
-          <h2>Sparse, denoising, contractive, convolutional</h2>
+          <h2>Other kinds of autoencoders</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="thinking"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s09-body" data-demo>
+          <div class="s09-top">
+            <div class="s09-tabs"></div>
+            <div class="s09-picker"></div>
+          </div>
+
+          <div class="s09-panel" data-tab="sparse">
+            <div class="s09-row">
+              <figure class="sp-grid-fig">
+                <canvas class="sp-grid" width="320" height="320" aria-label="The 1024 code neurons as a 32 by 32 grid; brighter means more active"></canvas>
+                <figcaption>1024 code neurons</figcaption>
+              </figure>
+              <div class="s09-side">
+                <div class="sp-toggle"></div>
+                <div class="sp-readouts"></div>
+                <div class="s09-figs">
+                  <figure><canvas class="cat-canvas small sp-input" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
+                  <figure><canvas class="cat-canvas small sp-on" width="64" height="64" aria-label="Rebuilt with the penalty"></canvas><figcaption>penalty on</figcaption></figure>
+                  <figure><canvas class="cat-canvas small sp-off" width="64" height="64" aria-label="Rebuilt without the penalty"></canvas><figcaption>penalty off</figcaption></figure>
+                </div>
+              </div>
+            </div>
+            <p class="s09-caption">L1 penalty → most neurons stay off</p>
+          </div>
+
+          <div class="s09-panel" data-tab="denoise" hidden>
+            <div class="dn-slider"></div>
+            <div class="s09-figs big">
+              <figure><canvas class="cat-canvas dn-noisy" width="64" height="64" aria-label="Noisy input"></canvas><figcaption>noisy input</figcaption></figure>
+              <figure class="dn-dae"><canvas class="cat-canvas" width="64" height="64" aria-label="Denoising autoencoder output"></canvas><figcaption>denoising AE</figcaption></figure>
+              <figure class="dn-ae"><canvas class="cat-canvas" width="64" height="64" aria-label="Plain autoencoder output"></canvas><figcaption>plain AE</figcaption></figure>
+            </div>
+            <p class="s09-caption">noisy in, clean out</p>
+          </div>
+
+          <div class="s09-panel" data-tab="contract" hidden>
+            <div class="ct-slider"></div>
+            <div class="s09-row">
+              <figure><canvas class="cat-canvas ct-input" width="64" height="64" aria-label="Jiggled input"></canvas><figcaption>jiggled input</figcaption></figure>
+              <div class="ct-bars" aria-live="polite"></div>
+              <div class="s09-figs">
+                <figure class="ct-ae"><canvas class="cat-canvas small" width="64" height="64" aria-label="Plain autoencoder output"></canvas><figcaption>plain AE</figcaption></figure>
+                <figure class="ct-cae"><canvas class="cat-canvas small" width="64" height="64" aria-label="Contractive autoencoder output"></canvas><figcaption>contractive AE</figcaption></figure>
+              </div>
+            </div>
+            <p class="s09-caption">small change in, small change in z</p>
+          </div>
+
+          <div class="s09-panel" data-tab="conv" hidden>
+            <div class="net-stage cv-stage"></div>
+            <div class="cv-notes">
+              <span class="sticker">plot twist: you've been watching one all along</span>
+              <p class="cv-note">dae_128 is a convolutional denoising autoencoder</p>
+            </div>
+          </div>
         </div>
       </section>
 

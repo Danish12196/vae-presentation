@@ -363,14 +363,22 @@ def export_not_cats(held_out, ae64, thresholds, device):
     write_json(OUT / "not_cats.json", out)
 
 
+@torch.no_grad()
 def export_sparse_codes(loaded, held_out, device):
-    """The sparse models are too heavy to ship (39 MB), so store their codes for the showcase cats."""
-    out = {}
+    """The sparse models are too heavy to ship (39 MB), so precompute what the sparse demo shows
+    for the showcase cats: the 1024 codes, the exact fraction of neurons above zero, and the
+    reconstructions (as sprites in the showcase layout)."""
+    out = {"layout": "per model: codes (one row of 1024 per showcase cat), active (fraction > 0 per cat)",
+           "recon": {}}
     x = to_tensor(held_out[:N_SHOWCASE], device)
     for name in sorted(SPARSE & loaded.keys()):
         run, model, _ = loaded[name]
-        out[name] = rounded(codes(run, model, x).cpu(), 2)
-    write_json(OUT / "sparse_codes.json", {"layout": "one row of 1024 codes per showcase cat", **out})
+        z = codes(run, model, x)
+        # 4 decimals: sparse_l1's few active neurons are small, 2 decimals would zero many of them.
+        out[name] = {"codes": rounded(z.cpu(), 4), "active": rounded((z > 0).float().mean(1).cpu(), 4)}
+        save_sprite(to_uint8(model.decode(z)), OUT / f"{name}_recon.png")
+        out["recon"][name] = f"{name}_recon.png"
+    write_json(OUT / "sparse_codes.json", out)
 
 
 # ------------------------------------------------------------------ manifest
