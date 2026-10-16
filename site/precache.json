@@ -1,6 +1,6 @@
 {
- "version": "74fb007f397e",
- "total_bytes": 72412729,
+ "version": "dbb735df2134",
+ "total_bytes": 72431326,
  "files": [
   {
    "path": "css/base.css",
@@ -25,6 +25,10 @@
   {
    "path": "css/part3.css",
    "bytes": 4606
+  },
+  {
+   "path": "css/part4.css",
+   "bytes": 3626
   },
   {
    "path": "css/tokens.css",
@@ -116,7 +120,11 @@
   },
   {
    "path": "index.html",
-   "bytes": 23178
+   "bytes": 23980
+  },
+  {
+   "path": "js/latentmap.js",
+   "bytes": 9809
   },
   {
    "path": "js/loader.js",
@@ -177,6 +185,10 @@
   {
    "path": "js/slides/s09.js",
    "bytes": 9889
+  },
+  {
+   "path": "js/slides/s10.js",
+   "bytes": 4360
   },
   {
    "path": "js/state.js",

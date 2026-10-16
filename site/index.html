@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/part1.css" />
     <link rel="stylesheet" href="css/part2.css" />
     <link rel="stylesheet" href="css/part3.css" />
+    <link rel="stylesheet" href="css/part4.css" />
     <script type="module" src="js/main.js"></script>
   </head>
   <body>
@@ -291,9 +292,21 @@
           <p class="part-label">Part 4 · Why autoencoders can't generate</p>
           <h2>Holes in the latent space</h2>
         </header>
-        <div class="slide-body" data-demo>
-          <div class="coming-soon"><div data-mascot="monster"></div><p class="speech">demo coming soon</p></div>
+        <div class="slide-body s10-body" data-demo>
+          <div class="s10-map">
+            <div class="map-tip" hidden><canvas width="32" height="32"></canvas><span>nearest training cat</span></div>
+          </div>
+          <div class="panel s10-side">
+            <figure class="s10-out">
+              <canvas class="cat-canvas" width="64" height="64" aria-label="The decoded point"></canvas>
+              <figcaption class="mono s10-z">click or tap the map</figcaption>
+            </figure>
+            <div class="s10-verdict" aria-live="polite"><span class="verdict-chip"></span><span class="s10-dist mono"></span></div>
+            <button type="button" class="btn primary" data-random>random point</button>
+            <p class="s10-tally mono">in the data: 0 / in the gaps: 0</p>
+          </div>
         </div>
+        <p class="s10-caption">the decoder never saw anything from the gaps</p>
       </section>
 
       <section class="slide" id="s11" data-part="5" data-title="Encode a cloud, not a point" data-accent="lilac">
