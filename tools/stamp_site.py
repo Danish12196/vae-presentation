@@ -11,8 +11,8 @@ other shell file. The models and data files carry their own content hash in thei
 (export.py), and files.json lists those names, so hashing files.json covers them without
 reading 60 MB on every run.
 
-It also checks the static host's limits (Cloudflare Pages: every file under 25 MiB,
-fewer than 20,000 files) and prints the 10 largest files.
+It also checks the hosting limits (SPEC.md: every file under 25 MiB; Vercel: at most 15,000
+files per deployment) and prints the 10 largest files.
 """
 
 import hashlib
@@ -22,14 +22,14 @@ import sys
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent / "site"
-# Not precached: the worker itself, its file list, host config, the 404 page, the link-preview image.
-SKIP_NAMES = {"sw.js", "precache.json", ".gitkeep", "_headers", "404.html", "og.jpg"}
+# Not precached: the worker itself, its file list, the 404 page, the link-preview image.
+SKIP_NAMES = {"sw.js", "precache.json", ".gitkeep", "404.html", "og.jpg"}
 SKIP_SUFFIXES = {".map", ".txt"}
 HASHED = re.compile(r"^(models|data)/.+\.[0-9a-f]{6}\.[^./]+$")  # content hash already in the name
 
 MIB = 1024 * 1024
 FILE_LIMIT = 25 * MIB
-COUNT_LIMIT = 20_000
+COUNT_LIMIT = 15_000
 
 
 def site_files():

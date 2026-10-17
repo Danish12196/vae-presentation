@@ -14,7 +14,7 @@ const CACHE = `cats-${VERSION}`;
 const BIG = /^(models|data)\/|\.wasm$/;
 
 const scoped = (path) => new URL(path, self.registration.scope).href;
-// The page is cached as "./": hosts like Cloudflare Pages redirect /index.html to /, and a
+// The page is cached as "./": hosts with clean URLs redirect /index.html to /, and a
 // redirected response can't be used to answer a navigation.
 const key = (path) => scoped(path === "index.html" ? "./" : path);
 

@@ -28,4 +28,4 @@ caches the new files (`training/export.py` runs it for you).
 
 ## Deploying
 
-The site is hosted on Cloudflare Pages; see [docs/DEPLOY.md](docs/DEPLOY.md).
+The site is hosted on Vercel; see [docs/DEPLOY.md](docs/DEPLOY.md).

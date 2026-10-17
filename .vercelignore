@@ -1,0 +1,6 @@
+# Only site/ is served (vercel.json: outputDirectory). Keep CLI uploads small.
+/training
+/tools
+/docs
+/.claude
+/.wrangler
