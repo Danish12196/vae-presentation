@@ -6,13 +6,17 @@
 // - every request is served cache-first
 // - a new VERSION means a new cache; old caches are deleted on activation
 //
-// VERSION is rewritten by tools/stamp_site.py whenever any site file changes.
+// VERSION is rewritten by tools/stamp_site.py whenever any site file changes (models and data
+// have a content hash in their names, so a hash of data/files.json covers them).
 
-const VERSION = "705ea4472cec";
+const VERSION = "299012653300";
 const CACHE = `cats-${VERSION}`;
 const BIG = /^(models|data)\/|\.wasm$/;
 
 const scoped = (path) => new URL(path, self.registration.scope).href;
+// The page is cached as "./": hosts like Cloudflare Pages redirect /index.html to /, and a
+// redirected response can't be used to answer a navigation.
+const key = (path) => scoped(path === "index.html" ? "./" : path);
 
 async function precacheList() {
   const cached = await caches.match(scoped("precache.json"));
@@ -28,7 +32,13 @@ self.addEventListener("install", (event) => {
       const cache = await caches.open(CACHE);
       await cache.put(scoped("precache.json"), res);
       const shell = files.map((f) => f.path).filter((p) => !BIG.test(p));
-      await cache.addAll(shell.map((p) => new Request(scoped(p), { cache: "no-cache" })));
+      await Promise.all(
+        shell.map(async (p) => {
+          const res = await fetch(new Request(key(p), { cache: "no-cache" }));
+          if (!res.ok) throw new Error(`${p}: HTTP ${res.status}`);
+          await cache.put(key(p), res);
+        }),
+      );
       await self.skipWaiting();
     })(),
   );
@@ -56,11 +66,11 @@ self.addEventListener("fetch", (event) => {
 async function cacheFirst(req, url) {
   const cache = await caches.open(CACHE);
   // Every page navigation is the one-page presentation; query strings don't matter.
-  const key = req.mode === "navigate" ? scoped("index.html") : url.origin + url.pathname;
-  const hit = await cache.match(key);
+  const k = req.mode === "navigate" ? key("index.html") : url.origin + url.pathname;
+  const hit = await cache.match(k);
   if (hit) return hit;
   const res = await fetch(req);
-  if (res.ok && res.type === "basic") cache.put(key, res.clone());
+  if (res.ok && res.type === "basic" && !res.redirected) cache.put(k, res.clone());
   return res;
 }
 
@@ -72,10 +82,10 @@ self.addEventListener("message", (event) => {
       const cache = await caches.open(CACHE);
       const missing = [];
       for (const path of await precacheList()) {
-        if (await cache.match(scoped(path))) continue;
+        if (await cache.match(key(path))) continue;
         try {
-          const res = await fetch(scoped(path));
-          if (res.ok) await cache.put(scoped(path), res);
+          const res = await fetch(key(path));
+          if (res.ok) await cache.put(key(path), res);
           else missing.push(path);
         } catch {
           missing.push(path);

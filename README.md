@@ -23,5 +23,9 @@ so edited slide modules show up on a normal reload.
 The offline service worker is off on localhost so your edits show up on reload; open
 http://localhost:8000/?sw=on to test offline mode, and `?sw=off` to turn it off again.
 
-After changing anything in `site/` (or re-running `training/export.py`), run
-`python tools/stamp_site.py` so the service worker caches the new files.
+After changing anything in `site/`, run `python tools/stamp_site.py` so the service worker
+caches the new files (`training/export.py` runs it for you).
+
+## Deploying
+
+The site is hosted on Cloudflare Pages; see [docs/DEPLOY.md](docs/DEPLOY.md).

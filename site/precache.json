@@ -1,6 +1,6 @@
 {
- "version": "705ea4472cec",
- "total_bytes": 72519362,
+ "version": "299012653300",
+ "total_bytes": 72522996,
  "files": [
   {
    "path": "css/base.css",
@@ -43,83 +43,83 @@
    "bytes": 1773
   },
   {
-   "path": "data/animals.json",
+   "path": "data/animals.790a2e.json",
    "bytes": 177
   },
   {
-   "path": "data/animals.png",
+   "path": "data/animals.c8e483.png",
    "bytes": 145108
   },
   {
-   "path": "data/anomaly.json",
+   "path": "data/anomaly.04faf7.json",
    "bytes": 3360
   },
   {
-   "path": "data/cls_dream.json",
+   "path": "data/cls_dream.4397af.json",
    "bytes": 210
   },
   {
-   "path": "data/cls_dream.png",
+   "path": "data/cls_dream.60e5aa.png",
    "bytes": 253782
   },
   {
    "path": "data/files.json",
-   "bytes": 2289
+   "bytes": 4080
   },
   {
-   "path": "data/latent_maps.json",
+   "path": "data/latent_maps.061a28.json",
    "bytes": 188050
   },
   {
-   "path": "data/map_thumbs.jpg",
+   "path": "data/map_thumbs.5d132a.jpg",
    "bytes": 979463
   },
   {
-   "path": "data/not_cats.json",
-   "bytes": 420
-  },
-  {
-   "path": "data/not_cats.png",
+   "path": "data/not_cats.9b33f3.png",
    "bytes": 34632
   },
   {
-   "path": "data/pca.json",
+   "path": "data/not_cats.f7b3d0.json",
+   "bytes": 420
+  },
+  {
+   "path": "data/pca.f56f45.json",
    "bytes": 1798
   },
   {
-   "path": "data/pca_k16.png",
+   "path": "data/pca_k16.021100.png",
    "bytes": 276844
   },
   {
-   "path": "data/pca_k2.png",
+   "path": "data/pca_k2.1baedb.png",
    "bytes": 218459
   },
   {
-   "path": "data/pca_k256.png",
+   "path": "data/pca_k256.38b817.png",
    "bytes": 439516
   },
   {
-   "path": "data/pca_k64.png",
+   "path": "data/pca_k64.7d4d1b.png",
    "bytes": 353394
   },
   {
-   "path": "data/showcase.json",
-   "bytes": 269
-  },
-  {
-   "path": "data/showcase.png",
+   "path": "data/showcase.72a00f.png",
    "bytes": 560517
   },
   {
-   "path": "data/sparse_codes.json",
+   "path": "data/showcase.ba327e.json",
+   "bytes": 269
+  },
+  {
+   "path": "data/sparse_codes.5da6ce.json",
    "bytes": 664087
   },
   {
-   "path": "data/sparse_l1_recon.png",
+   "path": "data/sparse_l1_recon.a3581e.png",
    "bytes": 386343
   },
   {
-   "path": "data/sparse_none_recon.png",
+   "path": "data/sparse_none_recon.54430b.png",
    "bytes": 439915
   },
   {
@@ -128,7 +128,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 35071
+   "bytes": 36097
   },
   {
    "path": "js/latentmap.js",
@@ -136,7 +136,7 @@
   },
   {
    "path": "js/loader.js",
-   "bytes": 3569
+   "bytes": 3576
   },
   {
    "path": "js/main.js",
@@ -148,7 +148,7 @@
   },
   {
    "path": "js/models.js",
-   "bytes": 14449
+   "bytes": 15084
   },
   {
    "path": "js/netdiagram.js",
@@ -255,107 +255,107 @@
    "bytes": 4369
   },
   {
-   "path": "models/ae_128.decoder.onnx",
+   "path": "models/ae_128.decoder.5d7764.onnx",
    "bytes": 2446506
   },
   {
-   "path": "models/ae_128.encoder.onnx",
+   "path": "models/ae_128.encoder.1c1730.onnx",
    "bytes": 2431744
   },
   {
-   "path": "models/ae_16.decoder.onnx",
+   "path": "models/ae_16.decoder.35d5b5.onnx",
    "bytes": 1528999
   },
   {
-   "path": "models/ae_16.encoder.onnx",
+   "path": "models/ae_16.encoder.3ac0e3.onnx",
    "bytes": 1514010
   },
   {
-   "path": "models/ae_2.decoder.onnx",
+   "path": "models/ae_2.decoder.e936c9.onnx",
    "bytes": 1414311
   },
   {
-   "path": "models/ae_2.encoder.onnx",
+   "path": "models/ae_2.encoder.644fae.onnx",
    "bytes": 1399294
   },
   {
-   "path": "models/ae_256.decoder.onnx",
+   "path": "models/ae_256.decoder.e68df7.onnx",
    "bytes": 3495084
   },
   {
-   "path": "models/ae_256.encoder.onnx",
+   "path": "models/ae_256.encoder.71cd94.onnx",
    "bytes": 3480578
   },
   {
-   "path": "models/ae_64.decoder.onnx",
+   "path": "models/ae_64.decoder.b91cf7.onnx",
    "bytes": 1922215
   },
   {
-   "path": "models/ae_64.encoder.onnx",
+   "path": "models/ae_64.encoder.48ce17.onnx",
    "bytes": 1907324
   },
   {
-   "path": "models/cae_64.decoder.onnx",
+   "path": "models/cae_64.decoder.988b45.onnx",
    "bytes": 1922215
   },
   {
-   "path": "models/cae_64.encoder.onnx",
+   "path": "models/cae_64.encoder.158700.onnx",
    "bytes": 1907324
   },
   {
-   "path": "models/cnn_cls.onnx",
+   "path": "models/cnn_cls.d1e1ba.onnx",
    "bytes": 2811735
   },
   {
-   "path": "models/dae_128.decoder.onnx",
+   "path": "models/dae_128.decoder.f69675.onnx",
    "bytes": 2446506
   },
   {
-   "path": "models/dae_128.encoder.onnx",
+   "path": "models/dae_128.encoder.56cad5.onnx",
    "bytes": 4860256
   },
   {
    "path": "models/manifest.json",
-   "bytes": 39165
+   "bytes": 39340
   },
   {
-   "path": "models/vae_128.decoder.onnx",
+   "path": "models/vae_128.decoder.0fa1da.onnx",
    "bytes": 2446506
   },
   {
-   "path": "models/vae_128.encoder.onnx",
+   "path": "models/vae_128.encoder.a568fb.onnx",
    "bytes": 3480977
   },
   {
-   "path": "models/vae_2d_b0.1.decoder.onnx",
+   "path": "models/vae_2d_b0.1.decoder.9b9384.onnx",
    "bytes": 1414311
   },
   {
-   "path": "models/vae_2d_b0.1.encoder.onnx",
+   "path": "models/vae_2d_b0.1.encoder.90939c.onnx",
    "bytes": 1416078
   },
   {
-   "path": "models/vae_2d_b0.decoder.onnx",
+   "path": "models/vae_2d_b0.decoder.93d5d3.onnx",
    "bytes": 1414311
   },
   {
-   "path": "models/vae_2d_b0.encoder.onnx",
+   "path": "models/vae_2d_b0.encoder.6f46cb.onnx",
    "bytes": 1416078
   },
   {
-   "path": "models/vae_2d_b1.decoder.onnx",
+   "path": "models/vae_2d_b1.decoder.324684.onnx",
    "bytes": 1414311
   },
   {
-   "path": "models/vae_2d_b1.encoder.onnx",
+   "path": "models/vae_2d_b1.encoder.5bd6a0.onnx",
    "bytes": 1416078
   },
   {
-   "path": "models/vae_2d_b4.decoder.onnx",
+   "path": "models/vae_2d_b4.decoder.30025b.onnx",
    "bytes": 1414311
   },
   {
-   "path": "models/vae_2d_b4.encoder.onnx",
+   "path": "models/vae_2d_b4.encoder.e8886d.onnx",
    "bytes": 1416078
   },
   {
@@ -411,11 +411,11 @@
    "bytes": 21908
   },
   {
-   "path": "vendor/ort/ort-wasm-simd-threaded.wasm",
+   "path": "vendor/ort-1.30.0/ort-wasm-simd-threaded.wasm",
    "bytes": 14239897
   },
   {
-   "path": "vendor/ort/ort.wasm.bundle.min.js",
+   "path": "vendor/ort-1.30.0/ort.wasm.bundle.min.js",
    "bytes": 73054
   }
  ]

@@ -1,0 +1,44 @@
+# Cloudflare Pages response headers (https://developers.cloudflare.com/pages/configuration/headers/).
+# A request that matches several rules gets all their headers; a header set twice is joined with
+# a comma, so the no-cache files inside cached folders first detach the long Cache-Control ("! ").
+
+# Cross-origin isolation: lets onnxruntime-web use SharedArrayBuffer for multi-threaded WASM.
+# Everything the page loads is same-origin (the only external URLs are plain links in the credits).
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  X-Content-Type-Options: nosniff
+
+# Content-hashed (models, data) or versioned (vendor/ort-1.30.0, fonts): never changes in place.
+/models/*
+  Cache-Control: public, max-age=31536000, immutable
+/data/*
+  Cache-Control: public, max-age=31536000, immutable
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Slide code and styles keep their plain names (no build step), so browsers recheck them hourly.
+# The service worker re-fetches them past the HTTP cache whenever its version changes.
+/css/*
+  Cache-Control: public, max-age=3600
+/js/*
+  Cache-Control: public, max-age=3600
+
+# Entry points: always revalidate, so a new deploy is seen on the next visit.
+/
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache
+/precache.json
+  Cache-Control: no-cache
+/models/manifest.json
+  ! Cache-Control
+  Cache-Control: no-cache
+/data/files.json
+  ! Cache-Control
+  Cache-Control: no-cache
+
+/*.wasm
+  Content-Type: application/wasm

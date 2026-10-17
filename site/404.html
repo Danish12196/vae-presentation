@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14112b" />
+    <meta name="robots" content="noindex" />
+    <title>404: this cat wandered off</title>
+    <!-- Absolute paths: the host serves this page for any missing URL, at any depth. -->
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link rel="stylesheet" href="/css/tokens.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px 16px;
+        box-sizing: border-box;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: var(--fs-body);
+        line-height: 1.45;
+        text-align: center;
+      }
+      main {
+        max-width: 40rem;
+      }
+      .lost {
+        width: min(260px, 60vw);
+        margin: 0 auto 8px;
+        animation: wander 3.2s var(--ease) infinite alternate;
+      }
+      .lost svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      @keyframes wander {
+        from { transform: translateX(-14px) rotate(-6deg); }
+        to { transform: translateX(14px) rotate(6deg); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lost { animation: none; }
+      }
+      h1 {
+        font-family: var(--font-head);
+        font-size: clamp(40px, 9vw, var(--fs-h2));
+        line-height: 1.1;
+        margin: 0 0 12px;
+      }
+      .code {
+        font-family: var(--font-mono);
+        color: var(--sunflower);
+      }
+      p {
+        margin: 0 0 28px;
+        color: var(--text-soft);
+      }
+      a.home {
+        display: inline-block;
+        font-family: var(--font-head);
+        font-weight: 600;
+        font-size: var(--fs-body);
+        color: var(--bg);
+        background: var(--coral);
+        padding: 12px 28px;
+        border-radius: 999px;
+        text-decoration: none;
+      }
+      a.home:hover,
+      a.home:focus-visible {
+        background: var(--sunflower);
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="lost" data-mascot="confused"></div>
+      <h1><span class="code">404</span>: here be monsters</h1>
+      <p>This page sits in a gap of the latent space: no cat ever lived here.</p>
+      <a class="home" href="/">Back to the cats</a>
+    </main>
+    <script type="module">
+      import { mountAll } from "/js/mascot.js";
+      mountAll();
+    </script>
+  </body>
+</html>

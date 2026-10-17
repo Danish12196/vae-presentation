@@ -11,7 +11,7 @@
 // Sessions are created on first use and cached. If a model hasn't been exported,
 // the helpers throw ModelMissing and the demo can call renderTraining().
 
-import * as ort from "../vendor/ort/ort.wasm.bundle.min.js";
+import * as ort from "../vendor/ort-1.30.0/ort.wasm.bundle.min.js";
 import { mascot } from "./mascot.js";
 
 export { ort };
@@ -25,7 +25,7 @@ const url = (path) => new URL(path, ROOT).href;
 // milliseconds on the CPU, and the WebGPU runtime would not fit the 25 MB per-file limit.
 // Threads need a cross-origin isolated page (SharedArrayBuffer); otherwise run single-threaded.
 // Only the .wasm path: the glue code is already inside the bundle.
-ort.env.wasm.wasmPaths = { wasm: url("vendor/ort/ort-wasm-simd-threaded.wasm") };
+ort.env.wasm.wasmPaths = { wasm: url("vendor/ort-1.30.0/ort-wasm-simd-threaded.wasm") };
 ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
 const SESSION_OPTIONS = { executionProviders: ["wasm"], graphOptimizationLevel: "all" };
 
@@ -39,21 +39,35 @@ export class ModelMissing extends Error {
 
 // ---------------------------------------------------------------- manifest and files
 
+const FILES = "data/files.json";
+const MANIFEST = "models/manifest.json";
+
+// Models and data files have a content hash in their names (showcase.3fa9c1.png) so the host can
+// cache them forever. Code asks for the logical name (data/showcase.png); files.json maps it.
+let fileMap = null;
+async function resolve(path) {
+  if (!/^(data|models)\//.test(path) || path === FILES || path === MANIFEST) return path;
+  fileMap ??= loadJSON(FILES).then(({ files }) => new Map(files.map((f) => [f.name, f.path])));
+  return (await fileMap).get(path) ?? path;
+}
+
 const jsonCache = new Map();
 export function loadJSON(path) {
   if (!jsonCache.has(path)) {
     jsonCache.set(
       path,
-      fetch(url(path)).then((r) => {
-        if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
-        return r.json();
-      }),
+      resolve(path)
+        .then((real) => fetch(url(real)))
+        .then((r) => {
+          if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
+          return r.json();
+        }),
     );
   }
   return jsonCache.get(path);
 }
 
-export const loadManifest = () => loadJSON("models/manifest.json");
+export const loadManifest = () => loadJSON(MANIFEST);
 
 /** The manifest entry for a model that can run in the browser; throws ModelMissing otherwise. */
 export async function getModel(name) {
@@ -248,7 +262,7 @@ export function loadSprite(path, { tile = SIZE, cols = 8, count } = {}) {
       (async () => {
         // fetch + createImageBitmap rather than <img>.decode(), which can wait for a rendered
         // frame and so stalls while the page isn't being painted.
-        const res = await fetch(url(path));
+        const res = await fetch(url(await resolve(path)));
         if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
         const img = await createImageBitmap(await res.blob());
         const sheet = document.createElement("canvas");

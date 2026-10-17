@@ -4,7 +4,7 @@
 
 import { loadJSON, provideBytes, setWasmBinary, warmUp } from "./models.js";
 
-const WASM = "vendor/ort/ort-wasm-simd-threaded.wasm";
+const WASM = "vendor/ort-1.30.0/ort-wasm-simd-threaded.wasm";
 const PARALLEL = 4;
 const MB = 1e6;
 

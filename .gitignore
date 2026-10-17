@@ -11,3 +11,6 @@ __pycache__/
 node_modules/
 
 # Note: site/models and site/data are committed on purpose (exported models are deployed).
+
+# Local Cloudflare emulator state (npx wrangler pages dev)
+.wrangler/

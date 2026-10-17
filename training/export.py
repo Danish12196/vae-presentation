@@ -6,12 +6,22 @@ site/models/  ONNX encoders, decoders and the classifier, plus manifest.json
 site/data/    sprites and precomputed results for the demos that would be too slow
               (or too heavy) to run in the browser, plus files.json
 
+Every file except manifest.json and files.json gets a short content hash in its name
+(vae_128.decoder.3fa9c1.onnx), so the host can let browsers cache them forever: a changed
+file is a new name. manifest.json names the model files; files.json maps every logical
+name (data/showcase.png) to its current file. At the end this runs tools/stamp_site.py,
+which gives the service worker a new cache version.
+
 Models that haven't been trained yet are skipped; the site shows a
 "this cat is still training" card for them.
 """
 
+import hashlib
 import io
 import json
+import re
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -26,7 +36,8 @@ from torch import nn
 import data
 from train import RUN_LIST, RUNS, Run, make_model
 
-SITE = Path(__file__).parent.parent / "site"
+ROOT = Path(__file__).resolve().parent.parent
+SITE = ROOT / "site"
 MODELS = SITE / "models"
 OUT = SITE / "data"
 
@@ -41,6 +52,8 @@ N_SHOWCASE = 64     # demo inputs everywhere on the site
 N_MAP = 2000        # training cats on the latent maps and for code statistics
 SPARSE = {"sparse_l1", "sparse_none"}  # too heavy to ship; their codes are precomputed instead
 SEED = 0
+HASH_LEN = 6
+UNHASHED = {"manifest.json", "files.json", ".gitkeep"}  # fixed names the site starts from
 
 
 # ------------------------------------------------------------------ helpers
@@ -65,6 +78,25 @@ def save_sprite(images, path, cols=8, **save_args):
         sheet[r * h:(r + 1) * h, c * w:(c + 1) * w] = img
     Image.fromarray(sheet).save(path, optimize=True, **save_args)
     return {"tile": w, "cols": cols, "count": n}
+
+
+def hashed_name(name, content):
+    """showcase.png + bytes -> showcase.3fa9c1.png"""
+    stem, dot, suffix = name.rpartition(".")
+    return f"{stem}.{hashlib.sha256(content).hexdigest()[:HASH_LEN]}.{suffix}"
+
+
+def logical_name(name):
+    """showcase.3fa9c1.png -> showcase.png"""
+    return re.sub(rf"\.[0-9a-f]{{{HASH_LEN}}}(\.[^.]+)$", r"\1", name)
+
+
+def hash_data_files():
+    """Rename every file in site/data to its content-hashed name. The JSON files keep using
+    logical names among themselves; the site looks them up in files.json."""
+    for path in sorted(OUT.iterdir()):
+        if path.is_file() and path.name not in UNHASHED and logical_name(path.name) == path.name:
+            path.replace(OUT / hashed_name(path.name, path.read_bytes()))
 
 
 def write_json(path, obj):
@@ -202,11 +234,12 @@ def export_models(loaded, verify_images, data_bytes):
         old.unlink()
     for p in parts:
         model_bytes = p["proto"].SerializeToString()
-        (MODELS / p["file"]).write_bytes(model_bytes)
+        file = hashed_name(p["file"], model_bytes)
+        (MODELS / file).write_bytes(model_bytes)
         diff = max_diff(model_bytes, p["module"], p["example"], p["input"])
         ok = diff < TOLERANCE[p["precision"]] and len(model_bytes) <= FILE_LIMIT
-        rows.append((p["file"], len(model_bytes), p["precision"], diff, ok))
-        files.setdefault(p["name"], {})[p["role"]] = {"file": p["file"], "precision": p["precision"]}
+        rows.append((file, len(model_bytes), p["precision"], diff, ok))
+        files.setdefault(p["name"], {})[p["role"]] = {"file": file, "precision": p["precision"]}
     return files, rows
 
 
@@ -415,10 +448,12 @@ def write_manifest(loaded, files, map_cats, device):
 
 
 def write_file_list():
-    """Every file the site has to download (the loading screen and service worker read this)."""
+    """Every file the site has to download (the loading screen and service worker read this),
+    with its logical name: {"name": "data/showcase.png", "path": "data/showcase.3fa9c1.png"}."""
     files = [p for d in (MODELS, OUT) for p in sorted(d.iterdir())
              if p.is_file() and p.name not in (".gitkeep", "files.json")]
-    entries = [{"path": p.relative_to(SITE).as_posix(), "bytes": p.stat().st_size} for p in files]
+    entries = [{"name": p.parent.relative_to(SITE).as_posix() + "/" + logical_name(p.name),
+                "path": p.relative_to(SITE).as_posix(), "bytes": p.stat().st_size} for p in files]
     total = sum(e["bytes"] for e in entries)
     write_json(OUT / "files.json", {"total_bytes": total, "files": entries})
     return total + (OUT / "files.json").stat().st_size
@@ -432,6 +467,9 @@ def main():
     torch.backends.cudnn.benchmark = False
     MODELS.mkdir(parents=True, exist_ok=True)
     OUT.mkdir(parents=True, exist_ok=True)
+    for old in OUT.iterdir():  # hashed names never overwrite each other: start clean
+        if old.is_file() and old.name != ".gitkeep":
+            old.unlink()
 
     train_cats, held_out = data.split(data.load_cats())
     map_cats = train_cats[np.random.default_rng(SEED).choice(len(train_cats), N_MAP, replace=False)]
@@ -459,6 +497,7 @@ def main():
     for _, m, _ in loaded.values():
         m.to(device)
     write_manifest(loaded, files, map_cats, device)
+    hash_data_files()
     total = write_file_list()
 
     print(f"\n{'file':32s} {'size':>9s}  {'weights':7s} {'max diff':>9s}  check")
@@ -469,6 +508,7 @@ def main():
           f"= {total / MB:.1f} MB (budget {TOTAL_LIMIT / MB:.0f} MB)")
     if not all(r[4] for r in rows) or total > TOTAL_LIMIT:
         raise SystemExit("export check FAILED")
+    subprocess.run([sys.executable, str(ROOT / "tools" / "stamp_site.py")], check=True)
 
 
 if __name__ == "__main__":

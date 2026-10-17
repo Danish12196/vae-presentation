@@ -27,6 +27,9 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-cache")  # always revalidate (cheap 304s locally)
+        # Same isolation as production (site/_headers), so multi-threaded WASM is tested locally too.
+        self.send_header("Cross-Origin-Opener-Policy", "same-origin")
+        self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
         super().end_headers()
 
 
