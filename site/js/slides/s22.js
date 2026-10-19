@@ -1,48 +1,106 @@
-// Questions: the thinking mascot, credits, and new vae_128 cats gently floating up behind it all.
-// Each cat floats with a CSS animation; when one leaves the top it comes back as a fresh cat.
-// Without vae_128 the background just stays empty (it's decoration).
+// Why VAE cats are blurry.
+// Left: a cat and its vae_128 reconstruction, with a loupe that magnifies the same spot on both.
+// Right: the averaging problem. If n different sharp cats are all plausible answers, the guess
+// with the lowest MSE is their pixel average, and the average of sharp cats is a blurry cat.
 
-import { decode, drawCat, hasModel, randn } from "../models.js";
+import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat, SIZE } from "../models.js";
+import { catPicker, slider } from "../ui.js";
 
-const COUNT = 10;
-const LATENT = 128;
+const LOUPE_PX = 12; // the loupe shows a 12x12 pixel patch of the 64x64 image
 
-let layer, cats = [];
+let orig, recon, hosts, avgCanvas, avgLabel, strip, count;
+let cat = 0;
 
 export async function init(section) {
-  layer = section.querySelector(".float-cats");
-  if (!(await hasModel("vae_128"))) return;
-  const images = await decode("vae_128", randn(COUNT * LATENT));
-  for (let i = 0; i < COUNT; i++) {
-    const c = document.createElement("canvas");
-    c.className = "float-cat";
-    drawCat(c, images, i);
-    place(c, true);
-    c.addEventListener("animationiteration", () => refresh(c));
-    layer.append(c);
-    cats.push(c);
-  }
-}
+  orig = section.querySelector(".s17-orig");
+  recon = section.querySelector(".s17-recon");
+  hosts = [...section.querySelectorAll(".loupe-host")];
+  avgCanvas = section.querySelector(".s17-avg");
+  avgLabel = section.querySelector(".s17-avg-label");
+  strip = section.querySelector(".s17-strip");
 
-export function enter() {
-  layer?.classList.add("running");
+  await loadShowcase();
+  await catPicker(section.querySelector(".s17-picker"), {
+    onPick: (i) => {
+      cat = i;
+      showPair();
+      showAverage();
+    },
+  });
+  count = slider(section.querySelector(".s17-slider"), {
+    label: "possible answers to hedge between",
+    min: 1,
+    max: 8,
+    step: 1,
+    value: 1,
+    format: (v) => `${v} cat${v > 1 ? "s" : ""}`,
+    onInput: showAverage,
+  });
+
+  // The loupe: hover with a mouse, or press and drag with a finger.
+  for (const c of [orig, recon]) {
+    c.addEventListener("pointermove", (e) => (e.pointerType !== "touch" || e.buttons) && loupe(e, c));
+    c.addEventListener("pointerdown", (e) => loupe(e, c));
+    c.addEventListener("pointerleave", hideLoupe);
+    c.addEventListener("pointerup", (e) => e.pointerType === "touch" && hideLoupe());
+  }
+
+  await showPair();
+  showAverage();
 }
 
 export function leave() {
-  layer?.classList.remove("running");
+  hideLoupe();
 }
 
-/** Random column, size and speed; `first` spreads the starting heights so they don't rise in a line. */
-function place(c, first = false) {
-  const duration = 16 + Math.random() * 12;
-  c.style.left = `${3 + Math.random() * 90}%`;
-  c.style.setProperty("--size", `${56 + Math.random() * 56}px`);
-  c.style.setProperty("--drift", `${(Math.random() - 0.5) * 80}px`);
-  c.style.animationDuration = `${duration}s`;
-  if (first) c.style.animationDelay = `${-Math.random() * duration}s`;
+async function showPair() {
+  const image = getShowcaseCat(cat);
+  drawCat(orig, image);
+  await inSlot(recon.closest("figure"), async () => drawCat(recon, await reconstruct("vae_128", [image])));
 }
 
-async function refresh(c) {
-  drawCat(c, await decode("vae_128", randn(LATENT)));
-  c.style.left = `${3 + Math.random() * 90}%`;
+/** Magnify the same spot on both images. */
+function loupe(e, from) {
+  const r = from.getBoundingClientRect();
+  const u = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  const v = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+  const sx = Math.min(SIZE - LOUPE_PX, Math.max(0, u * SIZE - LOUPE_PX / 2));
+  const sy = Math.min(SIZE - LOUPE_PX, Math.max(0, v * SIZE - LOUPE_PX / 2));
+  hosts.forEach((host, i) => {
+    const source = i === 0 ? orig : recon;
+    const lens = host.querySelector(".loupe");
+    const ctx = lens.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, lens.width, lens.height);
+    ctx.drawImage(source, sx, sy, LOUPE_PX, LOUPE_PX, 0, 0, lens.width, lens.height);
+    lens.style.left = `${u * 100}%`;
+    lens.style.top = `${v * 100}%`;
+    lens.classList.add("on");
+  });
+}
+
+function hideLoupe() {
+  for (const l of document.querySelectorAll("#s22 .loupe")) l.classList.remove("on");
+}
+
+/** Pixel average of n showcase cats, starting with the picked one. */
+function showAverage() {
+  const n = count.value;
+  const cats = Array.from({ length: n }, (_, k) => getShowcaseCat((cat + k * 7) % 64));
+  const avg = new ImageData(SIZE, SIZE);
+  for (let i = 0; i < avg.data.length; i++) {
+    let sum = 0;
+    for (const c of cats) sum += c.data[i];
+    avg.data[i] = sum / n;
+  }
+  drawCat(avgCanvas, avg);
+  avgLabel.textContent = n === 1 ? "one sharp cat" : `average of ${n}`;
+  strip.replaceChildren(
+    ...cats.map((c) => {
+      const t = document.createElement("canvas");
+      t.className = "cat-canvas small";
+      drawCat(t, c);
+      return t;
+    }),
+  );
 }

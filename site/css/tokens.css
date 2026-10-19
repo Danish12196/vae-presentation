@@ -44,9 +44,25 @@
 @media (max-height: 820px) {
   :root {
     --fs-h1: 68px;
-    --fs-h2: 56px;
-    --gap: 18px;
-    --pad-x: 48px;
+    --fs-h2: 48px;
+    --fs-h3: 28px;
+    --gap: 14px;
+    --pad-x: 40px;
+  }
+}
+
+/* Short laptops, and the same layout under 110–125% browser zoom. */
+@media (max-height: 700px) {
+  :root {
+    --fs-body: 18px;
+    --fs-small: 16px;
+    --fs-h1: 44px;
+    --fs-h2: 32px;
+    --fs-h3: 22px;
+    --fs-label: 14px;
+    --gap: 8px;
+    --pad-x: 24px;
+    --bar-h: 36px;
   }
 }
 

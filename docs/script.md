@@ -32,7 +32,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - That's what generative models do. (A generative model learns something about the distribution of the images themselves, so it can produce new ones.)
 - Today we're going to look at one of the first and most important families of generative models, which are autoencoders and variational autoencoders.
 
-*Slide: an encoder-decoder diagram. Image in, layers shrinking, layers growing, image out.*
+*Slide: an encoder-decoder diagram. Flipping the switch plays the layers from the input out to the ending. There is no "next layer" button.*
 
 - So the first question is, could we just use the networks we already have?
 - A normal classification CNN won't work as it is, because it outputs class scores, not an image.
@@ -54,6 +54,13 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - We need to force the model to learn features.
 
 ## Part 2: Autoencoders
+
+*Slide: a short history. 1986 Rumelhart, Hinton & Williams; 2006 Hinton & Salakhutdinov; 2008 Vincent et al. on denoising.*
+
+- Before the demo, a bit of history, and only the dates I'm confident about.
+- The usual citation for autoencoders is Rumelhart, Hinton and Williams in 1986: train a network to rebuild its input so the hidden layer learns a code.
+- The deep version that people actually used on images is Hinton and Salakhutdinov, Science, 2006.
+- Denoising autoencoders are Vincent, Larochelle, Bengio and Manzagol, 2008.
 
 *Slide: the encoder-decoder diagram with a narrow middle section labelled "bottleneck" and "z".*
 
@@ -89,12 +96,12 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - So you can think of a deep autoencoder as a nonlinear version of PCA.
 - The nonlinear activations are what let it capture much more complex structure, like curves and textures, that PCA can't.
 
-*Slide: four small examples of autoencoder uses.*
+*Slide: four tabs, each one live. Compression, denoising, features, anomaly detection.*
 
 - So what are autoencoders actually used for?
-- Compression, because the latent vector is a much smaller representation of the image.
-- Denoising, which is cleaning up noisy or damaged images.
-- Feature extraction, where we throw away the decoder and use the encoder's output as input to another model.
+- Compression, because the latent vector is a much smaller representation of the image. The slider is the same family of models as the bottleneck, ae_2 through ae_256.
+- Denoising, which is cleaning up noisy or damaged images. Here the noise slider feeds dae_128.
+- Feature extraction, where we throw away the decoder and use the encoder's output as input to another model. The map shows ae_2 codes, and the four neighbours are real decodes of nearby codes.
 - And anomaly detection.
 - For anomaly detection, we train the autoencoder only on normal data.
 - When something unusual comes in, the model reconstructs it badly, because it has never seen anything like it.
@@ -102,9 +109,10 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 ## Part 3: Other types of autoencoders
 
-*Slide: a grid of the four variants, one small diagram each.*
+*Slide: four tabs. Same job, one extra rule each: sparse, denoising, contractive, convolutional.*
 
 - What we've built so far is the undercomplete autoencoder.
+- Say that out loud: these are not four new jobs. They are four extra rules about the code.
 - But the bottleneck isn't the only way to force the model to learn features.
 - There are a few other variants worth knowing.
 - A sparse autoencoder can have a large hidden layer, even larger than the input.
@@ -141,6 +149,13 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - And that's exactly what variational autoencoders do.
 
 ## Part 5: Variational autoencoders (VAEs)
+
+*Slide: where VAEs come from. Kingma & Welling 2013, and Rezende, Mohamed & Wierstra 2014.*
+
+- Two groups, almost at once.
+- Kingma and Welling, December 2013, then ICLR 2014: Auto-Encoding Variational Bayes.
+- Rezende, Mohamed and Wierstra, ICML 2014: the same idea, worked out independently.
+- Don't merge them into one person or one date.
 
 ### The core idea
 
@@ -180,7 +195,19 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - So instead we maximize the ELBO, which is a practical stand-in that pushes the likelihood up.
 - One caveat: our reconstruction term is mean squared error. For a decoder with a fixed variance, that matches the negative log-likelihood up to a constant and a fixed scale.
 
-### The reparameterization trick
+### Backprop, then the reparameterization trick
+
+*Slide: forward, loss, chain rule. A plain autoencoder is differentiable the whole way.*
+
+- Backpropagation is just the chain rule, walked backwards through the layers.
+- Each conv layer only needs the gradient from the layer above it.
+- A plain autoencoder has no problem here. z is a function of the weights, so the gradient flows through it.
+
+*Slide: plain AE on the left, z = encoder(x). VAE on the right, z sampled from N(mu, sigma).*
+
+- The break is only the sampling step in a VAE.
+- mu and sigma are ordinary numbers. You can differentiate those.
+- A random draw is not a smooth function of them, so the gradient stops at the dice.
 
 *Slide: z = mu + sigma × epsilon, with epsilon drawn from a standard normal.*
 
@@ -219,7 +246,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 ### Extensions
 
-*Slide: β-VAE, VQ-VAE, and Stable Diffusion, one line each.*
+*Slide: β-VAE, VQ-VAE, and Stable Diffusion. "Remember this?" opens a note about the KL dial. It does not leave the slide.*
 
 - People have built a lot on top of the basic VAE. I'll mention two.
 - A β-VAE, or beta-VAE, adds a weight called beta to the KL term.
@@ -261,6 +288,8 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - Mainly in image quality. GANs produce much sharper images, because the discriminator punishes anything that looks fake, including blur.
 - And diffusion models go even further, producing both high quality and high variety.
 - But diffusion has its own cost. It generates an image over many denoising steps, so it's much slower than a VAE or a GAN, which each need just one pass.
+- The triangle keeps all three labels up at once: who is strong on quality, who on variety, who on speed.
+- Gary is not a GAN photo. The repo has no GAN model. Those nine pictures are our VAE decoding one code, to show mode collapse. Say that. A real GAN would be sharper.
 - Researchers sometimes call this the generative learning trilemma. (A trilemma is a choice between three options where you can only fully get two.)
 - The three things we want are high quality, high variety, and fast generation.
 - VAEs give us variety and speed. GANs give us quality and speed. Diffusion gives us quality and variety.
@@ -271,9 +300,10 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 ### Wrap-up
 
-*Slide: summary, three rows. Autoencoder, VAE, and what each solves.*
+*Slide: a timeline. CNN, autoencoder, VAE, GAN, diffusion. Each row is a main point, revealed on the next press.*
 
-- So to wrap up.
+- So to wrap up, as a timeline, not a footnote.
+- CNNs, from LeCun in 1989 and 1998 through AlexNet in 2012, tell images apart. They do not draw them.
 - We started with discriminative models that understand images, and asked how we could generate them instead.
 - A plain encoder-decoder would just learn to copy the input, so we added a bottleneck.
 - That gave us the autoencoder, which learns useful features without any labels, by minimizing the reconstruction loss.

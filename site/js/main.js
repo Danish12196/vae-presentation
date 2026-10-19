@@ -162,9 +162,14 @@ function toggleFullscreen() {
 
 function closeOverlays() {
   help.hidden = true;
+  const remember = document.querySelector("#remember");
+  if (remember) remember.hidden = true;
 }
 help.addEventListener("click", (e) => {
   if (e.target === help) closeOverlays();
+});
+document.querySelector("#remember")?.addEventListener("click", (e) => {
+  if (e.target.id === "remember") closeOverlays();
 });
 
 // ---------------------------------------------------------------- touch: prev/next buttons
