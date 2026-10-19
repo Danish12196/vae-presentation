@@ -98,7 +98,7 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
   function drawAxes() {
     const s = size();
     const [ox, oy] = api.toScreen([0, 0]);
-    ctx.strokeStyle = "rgba(201, 195, 236, 0.22)";
+    ctx.strokeStyle = "rgba(36, 23, 15, 0.22)";
     ctx.lineWidth = 1;
     // A faint grid every quarter of the view, then the two axes through zero.
     ctx.setLineDash([3, 6]);
@@ -112,7 +112,7 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
       ctx.stroke();
     }
     ctx.setLineDash([]);
-    ctx.strokeStyle = "rgba(201, 195, 236, 0.5)";
+    ctx.strokeStyle = "rgba(36, 23, 15, 0.55)";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(0, oy);
@@ -120,7 +120,7 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
     ctx.moveTo(ox, 0);
     ctx.lineTo(ox, s);
     ctx.stroke();
-    ctx.fillStyle = "rgba(247, 245, 255, 0.85)";
+    ctx.fillStyle = "#24170f";
     ctx.font = "600 16px 'JetBrains Mono', monospace";
     ctx.textAlign = "right";
     ctx.fillText("z1", s - 8, Math.min(s - 8, Math.max(18, oy - 8)));
@@ -150,7 +150,7 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
     drawAxes();
     const pts = currentPoints();
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.28)"; // a light rim so dark cats stay visible
+    ctx.strokeStyle = "rgba(36, 23, 15, 0.55)"; // a dark rim so pale cats stay visible on paper
     pts.forEach((p, i) => {
       const [x, y] = api.toScreen(p);
       if (x < -dot || y < -dot || x > s + dot || y > s + dot) return;
@@ -167,7 +167,7 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
 
   function drawCrosshair(z) {
     const [x, y] = api.toScreen(z);
-    ctx.strokeStyle = "#ffd166";
+    ctx.strokeStyle = "#c4622d";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(x, y, 11, 0, Math.PI * 2);

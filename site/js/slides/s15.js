@@ -245,8 +245,8 @@ function drawZ(ctx, m) {
   const z = [mu[0] + sigma * eps[0], mu[1] + sigma * eps[1]];
   const [zx, zy] = m.toScreen(z);
   ctx.save();
-  ctx.fillStyle = "rgba(179, 136, 255, 0.25)";
-  ctx.strokeStyle = "#b388ff";
+  ctx.fillStyle = "rgba(196, 98, 45, 0.22)";
+  ctx.strokeStyle = "#24170f";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.arc(mx, my, Math.max(3, rx - mx), 0, Math.PI * 2);
@@ -258,7 +258,7 @@ function drawZ(ctx, m) {
   ctx.moveTo(mx, my - 6);
   ctx.lineTo(mx, my + 6);
   ctx.stroke();
-  ctx.fillStyle = "#ffd166";
+  ctx.fillStyle = "#c4622d";
   ctx.beginPath();
   ctx.arc(zx, zy, 5, 0, Math.PI * 2);
   ctx.fill();

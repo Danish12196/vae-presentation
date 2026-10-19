@@ -93,12 +93,11 @@ function drawCloud(ctx, m) {
   for (const [k, alpha] of [[2, 0.22], [1, 0.4]]) {
     ctx.beginPath();
     ctx.ellipse(cx, cy, rx * k, ry * k, 0, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(179, 136, 255, ${alpha})`;
-    ctx.shadowColor = "#b388ff";
-    ctx.shadowBlur = 24;
+    ctx.fillStyle = `rgba(196, 98, 45, ${alpha})`;
+    ctx.shadowBlur = 0;
     ctx.fill();
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "rgba(179, 136, 255, 0.9)";
+    ctx.strokeStyle = "rgba(36, 23, 15, 0.85)";
     ctx.stroke();
   }
   ctx.shadowBlur = 0;
@@ -106,7 +105,7 @@ function drawCloud(ctx, m) {
     const [x, y] = m.toScreen(z);
     ctx.beginPath();
     ctx.arc(x, y, i === samples.length - 1 ? 6 : 4, 0, Math.PI * 2);
-    ctx.fillStyle = i === samples.length - 1 ? "#ffd166" : "rgba(255, 209, 102, 0.55)";
+    ctx.fillStyle = i === samples.length - 1 ? "#c4622d" : "rgba(36, 23, 15, 0.55)";
     ctx.fill();
   });
   ctx.restore();

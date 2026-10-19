@@ -15,20 +15,20 @@
 }
 .title-slide .slide-body::before {
   content: "";
-  width: 72px;
-  height: 6px;
-  border-radius: 999px;
+  width: 96px;
+  height: 10px;
   background: var(--accent);
+  box-shadow: 4px 4px 0 var(--stamp);
 }
 .byline {
-  font-family: var(--font-head);
-  font-weight: 500;
+  font-family: var(--font-mono);
+  font-weight: 700;
   font-size: var(--fs-small);
   color: var(--text);
-  padding: 6px 18px;
-  border-radius: 999px;
+  padding: 8px 16px;
   background: var(--bg-raised);
-  border: 2px solid var(--line);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
 }
 .scroll-hint {
   position: absolute;
@@ -40,8 +40,8 @@
   font-size: var(--fs-label);
   color: var(--text-soft);
   padding: 4px 14px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
 }
 .scroll-hint span {
   display: inline-block;
@@ -67,8 +67,11 @@
 }
 .ice-body h2 {
   font-size: clamp(52px, 7.4vw, 108px);
-  line-height: 0.92;
-  max-width: 11ch;
+  line-height: 0.9;
+  max-width: 12ch;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  text-shadow: 6px 6px 0 var(--stamp);
 }
 .ice-or {
   display: block;
@@ -172,9 +175,10 @@
 }
 .flow-label {
   padding: 10px 34px;
-  border-radius: 999px;
   background: var(--accent);
   color: var(--bg);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
   font-family: var(--font-head);
   font-weight: 700;
   font-size: var(--fs-h3);
@@ -438,7 +442,9 @@
   white-space: nowrap;
   transform: rotate(-10deg);
   background: var(--coral);
-  color: var(--text);
+  color: var(--bg);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
 }
 .stamp:not([hidden]) {
   animation: stamp-in 320ms var(--ease);

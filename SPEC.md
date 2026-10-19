@@ -74,8 +74,9 @@ Part 6: Limitations, extensions, comparison, wrap-up
 22. Questions: the thinking mascot, new vae_128 cats floating up in the background, and credits (fferlito cat faces, AFHQ / StarGAN v2, PyTorch and ONNX Runtime Web, the site and the GitHub repo).
 
 ## Design
-- Dark navy background (#14112B) with bright accents: coral #FF6B6B, sunflower #FFD166, mint #06D6A0, sky #4CC9F0, lilac #B388FF. One accent per part, in that order; Part 6 comes back to coral.
-- Fonts (vendored with @fontsource): Fredoka for headings, Inter for body, JetBrains Mono for numbers and code.
+- Pixel-training chrome on warm paper (#EFE6D2) with ink (#24170F). Accents are dark stamps so labels stay readable: coral #9D2F28, sunflower #A85B12, mint #1F5C3A, sky #1E3F66, lilac #6B3050. One accent per part, in that order; Part 6 comes back to coral. Frames are square, with a hard offset shadow. The orange stamp colour (#E07A3D) is the heading shadow only.
+- Every cat the demos show is still a trained-model output or a dataset image (ONNX encoders and decoders, the showcase sprite, precomputed reconstructions). The pixel look is frames, type, colours and the SVG mascot. It does not replace those images.
+- Fonts: Noto Sans Display Bold for headings (vendored TTF, OFL), Inter for body, JetBrains Mono for numbers and code. Fredoka stays loaded for the mascot's short labels.
 - Large type for a projector: body at least 24px, headings 56px+ (scaled down on phones). High contrast; no thin grey text.
 - A simple original cat mascot drawn in SVG (not a known character), reused with different expressions.
 - Humour: at most one joke per slide, never at anyone's expense, never in place of a technical claim. Running gags: Photocopier Cat, here be monsters, Gary the GAN.

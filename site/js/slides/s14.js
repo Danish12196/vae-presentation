@@ -59,7 +59,7 @@ function drawPrior(ctx, m) {
   const [r1] = m.toScreen([1, 0]);
   ctx.save();
   ctx.setLineDash([6, 6]);
-  ctx.strokeStyle = "rgba(179, 136, 255, 0.85)";
+  ctx.strokeStyle = "rgba(196, 98, 45, 0.9)";
   ctx.lineWidth = 2;
   for (const k of [1, 2]) {
     ctx.beginPath();
@@ -67,7 +67,7 @@ function drawPrior(ctx, m) {
     ctx.stroke();
   }
   ctx.setLineDash([]);
-  ctx.fillStyle = "rgba(179, 136, 255, 0.95)";
+  ctx.fillStyle = "#24170f";
   ctx.font = "600 14px 'JetBrains Mono', monospace";
   ctx.fillText("N(0, 1)", ox + (r1 - ox) * 2 + 6, oy - 6);
   ctx.restore();

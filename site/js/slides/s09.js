@@ -11,9 +11,9 @@ import { imagePicker } from "../ui.js";
 import { drawErrorHeatmap, histogram } from "../viz.js";
 
 const COLOURS = [
-  { name: "coral", value: "#ff6b6b" },
-  { name: "mint", value: "#06d6a0" },
-  { name: "ink", value: "#14112b" },
+  { name: "coral", value: "#d24b3a" },
+  { name: "mint", value: "#1f8a5b" },
+  { name: "ink", value: "#24170f" },
 ];
 const BRUSH = 5;        // in the image's own 64x64 pixels: thick
 const THROTTLE = 120;   // ms between live reconstructions while drawing

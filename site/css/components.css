@@ -9,12 +9,13 @@
   gap: 10px;
   min-height: 52px;
   padding: 10px 24px;
-  border: 2px solid var(--accent);
-  border-radius: 999px;
-  background: transparent;
+  border: 3px solid var(--line);
+  border-radius: 0;
+  background: var(--bg-raised);
   color: var(--text);
+  box-shadow: 4px 4px 0 var(--accent);
   font-family: var(--font-head);
-  font-weight: 600;
+  font-weight: 700;
   font-size: var(--fs-small);
   cursor: pointer;
   transition: background-color var(--t-fast) linear, transform var(--t-fast) var(--ease);
@@ -28,6 +29,8 @@
 .btn.primary {
   background: var(--accent);
   color: var(--bg);
+  border-color: var(--line);
+  box-shadow: 4px 4px 0 var(--line);
 }
 .btn.primary:hover {
   background: color-mix(in srgb, var(--accent) 85%, white);
@@ -41,8 +44,9 @@
 
 .card {
   background: var(--bg-raised);
-  border: 2px solid var(--line);
-  border-radius: var(--radius);
+  border: 3px solid var(--line);
+  border-radius: 0;
+  box-shadow: 4px 4px 0 var(--line);
   padding: calc(var(--gap) * 1.1);
   display: flex;
   flex-direction: column;
@@ -73,19 +77,20 @@
 }
 .formula-bar .formula {
   margin: 0;
-  padding: 6px 14px;
-  border-radius: var(--radius-small);
-  background: var(--bg-sunken);
-  border: 2px solid var(--line);
+  padding: 8px 14px;
+  border-radius: 0;
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   line-height: 1.35;
 }
 .formula-bar:has(.is-active) .formula:not(.is-active) {
-  opacity: 0.72;
+  opacity: 0.85;
 }
 .formula-bar .formula.is-active {
   border-color: var(--accent);
+  box-shadow: 4px 4px 0 var(--accent);
 }
 .formula-bar .recon {
   color: var(--coral);
@@ -105,9 +110,10 @@
   font-family: var(--font-head);
   font-weight: 700;
   font-size: var(--fs-small);
-  border-radius: 12px;
+  border: 3px solid var(--line);
+  border-radius: 0;
   transform: rotate(-3deg);
-  box-shadow: 4px 4px 0 color-mix(in srgb, black 40%, transparent);
+  box-shadow: 4px 4px 0 var(--line);
 }
 .sticker.tilt-right {
   transform: rotate(3deg);
@@ -115,24 +121,23 @@
 
 /* ---------------------------------------------------------------- cat canvas */
 
-/* 64x64 images drawn at native size and scaled up crisply, with a soft glow frame. */
+/* 64x64 images drawn at native size and scaled up crisply.
+   The pixels inside are the model or dataset image; the frame is chrome. */
 .cat-canvas {
   display: block;
   width: var(--cat-size, 256px);
   height: var(--cat-size, 256px);
   aspect-ratio: 1;
   image-rendering: pixelated;
-  border-radius: 14px;
-  background: var(--bg-sunken);
-  border: 3px solid color-mix(in srgb, var(--accent) 70%, white);
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent),
-    0 0 36px color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 0;
+  background: #1c1612;
+  border: 4px solid var(--line);
+  box-shadow: 6px 6px 0 var(--accent);
 }
 .cat-canvas.small {
   --cat-size: 96px;
-  border-width: 2px;
-  border-radius: 10px;
-  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 30%, transparent);
+  border-width: 3px;
+  box-shadow: 3px 3px 0 var(--accent);
 }
 @media (max-width: 760px) {
   .cat-canvas {
@@ -175,33 +180,33 @@
   touch-action: none;        /* dragging the slider never scrolls the page */
 }
 .slider input[type="range"]::-webkit-slider-runnable-track {
-  height: 12px;
-  border-radius: 6px;
+  height: 14px;
+  border-radius: 0;
   background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--bg-sunken) var(--fill, 0%));
-  border: 2px solid var(--line);
+  border: 3px solid var(--line);
 }
 .slider input[type="range"]::-moz-range-track {
-  height: 12px;
-  border-radius: 6px;
+  height: 14px;
+  border-radius: 0;
   background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--bg-sunken) var(--fill, 0%));
-  border: 2px solid var(--line);
+  border: 3px solid var(--line);
 }
 .slider input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 34px;
-  height: 34px;
-  margin-top: -13px;
-  border-radius: 50%;
-  background: var(--text);
-  border: 5px solid var(--accent);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent);
+  width: 28px;
+  height: 28px;
+  margin-top: -10px;
+  border-radius: 0;
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
+  box-shadow: 3px 3px 0 var(--accent);
 }
 .slider input[type="range"]::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--text);
-  border: 5px solid var(--accent);
+  width: 22px;
+  height: 22px;
+  border-radius: 0;
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
 }
 .slider-ticks {
   display: flex;
@@ -232,9 +237,9 @@
   flex-shrink: 0;
   width: 68px;
   height: 38px;
-  border-radius: 19px;
+  border-radius: 0;
   background: var(--bg-sunken);
-  border: 2px solid var(--line);
+  border: 3px solid var(--line);
   transition: background-color var(--t-fast) linear;
 }
 .toggle-track::after {
@@ -244,7 +249,7 @@
   left: 4px;
   width: 26px;
   height: 26px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--text-soft);
   transition: transform var(--t-fast) var(--ease), background-color var(--t-fast) linear;
 }
@@ -268,16 +273,16 @@
   flex-wrap: wrap;
   gap: 8px;
   padding: 6px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--bg-sunken);
-  border: 2px solid var(--line);
+  border: 3px solid var(--line);
   width: fit-content;
   max-width: 100%;
 }
 .tab {
   padding: 8px 22px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: var(--text-soft);
   font-family: var(--font-head);
@@ -358,7 +363,7 @@
 .cat-pick {
   padding: 0;
   border: 3px solid transparent;
-  border-radius: 12px;
+  border-radius: 0;
   background: none;
   cursor: pointer;
   transition: border-color var(--t-fast) linear, transform var(--t-fast) var(--ease);
@@ -367,15 +372,15 @@
   display: block;
   width: 64px;
   height: 64px;
-  border-radius: 9px;
+  border-radius: 0;
   image-rendering: pixelated;
 }
 .cat-pick:hover {
   transform: translateY(-3px);
 }
 .cat-pick[aria-pressed="true"] {
-  border-color: var(--accent);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 50%, transparent);
+  border-color: var(--line);
+  box-shadow: 4px 4px 0 var(--accent);
 }
 @media (max-width: 760px) {
   .cat-pick canvas {
@@ -489,7 +494,8 @@
 /* Verdict chips on the anomaly slide and the latent-map slide. */
 .verdict-chip {
   padding: 6px 20px;
-  border-radius: 999px;
+  border-radius: 0;
+  border: 3px solid var(--line);
   font-family: var(--font-head);
   font-weight: 700;
   font-size: var(--fs-body);

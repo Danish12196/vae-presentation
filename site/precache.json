@@ -1,50 +1,50 @@
 {
- "version": "01e50d181f88",
- "total_bytes": 72513631,
+ "version": "b68ecce2f5ed",
+ "total_bytes": 73026187,
  "files": [
   {
    "path": "404.html",
-   "bytes": 2663
+   "bytes": 2715
   },
   {
    "path": "css/base.css",
-   "bytes": 8360
+   "bytes": 8108
   },
   {
    "path": "css/components.css",
-   "bytes": 11710
+   "bytes": 11638
   },
   {
    "path": "css/fonts.css",
-   "bytes": 3664
+   "bytes": 3901
   },
   {
    "path": "css/part1.css",
-   "bytes": 13111
+   "bytes": 13326
   },
   {
    "path": "css/part2.css",
-   "bytes": 11969
+   "bytes": 11939
   },
   {
    "path": "css/part3.css",
-   "bytes": 4606
+   "bytes": 4510
   },
   {
    "path": "css/part4.css",
-   "bytes": 3419
+   "bytes": 3344
   },
   {
    "path": "css/part5.css",
-   "bytes": 12698
+   "bytes": 12659
   },
   {
    "path": "css/part6.css",
-   "bytes": 12767
+   "bytes": 12725
   },
   {
    "path": "css/tokens.css",
-   "bytes": 1773
+   "bytes": 1479
   },
   {
    "path": "data/animals.790a2e.json",
@@ -136,7 +136,7 @@
   },
   {
    "path": "js/latentmap.js",
-   "bytes": 11350
+   "bytes": 11332
   },
   {
    "path": "js/loader.js",
@@ -148,7 +148,7 @@
   },
   {
    "path": "js/mascot.js",
-   "bytes": 6743
+   "bytes": 6713
   },
   {
    "path": "js/models.js",
@@ -200,7 +200,7 @@
   },
   {
    "path": "js/slides/s10.js",
-   "bytes": 9792
+   "bytes": 9856
   },
   {
    "path": "js/slides/s11.js",
@@ -208,7 +208,7 @@
   },
   {
    "path": "js/slides/s12.js",
-   "bytes": 4365
+   "bytes": 4324
   },
   {
    "path": "js/slides/s13.js",
@@ -216,11 +216,11 @@
   },
   {
    "path": "js/slides/s14.js",
-   "bytes": 2476
+   "bytes": 2455
   },
   {
    "path": "js/slides/s15.js",
-   "bytes": 10973
+   "bytes": 10971
   },
   {
    "path": "js/slides/s16.js",
@@ -365,6 +365,10 @@
   {
    "path": "models/vae_2d_b4.encoder.e8886d.onnx",
    "bytes": 1416078
+  },
+  {
+   "path": "vendor/fonts/NotoSansDisplay-Bold.ttf",
+   "bytes": 513000
   },
   {
    "path": "vendor/fonts/fredoka-latin-500-normal.woff2",

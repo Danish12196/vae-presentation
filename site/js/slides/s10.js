@@ -119,20 +119,21 @@ const sparse = {
   },
 };
 
-/** 1024 activations as a 32x32 grid of cells: dark = off, bright mint = strongly on. */
+/** 1024 activations as a 32x32 grid of cells: paper = off, ink green = strongly on.
+    The values are the precomputed codes; only the paint colours changed. */
 function drawGrid(canvas, codes, scale) {
   const ctx = canvas.getContext("2d");
   const cell = canvas.width / 32;
-  ctx.fillStyle = "#0e0c20";
+  ctx.fillStyle = "#efe6d2";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   codes.forEach((v, i) => {
     const x = (i % 32) * cell;
     const y = Math.floor(i / 32) * cell;
     if (v > 0) {
       const t = Math.min(1, v / scale);
-      ctx.fillStyle = `rgba(6, 214, 160, ${0.25 + 0.75 * t})`; // mint
+      ctx.fillStyle = `rgba(31, 92, 58, ${0.25 + 0.75 * t})`;
     } else {
-      ctx.fillStyle = "#231d47";
+      ctx.fillStyle = "#e4d7c0";
     }
     ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
   });
