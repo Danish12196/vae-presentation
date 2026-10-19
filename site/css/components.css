@@ -80,37 +80,6 @@
   transform: rotate(3deg);
 }
 
-/* Speech bubble next to the mascot. */
-.speech {
-  position: relative;
-  padding: 16px 24px;
-  background: var(--text);
-  color: var(--bg);
-  border-radius: 22px;
-  font-family: var(--font-head);
-  font-weight: 600;
-  font-size: var(--fs-h3);
-  max-width: 14ch;
-}
-.speech::before {
-  content: "";
-  position: absolute;
-  left: -14px;
-  top: 50%;
-  border: 10px solid transparent;
-  border-right: 16px solid var(--text);
-  transform: translateY(-50%);
-}
-@media (max-width: 760px) {
-  .speech::before {
-    left: 50%;
-    top: -24px;
-    border: 10px solid transparent;
-    border-bottom: 16px solid var(--text);
-    transform: translateX(-50%);
-  }
-}
-
 /* ---------------------------------------------------------------- cat canvas */
 
 /* 64x64 images drawn at native size and scaled up crisply, with a soft glow frame. */
@@ -353,12 +322,6 @@
 
 /* ---------------------------------------------------------------- cat picker */
 
-.cat-picker {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
 .cat-pick {
   padding: 0;
   border: 3px solid transparent;

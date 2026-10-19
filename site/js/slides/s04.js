@@ -2,7 +2,7 @@
 // summary (ae_64, live). Make every layer as wide as the input and the network can just copy:
 // perfect loss, nothing learned. The "on" state is an illustration, not a trained model.
 
-import { encode, decode, drawCat, toTensor, withModel } from "../models.js";
+import { encode, decode, drawCat, squaredError, withModel, SIZE } from "../models.js";
 import { toggle, readout } from "../ui.js";
 import { mountMascot } from "../mascot.js";
 import { netDiagram } from "../netdiagram.js";
@@ -79,10 +79,7 @@ async function update() {
     const out = await decode("ae_64", z);
     drawCat(net.output, out);
     // Mean squared error per pixel value between the input and the reconstruction.
-    const x = toTensor(image).data;
-    let sum = 0;
-    for (let i = 0; i < x.length; i++) sum += (x[i] - out.data[i]) ** 2;
-    bottleneckLoss = sum / x.length;
+    bottleneckLoss = squaredError(image, out) / (3 * SIZE * SIZE);
   }, { compact: true });
   loss.set(bottleneckLoss);
 }

@@ -109,10 +109,8 @@ async function showGenerative() {
     if (!(err instanceof ModelMissing)) throw err;
     imageCanvas.hidden = true;
     const holder = document.createElement("div");
-    imageSlot.append(holder);
     renderTraining(holder, "vae_128", { compact: true });
     imageSlot.append(holder.firstElementChild);
-    holder.remove();
   }
 }
 

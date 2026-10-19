@@ -4,7 +4,7 @@
 //   Meet Gary, a mode-collapsed GAN (an illustration: his cats are drawn by our VAE from one fixed
 //   code, with tiny jitter), next to nine genuinely different vae_128 samples.
 
-import { decode, fromTensor, inSlot, randn, ort } from "../models.js";
+import { decode, drawTiles, inSlot, randn, ort } from "../models.js";
 import { tabs } from "../ui.js";
 
 const ROWS = [
@@ -16,7 +16,7 @@ const ROWS = [
 ];
 const CORNERS = { quality: [160, 34], variety: [36, 248], speed: [284, 248] };
 const GETS = { vae: ["variety", "speed"], gan: ["quality", "speed"], diffusion: ["quality", "variety"] };
-const LATENT = 128, TILE = 64, GAP = 4;
+const LATENT = 128, GAP = 4;
 
 let tri, grids;
 
@@ -100,8 +100,7 @@ async function generate() {
   for (let g = 0; g < 2; g++) {
     await inSlot(grids[g].closest("figure"), async () => {
       const images = await decode("vae_128", new ort.Tensor("float32", batches[g], [9, LATENT]));
-      const ctx = grids[g].getContext("2d");
-      for (let i = 0; i < 9; i++) ctx.putImageData(fromTensor(images, i), (i % 3) * (TILE + GAP) + GAP / 2, Math.floor(i / 3) * (TILE + GAP) + GAP / 2);
+      drawTiles(grids[g], images, { cols: 3, gap: GAP, inset: GAP / 2 });
     });
   }
 }

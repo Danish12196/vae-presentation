@@ -13,8 +13,6 @@ const FUR_DARK = "#e98c45";
 const INK = "#241b3d";
 const PINK = "#ff8fa3";
 
-const EXPRESSIONS = ["happy", "thinking", "confused", "sleepy", "shocked", "monster"];
-
 // Eyes, mouth and extras for each expression, drawn on a 200x200 face.
 const FACES = {
   happy: {
@@ -126,5 +124,3 @@ export function mountAll(root = document) {
     mountMascot(el, { expression: el.dataset.mascot, animate: el.hasAttribute("data-animate") });
   }
 }
-
-export { EXPRESSIONS };
