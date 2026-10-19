@@ -149,18 +149,25 @@
 
 @media (max-width: 760px) {
   .s10-body {
-    gap: var(--gap);
+    flex-direction: row;
+    gap: 10px;
     align-items: center;
   }
   .s10-map {
-    --map-size: min(92vw, 420px);
+    --map-size: 168px;
   }
   .s10-side {
+    flex: 1 1 auto;
     flex-basis: auto;
-    width: 100%;
+    width: auto;
+    gap: 8px;
   }
   .s10-out .cat-canvas {
-    --cat-size: 150px;
+    --cat-size: 112px;
+  }
+  .s10-verdict {
+    min-height: 0;
+    gap: 4px;
   }
   .monster-label .mascot {
     width: 28px;

@@ -576,8 +576,15 @@ svg.tri {
     width: 90px;
   }
   .wrap-row {
-    padding: 10px 22px;
-    grid-template-columns: minmax(0, 1.1fr) auto minmax(0, 1.6fr) 84px;
+    padding: 6px 14px;
+    grid-template-columns: 6.2ch minmax(0, 0.7fr) minmax(0, 2fr);
+    gap: 8px 12px;
+  }
+  .wrap-result {
+    font-size: 16px;
+  }
+  .wrap-model {
+    font-size: 22px;
   }
 }
 
@@ -613,17 +620,53 @@ svg.tri {
     --cat-size: 40px;
   }
   .s18-top {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+  }
+  .card.ext {
+    padding: 8px 10px;
+  }
+  .vq-row {
+    gap: 6px;
+  }
+  .vq-codebook,
+  .vq-mosaic.cat-canvas.small {
+    width: 52px;
+    height: 52px;
+    --cat-size: 52px;
   }
   .sd-flow {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    justify-content: center;
+    gap: 4px 6px;
+  }
+  .sd-arrow {
+    display: none;
+  }
+  .sd-node {
+    padding: 2px;
+    gap: 2px;
+  }
+  .sd-node .mono {
+    font-size: 10px;
+  }
+  .sd-box.big {
+    width: 40px;
+    height: 40px;
   }
   .sd-foot {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 6px;
+  }
+  .sd-caption {
+    font-size: 13px;
   }
   .s19-top {
-    flex-direction: column;
-    gap: var(--gap);
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
   }
   .cmp-table {
     font-size: 13px;
@@ -641,13 +684,37 @@ svg.tri {
     min-height: 30px;
     padding: 2px 6px;
   }
+  .gary-mascot {
+    display: none;
+  }
+  .gary {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 12px;
+  }
   .gary-grid {
-    width: 130px;
+    width: 84px;
+  }
+  .gary-caption {
+    flex: 1 1 100%;
+    max-width: 36ch;
+    font-size: 13px;
+  }
+  svg.tri {
+    width: 132px;
+  }
+  .sd-step {
+    width: 36px;
+    height: 36px;
+  }
+  .sd-final.cat-canvas.small,
+  .sd-tiny .cat-canvas.small {
+    --cat-size: 48px;
   }
   .wrap-row {
-    grid-template-columns: 1fr 64px;
-    gap: 6px 12px;
-    padding: 10px 14px;
+    grid-template-columns: 5.2ch minmax(0, 0.8fr) minmax(0, 1.4fr);
+    gap: 4px 8px;
+    padding: 6px 8px;
   }
   .wrap-arrow {
     display: none;
@@ -656,8 +723,8 @@ svg.tri {
     font-size: 20px;
   }
   .wrap-result {
-    grid-column: 1;
-    font-size: 16px;
+    grid-column: auto;
+    font-size: 13px;
   }
   .wrap-mascot {
     grid-column: 2;
