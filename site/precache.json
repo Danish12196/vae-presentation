@@ -1,6 +1,6 @@
 {
- "version": "6cb0ec9e6977",
- "total_bytes": 72516185,
+ "version": "dfbf24fee59b",
+ "total_bytes": 72516192,
  "files": [
   {
    "path": "404.html",
@@ -132,7 +132,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 36286
+   "bytes": 36293
   },
   {
    "path": "js/latentmap.js",
