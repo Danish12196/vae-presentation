@@ -9,12 +9,11 @@ import { getCurrent, onCurrentChange } from "../state.js";
 
 const HINT = "hover or tap a layer";
 
-let net, nextButton, info, ending = "classifier";
+let net, info, ending = "classifier";
 
 export async function init(section) {
   info = section.querySelector(".net-info");
   info.textContent = HINT;
-  nextButton = section.querySelector("[data-next]");
   net = netDiagram(section.querySelector(".net-stage"), {
     ending,
     built: 1,
@@ -28,22 +27,22 @@ export async function init(section) {
     onChange: (decoder) => {
       ending = decoder ? "decoder" : "classifier";
       net.setEnding(ending);
+      net.play();
       fill();
     },
   });
 
-  nextButton.addEventListener("click", () => {
-    if (net.complete()) net.reset();
-    else net.next();
-    nextButton.textContent = net.complete() ? "start again" : "next layer";
-  });
-
   onCurrentChange(fill);
   await fill();
+  net.play();
 }
 
 export function enter() {
   fill();
+}
+
+export function leave() {
+  net?.stop();
 }
 
 /** Draw the current image into the diagram, and run the ending that is showing. */

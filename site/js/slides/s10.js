@@ -1,274 +1,324 @@
-// Other kinds of autoencoders, one tab each, all on the same picked cat.
-//   Sparse:        the 1024-neuron code as a 32x32 grid (precomputed: the sparse models are too big
-//                  to ship), with the L1 penalty on (sparse_l1) or off (sparse_none).
-//   Denoising:     noisy cat -> dae_128 (trained on noisy inputs) vs ae_128 (never saw noise), live.
-//   Contractive:   jiggle the input a little, ~4 times a second, and measure how far the code moves
-//                  for ae_64 and cae_64, each divided by that model's code spread so the bars compare fairly.
-//   Convolutional: the architecture we have used all along.
+// What autoencoders are good for: three small cards and a live anomaly detector.
+// ae_64 was trained on normal cats only. Draw on a cat (or pick a "not a cat") and watch
+// its reconstruction error land on the histogram of 512 held-out normal cats.
+//   above the 99th percentile        -> ANOMALY (can't rebuild it)
+//   between the 95th and 99th        -> hmm, suspicious
+//   below the 1st percentile         -> ANOMALY (suspiciously easy: flat or blurry images)
+// The upside-down and colour-inverted cats pass as normal: the honest blind spot.
 
-import {
-  drawCat, encode, decode, reconstruct, inSlot, renderTraining, loadShowcase, getShowcaseCat,
-  loadManifest, loadJSON, loadSprite, toTensor, randn, SIZE,
-} from "../models.js";
-import { catPicker, tabs, toggle, slider, readout } from "../ui.js";
-import { netDiagram } from "../netdiagram.js";
+import { drawCat, reconstruct, squaredError, inSlot, loadShowcase, getShowcaseCat, loadNotCats, loadJSON, encode, decode, toTensor, randn, SIZE } from "../models.js";
+import { imagePicker, catPicker, slider, tabs } from "../ui.js";
+import { drawErrorHeatmap, histogram } from "../viz.js";
+import { loadLatentMap } from "../latentmap.js";
 
-const PIXELS = 3 * SIZE * SIZE;
-const JIGGLE_EVERY = 250; // ms
-const BAR_MAX = 0.5;      // code movement / code spread that fills a bar
+const COLOURS = [
+  { name: "coral", value: "#d24b3a" },
+  { name: "mint", value: "#1f8a5b" },
+  { name: "ink", value: "#24170f" },
+];
+const BRUSH = 5;        // in the image's own 64x64 pixels: thick
+const THROTTLE = 120;   // ms between live reconstructions while drawing
+const HIST_MAX = 360;
 
-/** base + scale * noise, each value clamped into [0, 1], as one CHW image. */
-function noisyImage(base, scale, noise) {
-  const noisy = new Float32Array(PIXELS);
-  for (let i = 0; i < PIXELS; i++) noisy[i] = Math.min(1, Math.max(0, base[i] + scale * noise[i]));
-  return noisy;
-}
+let canvas, ctx, reconCanvas, heatCanvas, reconSlot, chip, reason, hist;
+let stats = null;
+let base = null;        // the picked image, before any drawing
+let source = null;      // { label, notCat }
+let colour = COLOURS[0].value;
+let undoStack = [];
+let drawing = false;
+let last = null;
+let timer = 0;
+let request = 0;
 
-let section, cat = 0, tab = "sparse", active = false;
-let manifest;
+export async function init(section) {
+  canvas = section.querySelector("canvas.draw");
+  ctx = canvas.getContext("2d", { willReadFrequently: true });
+  reconSlot = section.querySelector(".recon-col figure");
+  [reconCanvas, heatCanvas] = section.querySelectorAll(".recon-col canvas");
+  chip = section.querySelector(".verdict-chip");
+  reason = section.querySelector(".verdict-reason");
 
-export async function init(el) {
-  section = el;
-  manifest = (await loadManifest()).models;
   await loadShowcase();
+  buildTools(section.querySelector(".draw-tools"));
+  await initJobs(section);
 
-  tabs(el.querySelector(".s09-tabs"), {
-    tabs: [
-      { id: "sparse", label: "Sparse" },
-      { id: "denoise", label: "Denoising" },
-      { id: "contract", label: "Contractive" },
-      { id: "conv", label: "Convolutional" },
-    ],
-    onChange: (id) => {
-      tab = id;
-      for (const p of el.querySelectorAll(".s09-panel")) p.hidden = p.dataset.tab !== id;
-      refresh();
-    },
+  try {
+    stats = await loadJSON("data/anomaly.json");
+    hist = histogram(section.querySelector(".anomaly-hist"), stats.errors, {
+      max: HIST_MAX,
+      lines: [
+        { at: stats.p1, label: "1%" },
+        { at: stats.p95, label: "95%" },
+        { at: stats.p99, label: "99%" },
+      ],
+    });
+  } catch {
+    /* no statistics exported: the verdict can't be judged */
+  }
+
+  // Six typical held-out cats (error inside the normal range; a few real cats are false alarms,
+  // which would muddle the demo), then the six "not a cat" images.
+  // anomaly.json lists the 512 held-out cats in order; the showcase is the first 64 of them.
+  const typical = Array.from({ length: 64 }, (_, i) => i)
+    .filter((i) => !stats || (stats.errors[i] > stats.p1 && stats.errors[i] < stats.p95))
+    .slice(0, 6);
+  const items = typical.map((i) => ({ image: getShowcaseCat(i), label: `Cat ${i + 1}` }));
+  try {
+    const notCats = await loadNotCats();
+    notCats.labels.forEach((label, i) => items.push({ image: notCats.sprite.get(i), label, notCat: true }));
+  } catch {
+    /* cats only */
+  }
+  imagePicker(section.querySelector(".anomaly-picker"), {
+    items,
+    columns: items.length,
+    onPick: (_, item) => load(item),
   });
-  await catPicker(el.querySelector(".s09-picker"), {
-    onPick: (i) => {
-      cat = i;
-      refresh();
-    },
-  });
 
-  await Promise.all([sparse.init(), denoise.init(), contract.init(), conv.init()]);
-  refresh();
-}
+  canvas.addEventListener("pointerdown", startStroke);
+  canvas.addEventListener("pointermove", moveStroke);
+  canvas.addEventListener("pointerup", endStroke);
+  canvas.addEventListener("pointercancel", endStroke);
 
-export function enter() {
-  active = true;
-  refresh();
+  load(items[0]);
 }
 
 export function leave() {
-  active = false;
-  contract.stop();
+  clearTimeout(timer);
+  drawing = false;
 }
 
-function refresh() {
-  contract.stop();
-  ({ sparse, denoise, contract, conv })[tab].show();
+// ---------------------------------------------------------------- picking and drawing
+
+function load(item) {
+  base = item.image;
+  source = item;
+  undoStack = [];
+  drawCat(canvas, base);
+  check();
 }
 
-// ================================================================ sparse
+function point(e) {
+  const r = canvas.getBoundingClientRect();
+  return [((e.clientX - r.left) / r.width) * 64, ((e.clientY - r.top) / r.height) * 64];
+}
 
-const sparse = {
-  data: null,
-  penalty: null,
-  scale: {},
+function startStroke(e) {
+  try {
+    canvas.setPointerCapture(e.pointerId); // keep the stroke even if the finger leaves the canvas
+  } catch {
+    /* capture is a nicety */
+  }
+  undoStack.push(ctx.getImageData(0, 0, 64, 64));
+  if (undoStack.length > 30) undoStack.shift();
+  drawing = true;
+  last = point(e);
+  stroke(last, last);
+}
 
-  async init() {
-    const panel = section.querySelector('[data-tab="sparse"]');
-    try {
-      this.data = await loadJSON("data/sparse_codes.json");
-      this.recon = {};
-      for (const name of ["sparse_l1", "sparse_none"]) {
-        this.recon[name] = await loadSprite(`data/${this.data.recon[name]}`);
-        // Brightness scale: the 99th percentile of this model's positive activations.
-        const values = this.data[name].codes.flat().filter((v) => v > 0).sort((a, b) => a - b);
-        this.scale[name] = values[Math.floor(values.length * 0.99)] || 1;
-      }
-    } catch {
-      renderTraining(panel.querySelector(".s09-row"), "sparse_l1");
-      return;
-    }
-    this.penalty = toggle(panel.querySelector(".sp-toggle"), { label: "L1 penalty", checked: true, onChange: () => this.show() });
-    const box = panel.querySelector(".sp-readouts");
-    this.onReadout = readout(box, { label: "neurons on (this cat)", format: (v) => `${v.toFixed(1)}%` });
-    const avg = document.createElement("p");
-    avg.className = "sp-avg";
-    const pct = (name) => `${((manifest[name]?.active_fraction ?? 0) * 100).toFixed(1)}%`;
-    avg.textContent = `average over the data: ${pct("sparse_l1")} on with penalty, ${pct("sparse_none")} without`;
-    box.append(avg);
-    this.canvas = panel.querySelector(".sp-grid");
-    this.panel = panel;
-  },
+function moveStroke(e) {
+  if (!drawing) return;
+  const p = point(e);
+  stroke(last, p);
+  last = p;
+}
 
-  show() {
-    if (!this.data) return;
-    const name = this.penalty.checked ? "sparse_l1" : "sparse_none";
-    const codes = this.data[name].codes[cat];
-    drawGrid(this.canvas, codes, this.scale[name]);
-    this.onReadout.set(this.data[name].active[cat] * 100);
-    drawCat(this.panel.querySelector(".sp-input"), getShowcaseCat(cat));
-    drawCat(this.panel.querySelector(".sp-on"), this.recon.sparse_l1.get(cat));
-    drawCat(this.panel.querySelector(".sp-off"), this.recon.sparse_none.get(cat));
-    this.panel.querySelector(".sp-on").closest("figure").classList.toggle("current", name === "sparse_l1");
-    this.panel.querySelector(".sp-off").closest("figure").classList.toggle("current", name === "sparse_none");
-  },
-};
+function endStroke() {
+  if (!drawing) return;
+  drawing = false;
+  clearTimeout(timer);
+  timer = 0;
+  check();
+}
 
-/** 1024 activations as a 32x32 grid of cells: paper = off, ink green = strongly on.
-    The values are the precomputed codes; only the paint colours changed. */
-function drawGrid(canvas, codes, scale) {
-  const ctx = canvas.getContext("2d");
-  const cell = canvas.width / 32;
-  ctx.fillStyle = "#efe6d2";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  codes.forEach((v, i) => {
-    const x = (i % 32) * cell;
-    const y = Math.floor(i / 32) * cell;
-    if (v > 0) {
-      const t = Math.min(1, v / scale);
-      ctx.fillStyle = `rgba(31, 92, 58, ${0.25 + 0.75 * t})`;
-    } else {
-      ctx.fillStyle = "#e4d7c0";
-    }
-    ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+function stroke(a, b) {
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = BRUSH;
+  ctx.lineCap = ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(...a);
+  ctx.lineTo(...b);
+  ctx.stroke();
+  // Live while drawing, but at most every THROTTLE ms.
+  if (!timer) {
+    timer = setTimeout(() => {
+      timer = 0;
+      check();
+    }, THROTTLE);
+  }
+}
+
+function buildTools(el) {
+  const swatches = COLOURS.map(({ name, value }, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "swatch";
+    b.style.setProperty("--swatch", value);
+    b.setAttribute("aria-label", `${name} brush`);
+    b.setAttribute("aria-pressed", String(i === 0));
+    b.addEventListener("click", () => {
+      colour = value;
+      swatches.forEach((s) => s.setAttribute("aria-pressed", String(s === b)));
+    });
+    return b;
   });
+  const undo = button("undo", () => {
+    const prev = undoStack.pop();
+    if (prev) {
+      ctx.putImageData(prev, 0, 0);
+      check();
+    }
+  });
+  const clear = button("clear", () => {
+    undoStack.push(ctx.getImageData(0, 0, 64, 64));
+    drawCat(canvas, base);
+    check();
+  });
+  el.append(...swatches, undo, clear);
 }
 
-// ================================================================ denoising
+function button(label, onClick) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "btn tool";
+  b.textContent = label;
+  b.addEventListener("click", onClick);
+  return b;
+}
 
-const denoise = {
-  noise: null,
-  noiseCat: -1,
-  request: 0,
+// ---------------------------------------------------------------- judging
 
-  async init() {
-    const panel = section.querySelector('[data-tab="denoise"]');
-    this.panel = panel;
-    this.sigma = slider(panel.querySelector(".dn-slider"), {
-      label: "noise σ",
-      min: 0,
-      max: 0.5,
-      step: 0.01,
-      value: 0.3, // from about 0.25 up, the denoising AE clearly wins
-      format: (v) => v.toFixed(2),
-      onInput: () => this.show(),
+async function check() {
+  const mine = ++request;
+  const image = ctx.getImageData(0, 0, 64, 64);
+  const error = await inSlot(reconSlot, async () => {
+    const out = await reconstruct("ae_64", [image]);
+    if (mine !== request) return null;
+    drawCat(reconCanvas, out);
+    drawErrorHeatmap(heatCanvas, image, out);
+    return squaredError(image, out);
+  });
+  if (mine !== request) return;
+  showVerdict(error);
+}
+
+function showVerdict(error) {
+  if (error == null || !stats) {
+    chip.textContent = "";
+    reason.textContent = "";
+    return;
+  }
+  hist?.mark(error);
+  let verdict;
+  if (error > stats.p99) verdict = ["ANOMALY", "can't rebuild it", "bad"];
+  else if (error > stats.p95) verdict = ["hmm, suspicious", "worse than 95% of cats", "warn"];
+  else if (error < stats.p1) verdict = ["ANOMALY", "suspiciously easy", "bad"];
+  else if (source?.notCat) verdict = ["normal cat", "blind spot: not a cat, but easy to rebuild", "ok"];
+  else verdict = ["normal cat", "", "ok"];
+  const [text, why, level] = verdict;
+  chip.textContent = text;
+  chip.dataset.level = level;
+  reason.textContent = why ? `${why} · error ${Math.round(error)}` : `error ${Math.round(error)}`;
+}
+
+// ---------------------------------------------------------------- compression, denoising, features
+
+const PIXELS = 3 * SIZE * SIZE;
+const CODE_STOPS = [2, 16, 64, 256];
+let jobCat = 0;
+let jobTab = "compress";
+let noise = null;
+let featureMap = null;
+
+async function initJobs(section) {
+  const panels = [...section.querySelectorAll(".use-panel")];
+  const show = (id) => {
+    jobTab = id;
+    for (const p of panels) p.hidden = p.dataset.tab !== id;
+    refreshJob();
+  };
+  tabs(section.querySelector(".s08-tabs"), {
+    tabs: [
+      { id: "compress", label: "Compression" },
+      { id: "denoise", label: "Denoising" },
+      { id: "features", label: "Features" },
+      { id: "anomaly", label: "Anomaly" },
+    ],
+    onChange: show,
+  });
+
+  const pickCat = (i) => { jobCat = i; noise = null; refreshJob(); };
+  await catPicker(section.querySelector(".uc-picker"), { onPick: pickCat });
+  await catPicker(section.querySelector(".ud-picker"), { onPick: pickCat });
+  await catPicker(section.querySelector(".uf-picker"), { onPick: pickCat });
+
+  slider(section.querySelector(".uc-slider"), {
+    label: "code size",
+    min: 0,
+    max: CODE_STOPS.length - 1,
+    step: 1,
+    value: 2,
+    format: (i) => `${CODE_STOPS[i]} numbers`,
+    ticks: CODE_STOPS.map(String),
+    onInput: () => refreshJob(),
+  });
+  slider(section.querySelector(".ud-slider"), {
+    label: "noise σ",
+    min: 0,
+    max: 0.5,
+    step: 0.01,
+    value: 0.35,
+    format: (v) => v.toFixed(2),
+    onInput: () => refreshJob(),
+  });
+
+  const host = section.querySelector(".uf-map");
+  if (host) {
+    featureMap = await loadLatentMap(host, "ae_2", {
+      dot: 2.2,
+      label: "ae_2 codes of training cats. The crosshair is this cat.",
     });
-  },
+  }
+  show("compress");
+}
 
-  async show() {
-    const mine = ++this.request;
-    // One fixed noise pattern per cat, so the slider only changes its strength.
-    if (this.noiseCat !== cat) {
-      this.noise = randn(PIXELS);
-      this.noiseCat = cat;
-    }
-    const x = toTensor(getShowcaseCat(cat)).data;
-    const input = noisyImage(x, this.sigma.value, this.noise);
-    drawCat(this.panel.querySelector(".dn-noisy"), input);
-    for (const [cls, model] of [[".dn-dae", "dae_128"], [".dn-ae", "ae_128"]]) {
-      const fig = this.panel.querySelector(cls);
-      await inSlot(fig, async () => {
-        const out = await reconstruct(model, input);
-        if (mine === this.request) drawCat(fig.querySelector("canvas"), out);
-      });
-    }
-  },
-};
-
-// ================================================================ contractive
-
-const contract = {
-  timer: 0,
-  gen: 0, // only the newest update loop may schedule the next jiggle
-  base: {},
-  baseCat: -1,
-
-  async init() {
-    const panel = section.querySelector('[data-tab="contract"]');
-    this.panel = panel;
-    this.level = slider(panel.querySelector(".ct-slider"), {
-      label: "jiggle",
-      min: 0,
-      max: 0.1,
-      step: 0.005,
-      value: 0.05,
-      format: (v) => (v === 0 ? "still" : v.toFixed(3)),
-      onInput: () => this.show(),
-    });
-    const bars = panel.querySelector(".ct-bars");
-    bars.innerHTML = `<p class="ct-title">how far z moves</p>`;
-    this.rows = {};
-    for (const [model, label] of [["ae_64", "plain AE"], ["cae_64", "contractive AE"]]) {
-      const row = document.createElement("div");
-      row.className = "ct-row";
-      row.innerHTML = `<span class="ct-label">${label}</span><span class="ct-track"><span class="ct-fill"></span></span><span class="ct-value mono">–</span>`;
-      bars.append(row);
-      this.rows[model] = row;
-    }
-  },
-
-  /** Average size of one code dimension's natural variation, so moves are comparable across models. */
-  spread(model) {
-    const std = manifest[model]?.code_std;
-    return std ? std.reduce((a, b) => a + b, 0) / std.length : 1;
-  },
-
-  stop() {
-    clearTimeout(this.timer);
-    this.timer = 0;
-    this.gen++;
-  },
-
-  async show() {
-    this.stop();
-    const gen = ++this.gen;
-    const image = getShowcaseCat(cat);
-    const x = toTensor(image);
-    if (this.baseCat !== cat) {
-      this.base = {};
-      this.baseCat = cat;
-    }
-    const level = this.level.value;
-    const jiggled = noisyImage(x.data, level, randn(PIXELS));
-    drawCat(this.panel.querySelector(".ct-input"), jiggled);
-
-    for (const [model, cls] of [["ae_64", ".ct-ae"], ["cae_64", ".ct-cae"]]) {
-      const fig = this.panel.querySelector(cls);
-      const moved = await inSlot(fig, async () => {
-        this.base[model] ??= (await encode(model, x)).z;
-        const z = (await encode(model, jiggled)).z;
-        drawCat(fig.querySelector("canvas"), await decode(model, z));
-        let d = 0;
-        for (let i = 0; i < z.data.length; i++) d += (z.data[i] - this.base[model].data[i]) ** 2;
-        return Math.sqrt(d) / this.spread(model);
-      });
-      const row = this.rows[model];
-      row.querySelector(".ct-fill").style.width = moved == null ? "0%" : `${Math.min(100, (moved / BAR_MAX) * 100)}%`;
-      row.querySelector(".ct-value").textContent = moved == null ? "–" : moved.toFixed(2);
-    }
-    // Keep jiggling while the slide is showing this tab and the slider is above zero.
-    if (gen === this.gen && active && tab === "contract" && level > 0) {
-      this.timer = setTimeout(() => this.show(), JIGGLE_EVERY);
-    }
-  },
-};
-
-// ================================================================ convolutional
-
-const conv = {
-  async init() {
-    this.net = netDiagram(section.querySelector(".cv-stage"), { ending: "decoder", note: false });
-    this.net.showAll();
-  },
-
-  async show() {
-    const image = getShowcaseCat(cat);
-    drawCat(this.net.input, image);
-    await inSlot(this.net.output.parentElement, async () => drawCat(this.net.output, await reconstruct("dae_128", [image])));
-  },
-};
+let jobRequest = 0;
+async function refreshJob() {
+  const mine = ++jobRequest;
+  const image = getShowcaseCat(jobCat);
+  if (jobTab === "compress") {
+    const sliderEl = document.querySelector(".uc-slider input");
+    const k = CODE_STOPS[Number(sliderEl?.value ?? 2)];
+    const ratio = document.querySelector(".uc-ratio");
+    if (ratio) ratio.textContent = `12,288 → ${k} · ${Math.round(12288 / k)}× smaller`;
+    drawCat(document.querySelector(".uc-in"), image);
+    const out = await reconstruct(`ae_${k}`, [image]);
+    if (mine === jobRequest) drawCat(document.querySelector(".uc-out"), out);
+  }
+  if (jobTab === "denoise") {
+    const sigma = Number(document.querySelector(".ud-slider input")?.value ?? 0.35);
+    noise ??= randn(PIXELS);
+    const noisy = new Float32Array(PIXELS);
+    const base = toTensor(image).data;
+    for (let i = 0; i < PIXELS; i++) noisy[i] = Math.min(1, Math.max(0, base[i] + sigma * noise[i]));
+    drawCat(document.querySelector(".ud-noisy"), noisy);
+    const out = await reconstruct("dae_128", noisy);
+    if (mine === jobRequest) drawCat(document.querySelector(".ud-clean"), out);
+  }
+  if (jobTab === "features" && featureMap) {
+    drawCat(document.querySelector(".uf-in"), image);
+    const { z } = await encode("ae_2", [image]);
+    const code = [z.data[0], z.data[1]];
+    featureMap.setCrosshair(code);
+    const label = document.querySelector(".uf-z");
+    if (label) label.textContent = `z = (${code[0].toFixed(2)}, ${code[1].toFixed(2)})`;
+    const nearest = featureMap.points
+      .map((p) => ({ p, d: (p[0] - code[0]) ** 2 + (p[1] - code[1]) ** 2 }))
+      .sort((a, b) => a.d - b.d)
+      .slice(0, 4);
+    const images = await decode("ae_2", nearest.flatMap((n) => n.p));
+    if (mine !== jobRequest) return;
+    document.querySelectorAll(".uf-neighbours canvas").forEach((c, i) => drawCat(c, images, i));
+  }
+}

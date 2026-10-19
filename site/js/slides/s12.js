@@ -1,112 +1,119 @@
-// The core idea: a VAE encodes a cat to a cloud (mu, sigma), not a point.
-// The picked cat's 1 and 2 sigma ellipses glow on the vae_2d_b1 map; "sample again" draws
-// z = mu + sigma * eps from that cloud, marks it on the map and decodes it. The last six samples
-// stay in a row: the same cat, slightly different each time.
-// The clouds are tiny next to the whole space (sigma ~0.05 on a map spanning about ±4), so after
-// picking a cat the map zooms in to about 12 sigma around mu; the readout says by how much.
+// Holes in the latent space. The ae_2 codes of 2,000 training cats, coloured by fur.
+// Click anywhere to decode that point with ae_2. The verdict is about the map, not the picture:
+// is this z somewhere the decoder has seen training cats, or out in a gap? (We tried judging the
+// pictures with cnn_cls, but it calls every decoder output "cat", even flat green noise.)
+// "Random point" samples the view uniformly and keeps score: most of the space is gaps.
 
-import { encode, decode, drawCat, hasModel, renderTraining, loadShowcase, getShowcaseCat, randn } from "../models.js";
-import { catPicker } from "../ui.js";
-import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
+import { decode, drawCat, hasModel, renderTraining, loadJSON, loadSprite, loadManifest } from "../models.js";
+import { latentMap } from "../latentmap.js";
+import { mascot } from "../mascot.js";
 
-const MODEL = "vae_2d_b1";
-const KEEP = 6;
-const ZOOM_SIGMAS = 12;
-
-let map, inCanvas, outCanvas, row, params;
-let cloud = null;     // { mu: [x, y], sigma: [sx, sy] }
-let samples = [];     // recent z, newest last
+let map, out, zLabel, chip, dist, tally, tip, tipCanvas, thumbs;
+let seenRadius = 0; // a z this close to a training cat counts as "seen territory"
+let spread = 1;     // typical size of one code dimension, for readable distances
+const score = { seen: 0, gaps: 0 };
+let request = 0;
 
 export async function init(section) {
-  const body = section.querySelector(".s11-body");
-  if (!(await hasModel(MODEL))) return renderTraining(body, MODEL);
-  inCanvas = section.querySelector(".s11-input");
-  outCanvas = section.querySelector(".s11-out");
-  row = section.querySelector(".s11-row");
-  params = section.querySelector(".s11-params");
+  const body = section.querySelector(".s10-body");
+  let data;
+  try {
+    data = await loadJSON("data/latent_maps.json");
+  } catch {
+    data = null;
+  }
+  if (!data?.maps?.ae_2 || !(await hasModel("ae_2"))) {
+    renderTraining(body, "ae_2");
+    return;
+  }
 
-  map = await loadLatentMap(section.querySelector(".s11-map"), MODEL, {
-    view: VAE_VIEW,
-    label: "The VAE's latent map with the picked cat's cloud",
+  out = section.querySelector(".s10-out canvas");
+  zLabel = section.querySelector(".s10-z");
+  chip = section.querySelector(".verdict-chip");
+  dist = section.querySelector(".s10-dist");
+  tally = section.querySelector(".s10-tally");
+  tip = section.querySelector(".map-tip");
+  tipCanvas = tip.querySelector("canvas");
+
+  const points = data.maps.ae_2;
+  const std = (await loadManifest()).models.ae_2?.code_std ?? [1, 1];
+  spread = (std[0] + std[1]) / 2;
+  seenRadius = typicalSpacing(points);
+
+  map = latentMap(section.querySelector(".s10-map"), {
+    points,
+    colours: data.colours,
+    onPick: (z) => pick(z),
+    onHover: showTip,
   });
-  map.overlay = drawCloud;
+  thumbs = await loadSprite(`data/${data.thumbs.file}`, data.thumbs);
 
-  await loadShowcase();
-  await catPicker(section.querySelector(".s11-picker"), { onPick: pickCat });
-  section.querySelector("[data-sample]").addEventListener("click", sampleAgain);
-  await pickCat(0);
-}
+  // Old-map labels in the biggest empty regions.
+  for (const z of map.emptySpots(3)) {
+    const label = document.createElement("div");
+    label.className = "monster-label";
+    label.innerHTML = `${mascot({ expression: "monster" })}<span>here be monsters</span>`;
+    label.setAttribute("aria-hidden", "true");
+    map.addLabel(z, label);
+  }
 
-async function pickCat(i) {
-  const image = getShowcaseCat(i);
-  drawCat(inCanvas, image);
-  const { mu, logvar } = await encode(MODEL, [image]);
-  cloud = {
-    mu: [mu.data[0], mu.data[1]],
-    sigma: [Math.exp(0.5 * logvar.data[0]), Math.exp(0.5 * logvar.data[1])],
-  };
-  params.textContent = `μ = (${cloud.mu.map((v) => v.toFixed(2)).join(", ")})   σ = (${cloud.sigma.map((v) => v.toFixed(2)).join(", ")})`;
-  samples = [];
-  row.replaceChildren();
-  // Show where the cloud sits in the whole space, then glide in close enough to see it.
-  map.stop();
-  map.view = { ...map.home };
-  map.draw();
-  const half = Math.max(0.35, ZOOM_SIGMAS * Math.max(...cloud.sigma));
-  setTimeout(() => map.zoomTo({ cx: cloud.mu[0], cy: cloud.mu[1], half }), 350);
-  params.textContent += `   zoom ×${Math.round(map.home.half / half)}`;
-  await sampleAgain();
+  section.querySelector("[data-random]").addEventListener("click", () => pick(map.randomPoint(), { counted: true }));
 }
 
 export function leave() {
-  map?.stop();
+  if (tip) tip.hidden = true;
 }
 
-/** z = mu + sigma * eps, eps ~ N(0, 1): one more draw from the same cloud. */
-async function sampleAgain() {
-  if (!cloud) return;
-  const eps = randn(2);
-  const z = [cloud.mu[0] + cloud.sigma[0] * eps[0], cloud.mu[1] + cloud.sigma[1] * eps[1]];
-  samples = [...samples, z].slice(-KEEP);
-  map.draw();
-  const image = await decode(MODEL, z);
-  drawCat(outCanvas, image);
-
-  const thumb = document.createElement("canvas");
-  thumb.className = "cat-canvas small";
-  thumb.setAttribute("role", "listitem");
-  thumb.setAttribute("aria-label", "A sample");
-  drawCat(thumb, image);
-  row.append(thumb);
-  while (row.children.length > KEEP) row.firstElementChild.remove();
-}
-
-/** Map overlay: a glowing 2-sigma and 1-sigma ellipse at mu, and the recent samples as dots. */
-function drawCloud(ctx, m) {
-  if (!cloud) return;
-  const [cx, cy] = m.toScreen(cloud.mu);
-  const [ex] = m.toScreen([cloud.mu[0] + cloud.sigma[0], cloud.mu[1]]);
-  const [, ey] = m.toScreen([cloud.mu[0], cloud.mu[1] + cloud.sigma[1]]);
-  const rx = Math.max(4, Math.abs(ex - cx));
-  const ry = Math.max(4, Math.abs(cy - ey));
-  ctx.save();
-  for (const [k, alpha] of [[2, 0.22], [1, 0.4]]) {
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rx * k, ry * k, 0, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(196, 98, 45, ${alpha})`;
-    ctx.shadowBlur = 0;
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "rgba(36, 23, 15, 0.85)";
-    ctx.stroke();
-  }
-  ctx.shadowBlur = 0;
-  samples.forEach((z, i) => {
-    const [x, y] = m.toScreen(z);
-    ctx.beginPath();
-    ctx.arc(x, y, i === samples.length - 1 ? 6 : 4, 0, Math.PI * 2);
-    ctx.fillStyle = i === samples.length - 1 ? "#c4622d" : "rgba(36, 23, 15, 0.55)";
-    ctx.fill();
+/**
+ * How close training cats usually are to their nearest neighbour: the 95th percentile of those
+ * distances. A clicked z within this radius of some training cat is in "seen territory".
+ */
+function typicalSpacing(points) {
+  const nearest = points.map((p, i) => {
+    let best = Infinity;
+    for (let j = 0; j < points.length; j++) {
+      if (j === i) continue;
+      const d = (p[0] - points[j][0]) ** 2 + (p[1] - points[j][1]) ** 2;
+      if (d < best) best = d;
+    }
+    return Math.sqrt(best);
   });
-  ctx.restore();
+  nearest.sort((a, b) => a - b);
+  return nearest[Math.floor(nearest.length * 0.95)];
+}
+
+function nearestTraining(z) {
+  let best = Infinity;
+  for (const p of map.points) best = Math.min(best, (p[0] - z[0]) ** 2 + (p[1] - z[1]) ** 2);
+  return Math.sqrt(best);
+}
+
+async function pick(z, { counted = false } = {}) {
+  const mine = ++request;
+  map.setCrosshair(z);
+  zLabel.textContent = `z = (${z[0].toFixed(1)}, ${z[1].toFixed(1)})`;
+  const d = nearestTraining(z);
+  const seen = d <= seenRadius;
+  chip.textContent = seen ? "seen territory" : "here be monsters";
+  chip.dataset.level = seen ? "ok" : "bad";
+  dist.textContent = `nearest training cat: ${(d / spread).toFixed(2)}σ away`;
+  if (counted) {
+    score[seen ? "seen" : "gaps"]++;
+    tally.textContent = `in the data: ${score.seen} / in the gaps: ${score.gaps}`;
+  }
+  const image = await decode("ae_2", z);
+  if (mine === request) drawCat(out, image);
+}
+
+/** On hover, the nearest training cat's thumbnail (only when the pointer is close to a dot). */
+function showTip(nearest, at) {
+  if (!nearest || nearest.distance > 28 || !thumbs) {
+    tip.hidden = true;
+    return;
+  }
+  tipCanvas.getContext("2d").putImageData(thumbs.get(nearest.index), 0, 0);
+  const [x, y] = map.toScreen(map.points[nearest.index]);
+  tip.style.left = `${x}px`;
+  tip.style.top = `${y}px`;
+  tip.hidden = false;
 }

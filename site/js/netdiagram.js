@@ -156,6 +156,24 @@ export function netDiagram(stage, { ending = "decoder", onInfo = null, built = I
     update();
   };
   api.complete = () => shown >= columns.length;
+  let playTimer = 0;
+  api.stop = () => clearTimeout(playTimer);
+  /** Build the layers from the input out to the ending. */
+  api.play = () => {
+    api.stop();
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      api.showAll();
+      return;
+    }
+    shown = 1;
+    update();
+    const step = () => {
+      if (shown >= columns.length) return;
+      api.next();
+      playTimer = setTimeout(step, 320);
+    };
+    playTimer = setTimeout(step, 180);
+  };
   api.setEnding = (name) => {
     endingName = name;
     build();

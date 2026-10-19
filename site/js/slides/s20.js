@@ -1,106 +1,89 @@
-// VAE vs GAN vs diffusion.
-//   The comparison table: every cell starts hidden and appears when clicked (a row header shows its row).
-//   The trilemma: pick a model and its two corners of quality / variety / speed light up.
-//   Meet Gary, a mode-collapsed GAN (an illustration: his cats are drawn by our VAE from one fixed
-//   code, with tiny jitter), next to nine genuinely different vae_128 samples.
+// Generating new cats. Left: 24 samples from vae_128 with z ~ N(0, I), the distribution its KL term
+// organised the latent space around. Right: 24 samples from ae_128, either naive (z ~ N(0, I)) or
+// fair (z drawn with the AE's own per-dimension code mean and std). Fair is still mostly nonsense:
+// a plain AE has no reason for the space between its codes to decode to cats.
+// No classifier scores: cnn_cls calls every decoder output "cat" (see SPEC), so the images speak.
+// Below: a small vae_2d_b1 map where any click decodes a plausible cat.
 
-import { decode, drawTiles, inSlot, randn } from "../models.js";
-import { tabs } from "../ui.js";
+import { decode, drawCat, drawTiles, inSlot, loadManifest, randn } from "../models.js";
+import { flipSwitch } from "../ui.js";
+import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
 
-const ROWS = [
-  ["Image quality", ["Blurry", false], ["Sharp", true], ["Sharp", true]],
-  ["Variety of outputs", ["High", true], ["Can suffer mode collapse", false], ["High", true]],
-  ["Generation speed", ["Fast, one pass", true], ["Fast, one pass", true], ["Slow, many steps", false]],
-  ["Training", ["Stable", true], ["Unstable", false], ["Stable", true]],
-  ["Encoder for real images", ["Yes", true], ["No", false], ["No (noising instead)", false]],
-];
-const CORNERS = { quality: [160, 34], variety: [36, 248], speed: [284, 248] };
-const GETS = { vae: ["variety", "speed"], gan: ["quality", "speed"], diffusion: ["quality", "variety"] };
-const LATENT = 128, GAP = 4;
+const COLS = 6, ROWS = 4, N = COLS * ROWS, LATENT = 128, GAP = 4;
 
-let tri, grids;
+let vaeCanvas, aeCanvas, vaeFig, aeFig, fair = false, aeStats = null, dice, pickCanvas, map;
+let request = 0;
 
 export async function init(section) {
-  buildTable(section.querySelector(".cmp-table tbody"));
+  vaeFig = section.querySelector(".gen-vae");
+  aeFig = section.querySelector(".gen-ae");
+  vaeCanvas = vaeFig.querySelector("canvas");
+  aeCanvas = aeFig.querySelector("canvas");
+  dice = section.querySelector(".reroll");
+  pickCanvas = section.querySelector(".s15-pick");
 
-  tri = section.querySelector("svg.tri");
-  buildTriangle();
-  tabs(section.querySelector(".tri-models"), {
-    tabs: [
-      { id: "vae", label: "VAE" },
-      { id: "gan", label: "GAN" },
-      { id: "diffusion", label: "Diffusion" },
-    ],
-    onChange: highlight,
+  const ae = (await loadManifest()).models.ae_128;
+  if (ae?.code_mean) aeStats = { mean: ae.code_mean, std: ae.code_std };
+
+  flipSwitch(section.querySelector(".ae-mode"), {
+    left: "naive N(0,1)",
+    right: "fair: its own stats",
+    label: "Sample the AE with its own code statistics",
+    onChange: (on) => {
+      fair = on;
+      rollAE();
+    },
   });
-  highlight("vae");
+  dice.addEventListener("click", reroll);
 
-  grids = [...section.querySelectorAll(".gary-grid")];
-  section.querySelector("[data-gary]").addEventListener("click", generate);
-  await generate();
-}
-
-function buildTable(tbody) {
-  for (const [label, ...cells] of ROWS) {
-    const tr = document.createElement("tr");
-    const th = document.createElement("th");
-    const rowButton = document.createElement("button");
-    rowButton.type = "button";
-    rowButton.className = "cmp-row";
-    rowButton.textContent = label;
-    th.append(rowButton);
-    tr.append(th);
-    const buttons = cells.map(([text, good]) => {
-      const td = document.createElement("td");
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = `cmp-cell ${good ? "good" : "bad"}`;
-      b.setAttribute("aria-label", `${label}: reveal`);
-      b.innerHTML = `<span class="cmp-q" aria-hidden="true">?</span><span class="cmp-a">${text}</span>`;
-      b.addEventListener("click", () => reveal(b));
-      td.append(b);
-      tr.append(td);
-      return b;
+  await inSlot(section.querySelector(".s15-pick-fig"), async () => {
+    map = await loadLatentMap(section.querySelector(".s15-map"), "vae_2d_b1", {
+      view: VAE_VIEW,
+      dot: 1.6,
+      label: "The VAE's latent map: click anywhere to decode a cat",
+      onPick: async (z) => {
+        map.setCrosshair(z);
+        drawCat(pickCanvas, await decode("vae_2d_b1", z));
+      },
     });
-    rowButton.addEventListener("click", () => buttons.forEach(reveal));
-    tbody.append(tr);
+    const z = [0.4, -0.3];
+    map.setCrosshair(z);
+    drawCat(pickCanvas, await decode("vae_2d_b1", z));
+  });
+  await reroll();
+}
+
+export function leave() {
+  dice?.classList.remove("rolling");
+}
+
+async function reroll() {
+  // Restart the dice spin even if it is mid-turn.
+  dice.classList.remove("rolling");
+  void dice.offsetWidth;
+  dice.classList.add("rolling");
+  // One grid per frame: each batch of 24 decodes blocks the page for a moment (~30 ms, more on
+  // slow phones), so yielding in between keeps the page responsive while the dice spins.
+  await rollVAE();
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r)));
+  await rollAE();
+}
+
+async function rollVAE() {
+  const mine = ++request;
+  await inSlot(vaeFig, async () => {
+    const images = await decode("vae_128", randn(N * LATENT));
+    if (mine === request) drawTiles(vaeCanvas, images, { cols: COLS, gap: GAP, inset: GAP / 2 });
+  });
+}
+
+async function rollAE() {
+  const z = randn(N * LATENT);
+  if (fair && aeStats) {
+    for (let i = 0; i < z.length; i++) {
+      const d = i % LATENT;
+      z[i] = aeStats.mean[d] + aeStats.std[d] * z[i];
+    }
   }
-}
-
-function reveal(b) {
-  b.classList.add("revealed");
-  b.removeAttribute("aria-label");
-}
-
-function buildTriangle() {
-  const [q, v, s] = [CORNERS.quality, CORNERS.variety, CORNERS.speed];
-  const edge = (a, b, k) => `<line class="tri-edge" data-edge="${k}" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" />`;
-  const corner = (name, [x, y], label, dy) =>
-    `<g class="tri-corner" data-corner="${name}"><circle cx="${x}" cy="${y}" r="16" /><text x="${x}" y="${y + dy}" text-anchor="middle">${label}</text></g>`;
-  tri.innerHTML = `
-    <polygon class="tri-fill" points="${q} ${v} ${s}" />
-    ${edge(q, v, "quality-variety")}${edge(v, s, "speed-variety")}${edge(q, s, "quality-speed")}
-    ${corner("quality", q, "Quality", -26)}${corner("variety", v, "Variety", 38)}${corner("speed", s, "Speed", 38)}`;
-}
-
-function highlight(model) {
-  const on = GETS[model];
-  for (const c of tri.querySelectorAll(".tri-corner")) c.classList.toggle("on", on.includes(c.dataset.corner));
-  const key = [...on].sort().join("-");
-  for (const e of tri.querySelectorAll(".tri-edge")) e.classList.toggle("on", e.dataset.edge === key);
-}
-
-/** Gary's nine cats (one code, tiny jitter) and nine independent VAE samples. */
-async function generate() {
-  const gary = randn(LATENT);
-  const garyBatch = new Float32Array(9 * LATENT);
-  const jitter = randn(9 * LATENT);
-  for (let i = 0; i < garyBatch.length; i++) garyBatch[i] = gary[i % LATENT] + 0.04 * jitter[i];
-  const batches = [garyBatch, randn(9 * LATENT)];
-  for (let g = 0; g < 2; g++) {
-    await inSlot(grids[g].closest("figure"), async () => {
-      const images = await decode("vae_128", batches[g]);
-      drawTiles(grids[g], images, { cols: 3, gap: GAP, inset: GAP / 2 });
-    });
-  }
+  await inSlot(aeFig, async () => drawTiles(aeCanvas, await decode("ae_128", z), { cols: COLS, gap: GAP, inset: GAP / 2 }));
 }

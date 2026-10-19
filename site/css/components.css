@@ -92,6 +92,49 @@
   border-color: var(--accent);
   box-shadow: 4px 4px 0 var(--accent);
 }
+.formula-bar {
+  flex-shrink: 0;
+}
+.sym {
+  position: relative;
+  display: inline;
+  padding: 0 1px;
+  border: 0;
+  border-bottom: 2px dashed currentColor;
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  cursor: help;
+}
+.sym .tip {
+  display: none;
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 260px;
+  padding: 8px 10px;
+  border: 3px solid var(--line);
+  background: var(--bg-raised);
+  color: var(--text);
+  box-shadow: 4px 4px 0 var(--line);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: left;
+  white-space: normal;
+}
+.sym:hover .tip,
+.sym:focus .tip,
+.sym:focus-visible .tip,
+.sym.on .tip {
+  display: block;
+}
 .formula-bar .recon {
   color: var(--coral);
   font-weight: 700;
@@ -180,26 +223,30 @@
   touch-action: none;        /* dragging the slider never scrolls the page */
 }
 .slider input[type="range"]::-webkit-slider-runnable-track {
-  height: 14px;
+  height: 18px;
   border-radius: 0;
   background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--bg-sunken) var(--fill, 0%));
   border: 3px solid var(--line);
+  box-sizing: border-box;
 }
 .slider input[type="range"]::-moz-range-track {
-  height: 14px;
+  height: 18px;
   border-radius: 0;
   background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--bg-sunken) var(--fill, 0%));
   border: 3px solid var(--line);
+  box-sizing: border-box;
 }
 .slider input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 28px;
-  height: 28px;
-  margin-top: -10px;
+  width: 22px;
+  height: 22px;
+  /* Centres a 22px thumb on an 18px track in Chrome. */
+  margin-top: -5px;
   border-radius: 0;
   background: var(--bg-raised);
   border: 3px solid var(--line);
-  box-shadow: 3px 3px 0 var(--accent);
+  box-sizing: border-box;
+  box-shadow: 3px 3px 0 var(--line);
 }
 .slider input[type="range"]::-moz-range-thumb {
   width: 22px;
@@ -207,6 +254,7 @@
   border-radius: 0;
   background: var(--bg-raised);
   border: 3px solid var(--line);
+  box-sizing: border-box;
 }
 .slider-ticks {
   display: flex;
@@ -219,6 +267,7 @@
 /* ---------------------------------------------------------------- toggle switch */
 
 .toggle {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 14px;
@@ -228,38 +277,43 @@
 }
 .toggle input {
   position: absolute;
-  opacity: 0;
   width: 1px;
   height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 .toggle-track {
   position: relative;
   flex-shrink: 0;
-  width: 68px;
-  height: 38px;
+  width: 64px;
+  height: 36px;
   border-radius: 0;
   background: var(--bg-sunken);
   border: 3px solid var(--line);
+  box-shadow: 3px 3px 0 var(--line);
   transition: background-color var(--t-fast) linear;
 }
 .toggle-track::after {
   content: "";
   position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 26px;
-  height: 26px;
+  top: 7px;
+  left: 7px;
+  width: 22px;
+  height: 22px;
   border-radius: 0;
-  background: var(--text-soft);
+  border: 3px solid var(--line);
+  box-sizing: border-box;
+  background: var(--bg-raised);
   transition: transform var(--t-fast) var(--ease), background-color var(--t-fast) linear;
 }
 .toggle input:checked + .toggle-track {
   background: color-mix(in srgb, var(--accent) 35%, var(--bg-sunken));
-  border-color: var(--accent);
+  border-color: var(--line);
 }
 .toggle input:checked + .toggle-track::after {
-  transform: translateX(30px);
-  background: var(--accent);
+  transform: translateX(28px);
+  background: var(--stamp);
 }
 .toggle input:focus-visible + .toggle-track {
   outline: 3px solid var(--sunflower);
@@ -446,17 +500,20 @@
   color: var(--accent);
 }
 .flip .toggle-track {
-  width: 84px;
-  height: 44px;
-  border-radius: 22px;
+  width: 76px;
+  height: 36px;
+  border-radius: 0;
 }
 .flip .toggle-track::after {
-  width: 32px;
-  height: 32px;
-  background: var(--accent);
+  top: 7px;
+  left: 7px;
+  width: 22px;
+  height: 22px;
+  background: var(--bg-raised);
 }
 .flip .toggle input:checked + .toggle-track::after {
   transform: translateX(40px);
+  background: var(--stamp);
 }
 /* Both sides are "on" states, so the track keeps the accent colour either way. */
 .flip .toggle-track,
