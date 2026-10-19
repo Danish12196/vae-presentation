@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Hourglass — title</title>
+  <style>
+    @font-face { font-family: "Display"; font-weight: 700; src: url("../fonts/NotoSerifDisplay-Bold.ttf") format("truetype"); }
+    @font-face { font-family: "Text"; font-weight: 400; src: url("../../site/vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Text"; font-weight: 600; src: url("../../site/vendor/fonts/inter-latin-600-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Mono"; src: url("../../site/vendor/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { background: #f6f3ee; color: #1a1a1a; font-family: Text, sans-serif; }
+    .sheet { height: 100%; position: relative; }
+    svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .copy { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; }
+    .band { background: #f6f3ee; padding: 8px 28px 12px; }
+    h1 { margin: 0; font-family: Display, serif; font-size: 64px; line-height: 0.92; }
+    .sub { margin: 8px 0 0; font-size: 24px; font-weight: 600; }
+    .meta { position: absolute; left: 36px; right: 36px; bottom: 22px; display: flex; justify-content: space-between; font-family: Mono, monospace; font-size: 16px; }
+    .tag { position: absolute; top: 22px; left: 36px; font-family: Mono, monospace; letter-spacing: 0.14em; font-size: 14px; color: #c4622d; }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <svg id="field" viewBox="0 0 1366 768" aria-hidden="true"></svg>
+    <p class="tag">MAAI901 · DEEP LEARNING FOR VISUAL DATA</p>
+    <div class="copy">
+      <div class="band">
+        <h1>Autoencoders &amp; VAEs</h1>
+        <p class="sub">teaching a network to imagine cats</p>
+      </div>
+    </div>
+    <p class="meta"><span>Danish</span><span>x → narrow z → x̂</span><span>Tuesday 20 October 2026</span></p>
+  </main>
+  <script>
+    const rand = (function (a) {
+      return function () {
+        a |= 0; a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    })(11);
+    const gauss = () => {
+      const u = Math.max(1e-9, rand()), v = rand();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    };
+    const svg = document.getElementById("field");
+    const ns = "http://www.w3.org/2000/svg";
+    const dot = (x, y, r, fill) => {
+      const c = document.createElementNS(ns, "circle");
+      c.setAttribute("cx", x.toFixed(1));
+      c.setAttribute("cy", y.toFixed(1));
+      c.setAttribute("r", r.toFixed(2));
+      c.setAttribute("fill", fill);
+      svg.appendChild(c);
+    };
+    for (let i = 0; i < 220; i++) dot(683 + gauss() * 280, 150 + gauss() * 78, 2.2 + rand() * 2.4, "#1a1a1a");
+    for (let i = 0; i < 36; i++) dot(683 + gauss() * 22, 384 + gauss() * 28, 2.6, "#c4622d");
+    for (let i = 0; i < 180; i++) dot(683 + gauss() * 240, 610 + gauss() * 70, 2 + rand() * 2.2, "#1a1a1a");
+  </script>
+</body>
+</html>
