@@ -106,7 +106,7 @@ input {
 
 /* Where a slide's demo lives. Panels sit side by side, and stack on phones. */
 .slide-body {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   gap: calc(var(--gap) * 1.5);
   align-items: center;
@@ -149,6 +149,21 @@ input {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+@media (max-height: 700px) {
+  .flow-image .cat-canvas { --cat-size: 150px; }
+  .bn-img .cat-canvas,
+  .loss-row .cat-canvas { --cat-size: 150px; }
+  .bn-diagram { width: 220px; height: 150px; }
+  .s10-map,
+  .s11-map,
+  .s13-map { --map-size: min(40vh, 320px); }
+  .formula-bar .formula { font-size: 14px; padding: 4px 8px; }
+  .loss-eq { font-size: 26px; }
+  .wrap-row { padding: 6px 10px; }
+  .gauss-wrap,
+  svg.gauss { height: min(200px, 30vh); max-height: min(200px, 30vh); }
 }
 
 /* ---------------------------------------------------------------- top bar */

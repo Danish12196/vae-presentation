@@ -1,74 +1,112 @@
-// Turning the KL dial: the same 2,000 cats encoded by four 2D VAEs trained with
-// beta = 0, 0.1, 1 and 4. The slider glides the dots between the four precomputed mu scatters:
-// beta 0 is a plain autoencoder (spread out, gaps), beta 4 packs everything around N(0, 1).
-// The rope above leans towards whichever term is winning.
+// The core idea: a VAE encodes a cat to a cloud (mu, sigma), not a point.
+// The picked cat's 1 and 2 sigma ellipses glow on the vae_2d_b1 map; "sample again" draws
+// z = mu + sigma * eps from that cloud, marks it on the map and decodes it. The last six samples
+// stay in a row: the same cat, slightly different each time.
+// The clouds are tiny next to the whole space (sigma ~0.05 on a map spanning about ±4), so after
+// picking a cat the map zooms in to about 12 sigma around mu; the readout says by how much.
 
-import { loadJSON, renderTraining } from "../models.js";
-import { slider } from "../ui.js";
-import { latentMap } from "../latentmap.js";
+import { encode, decode, drawCat, hasModel, renderTraining, loadShowcase, getShowcaseCat, randn } from "../models.js";
+import { catPicker } from "../ui.js";
+import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
 
-const BETAS = [
-  { beta: "0", key: "vae_2d_b0", pull: -0.85 },
-  { beta: "0.1", key: "vae_2d_b0.1", pull: -0.45 },
-  { beta: "1", key: "vae_2d_b1", pull: 0.05 },
-  { beta: "4", key: "vae_2d_b4", pull: 0.6 },
-];
+const MODEL = "vae_2d_b1";
+const KEEP = 6;
+const ZOOM_SIGMAS = 12;
 
-let map, tug;
+let map, inCanvas, outCanvas, row, params;
+let cloud = null;     // { mu: [x, y], sigma: [sx, sy] }
+let samples = [];     // recent z, newest last
 
 export async function init(section) {
-  const body = section.querySelector(".s13-body");
-  const data = await loadJSON("data/latent_maps.json").catch(() => null);
-  const missing = BETAS.find((b) => !data?.maps?.[b.key]);
-  if (missing) return renderTraining(body, missing.key);
+  const body = section.querySelector(".s11-body");
+  if (!(await hasModel(MODEL))) return renderTraining(body, MODEL);
+  inCanvas = section.querySelector(".s11-input");
+  outCanvas = section.querySelector(".s11-out");
+  row = section.querySelector(".s11-row");
+  params = section.querySelector(".s11-params");
 
-  // One fixed view for all four, fitted to the widest (beta = 0), so the packing is visible.
-  map = latentMap(section.querySelector(".s13-map"), {
-    points: data.maps[BETAS[0].key],
-    colours: data.colours,
-    extent: 1.15,
-    dot: 2.6,
-    label: "Latent maps of four VAEs, from beta 0 to beta 4",
+  map = await loadLatentMap(section.querySelector(".s11-map"), MODEL, {
+    view: VAE_VIEW,
+    label: "The VAE's latent map with the picked cat's cloud",
   });
-  map.overlay = drawPrior;
-  tug = section.querySelector(".tug");
+  map.overlay = drawCloud;
 
-  slider(section.querySelector(".s13-slider"), {
-    label: "KL weight β",
-    min: 0,
-    max: BETAS.length - 1,
-    step: 1,
-    value: 0,
-    format: (i) => `β = ${BETAS[i].beta}`,
-    ticks: BETAS.map((b) => b.beta),
-    onInput: (i) => {
-      map.setPoints(data.maps[BETAS[i].key]);
-      tug.style.setProperty("--pull", BETAS[i].pull);
-    },
-  });
-  tug.style.setProperty("--pull", BETAS[0].pull);
+  await loadShowcase();
+  await catPicker(section.querySelector(".s11-picker"), { onPick: pickCat });
+  section.querySelector("[data-sample]").addEventListener("click", sampleAgain);
+  await pickCat(0);
+}
+
+async function pickCat(i) {
+  const image = getShowcaseCat(i);
+  drawCat(inCanvas, image);
+  const { mu, logvar } = await encode(MODEL, [image]);
+  cloud = {
+    mu: [mu.data[0], mu.data[1]],
+    sigma: [Math.exp(0.5 * logvar.data[0]), Math.exp(0.5 * logvar.data[1])],
+  };
+  params.textContent = `μ = (${cloud.mu.map((v) => v.toFixed(2)).join(", ")})   σ = (${cloud.sigma.map((v) => v.toFixed(2)).join(", ")})`;
+  samples = [];
+  row.replaceChildren();
+  // Show where the cloud sits in the whole space, then glide in close enough to see it.
+  map.stop();
+  map.view = { ...map.home };
+  map.draw();
+  const half = Math.max(0.35, ZOOM_SIGMAS * Math.max(...cloud.sigma));
+  setTimeout(() => map.zoomTo({ cx: cloud.mu[0], cy: cloud.mu[1], half }), 350);
+  params.textContent += `   zoom ×${Math.round(map.home.half / half)}`;
+  await sampleAgain();
 }
 
 export function leave() {
-  map?.stop(); // jump to the end of any glide in progress
+  map?.stop();
 }
 
-/** N(0, 1) as dashed 1 and 2 sigma rings: where the KL term pulls every cloud. */
-function drawPrior(ctx, m) {
-  const [ox, oy] = m.toScreen([0, 0]);
-  const [r1] = m.toScreen([1, 0]);
+/** z = mu + sigma * eps, eps ~ N(0, 1): one more draw from the same cloud. */
+async function sampleAgain() {
+  if (!cloud) return;
+  const eps = randn(2);
+  const z = [cloud.mu[0] + cloud.sigma[0] * eps[0], cloud.mu[1] + cloud.sigma[1] * eps[1]];
+  samples = [...samples, z].slice(-KEEP);
+  map.draw();
+  const image = await decode(MODEL, z);
+  drawCat(outCanvas, image);
+
+  const thumb = document.createElement("canvas");
+  thumb.className = "cat-canvas small";
+  thumb.setAttribute("role", "listitem");
+  thumb.setAttribute("aria-label", "A sample");
+  drawCat(thumb, image);
+  row.append(thumb);
+  while (row.children.length > KEEP) row.firstElementChild.remove();
+}
+
+/** Map overlay: a glowing 2-sigma and 1-sigma ellipse at mu, and the recent samples as dots. */
+function drawCloud(ctx, m) {
+  if (!cloud) return;
+  const [cx, cy] = m.toScreen(cloud.mu);
+  const [ex] = m.toScreen([cloud.mu[0] + cloud.sigma[0], cloud.mu[1]]);
+  const [, ey] = m.toScreen([cloud.mu[0], cloud.mu[1] + cloud.sigma[1]]);
+  const rx = Math.max(4, Math.abs(ex - cx));
+  const ry = Math.max(4, Math.abs(cy - ey));
   ctx.save();
-  ctx.setLineDash([6, 6]);
-  ctx.strokeStyle = "rgba(196, 98, 45, 0.9)";
-  ctx.lineWidth = 2;
-  for (const k of [1, 2]) {
+  for (const [k, alpha] of [[2, 0.22], [1, 0.4]]) {
     ctx.beginPath();
-    ctx.arc(ox, oy, (r1 - ox) * k, 0, Math.PI * 2);
+    ctx.ellipse(cx, cy, rx * k, ry * k, 0, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(196, 98, 45, ${alpha})`;
+    ctx.shadowBlur = 0;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(36, 23, 15, 0.85)";
     ctx.stroke();
   }
-  ctx.setLineDash([]);
-  ctx.fillStyle = "#24170f";
-  ctx.font = "600 14px 'JetBrains Mono', monospace";
-  ctx.fillText("N(0, 1)", ox + (r1 - ox) * 2 + 6, oy - 6);
+  ctx.shadowBlur = 0;
+  samples.forEach((z, i) => {
+    const [x, y] = m.toScreen(z);
+    ctx.beginPath();
+    ctx.arc(x, y, i === samples.length - 1 ? 6 : 4, 0, Math.PI * 2);
+    ctx.fillStyle = i === samples.length - 1 ? "#c4622d" : "rgba(36, 23, 15, 0.55)";
+    ctx.fill();
+  });
   ctx.restore();
 }

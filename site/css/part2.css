@@ -93,47 +93,31 @@ figure > figcaption {
   position: relative;
 }
 
-/* The network drawn as a funnel: its middle narrows with the slider (--open from 0 to 1). */
+/* A tapered hourglass. The neck width is drawn in JS from the bottleneck slider. */
 .bn-diagram {
-  --open: 0.06;
-  display: flex;
-  align-items: center;
   width: 280px;
-  height: 220px;
+  height: 200px;
+  flex-shrink: 0;
 }
-.bn-enc,
-.bn-dec {
-  flex: 1;
+.bn-glass {
+  display: block;
+  width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, var(--bg)), var(--accent));
-  transition: clip-path var(--t-med) var(--ease);
+  overflow: visible;
 }
-.bn-enc {
-  clip-path: polygon(0 0, 100% calc(50% - var(--open) * 50%), 100% calc(50% + var(--open) * 50%), 0 100%);
+.bn-enc-shape,
+.bn-dec-shape {
+  stroke: var(--line);
+  stroke-width: 4;
+  stroke-linejoin: round;
 }
-.bn-dec {
-  background: linear-gradient(270deg, color-mix(in srgb, var(--sky) 55%, var(--bg)), var(--sky));
-  clip-path: polygon(0 calc(50% - var(--open) * 50%), 100% 0, 100% 100%, 0 calc(50% + var(--open) * 50%));
-}
-.bn-z {
-  position: relative;
-  width: 44px;
-  height: calc(var(--open) * 100%);
-  min-height: 6px;
-  margin: 0 4px;
-  border-radius: 4px;
-  background: var(--lilac);
-  box-shadow: 3px 3px 0 var(--line);
-  transition: height var(--t-med) var(--ease);
-}
-.bn-z span {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: var(--fs-small);
+.bn-enc-shape { fill: var(--accent); }
+.bn-dec-shape { fill: var(--sky); }
+.bn-z-label {
+  fill: var(--line);
+  font-family: var(--font-mono);
+  font-size: 22px;
   font-weight: 700;
-  color: var(--lilac);
 }
 
 .bn-copier {
@@ -284,8 +268,58 @@ figure > figcaption {
 /* ================================================================ s08 uses + anomaly detector */
 
 .s08-body {
+  flex-direction: column;
   align-items: stretch;
-  gap: calc(var(--gap) * 1.2);
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 0;
+}
+.use-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 0;
+}
+.use-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.use-panel .cat-canvas { --cat-size: min(180px, 28vh); }
+.uc-mid { width: min(360px, 100%); display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.uc-ratio { font-family: var(--font-mono); font-weight: 700; font-size: var(--fs-h3); text-align: center; }
+.uf-map { --map-size: min(260px, 34vh); }
+.uf-neighbours { display: flex; gap: 8px; }
+.use-caption { margin: 0; max-width: 78ch; text-align: center; color: var(--text-soft); font-size: var(--fs-small); }
+.kind-lead { margin: 0; max-width: 70ch; color: var(--text); }
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: min(980px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.history li {
+  display: grid;
+  grid-template-columns: 9ch 1fr;
+  gap: 14px;
+  align-items: baseline;
+  padding: 12px 16px;
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
+}
+.hy {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+  color: var(--accent);
 }
 .uses {
   flex: 0 0 300px;
@@ -643,7 +677,10 @@ figure > figcaption {
   .recon-col .cat-canvas.small {
     --cat-size: 76px;
   }
+  .uc-picker .image-picker,
+  .ud-picker .image-picker,
+  .uf-picker .image-picker,
   .anomaly-picker .image-picker {
-    --picker-cols: 6 !important;
+    --picker-cols: 4 !important;
   }
 }

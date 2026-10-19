@@ -1,85 +1,85 @@
-// Reconstruction loss: input, ae_64's output and the squared error of every pixel.
-// MSE and BCE computed live. The only "label" is the input itself.
+// The bottleneck: squeeze the cat through k numbers and rebuild it (ae_2, ae_16, ae_64, ae_256, live).
+// The last stop removes the bottleneck: a perfect copy, and Photocopier Cat is back.
 
-import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat, toTensor } from "../models.js";
-import { catPicker, tabs, readout } from "../ui.js";
-import { drawErrorHeatmap, heatLegend } from "../viz.js";
+import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat } from "../models.js";
+import { catPicker, slider } from "../ui.js";
 
-const EPS = 1e-6;
+const INPUT = 12288;
+const STOPS = [
+  { k: 2, open: 0.06 },
+  { k: 16, open: 0.16 },
+  { k: 64, open: 0.3 },
+  { k: 256, open: 0.5 },
+  { k: null, open: 1 }, // no bottleneck
+];
+const fmt = (n) => n.toLocaleString("en-US");
 
-let canvases, outSlot, formulas, counter, readouts, lossTabs;
+let inCanvas, outCanvas, outSlot, diagram, kEl, ratioEl, copier, picker, stop;
 let cat = 0;
 let request = 0;
 
 export async function init(section) {
-  canvases = section.querySelectorAll(".loss-row canvas");
-  outSlot = section.querySelector(".loss-out");
-  formulas = [...section.querySelectorAll(".formula")];
-  counter = section.querySelector(".labels-count");
-  heatLegend(section.querySelector(".legend"));
-
-  const box = section.querySelector(".loss-readouts");
-  readouts = {
-    mse: readout(box, { label: "MSE (mean)", format: (v) => v.toFixed(4) }),
-    sum: readout(box, { label: "MSE (summed)", format: (v) => v.toFixed(1) }),
-    bce: readout(box, { label: "BCE (mean)", format: (v) => v.toFixed(4) }),
-  };
-  readouts.mse.el.dataset.loss = readouts.sum.el.dataset.loss = "mse";
-  readouts.bce.el.dataset.loss = "bce";
-
-  lossTabs = tabs(section.querySelector(".loss-tabs"), {
-    tabs: [
-      { id: "mse", label: "MSE" },
-      { id: "bce", label: "BCE" },
-    ],
-    onChange: showSelected,
-  });
+  [inCanvas, outCanvas] = section.querySelectorAll(".bn-img canvas");
+  outSlot = section.querySelector(".bn-out");
+  diagram = section.querySelector(".bn-diagram");
+  kEl = section.querySelector(".bn-k");
+  ratioEl = section.querySelector(".bn-ratio");
+  copier = section.querySelector(".bn-copier");
 
   await loadShowcase();
-  await catPicker(section.querySelector(".s06-picker"), {
+  stop = slider(section.querySelector(".bn-slider"), {
+    label: "bottleneck size",
+    min: 0,
+    max: STOPS.length - 1,
+    step: 1,
+    value: 0,
+    format: (i) => (STOPS[i].k ? `${STOPS[i].k} numbers` : "no bottleneck"),
+    ticks: ["2", "16", "64", "256", "none"],
+    onInput: update,
+  });
+  picker = await catPicker(section.querySelector(".bn-picker"), {
     onPick: (i) => {
       cat = i;
       update();
     },
   });
-  showSelected();
   await update();
 }
 
-function showSelected() {
-  const loss = lossTabs.value;
-  for (const r of Object.values(readouts)) r.el.classList.toggle("dim", r.el.dataset.loss !== loss);
-  for (const f of formulas) f.classList.toggle("is-active", f.dataset.loss === loss);
+/** Smooth hourglass: full height at the ends, a neck whose opening follows the slider. */
+function drawGlass(diagram, open) {
+  const mid = 110;
+  const neck = 12 + open * 86;
+  const top = mid - neck;
+  const bot = mid + neck;
+  diagram.querySelector(".bn-enc-shape").setAttribute(
+    "d",
+    `M 14 14 C 78 14 100 ${top} 128 ${top} L 128 ${bot} C 100 ${bot} 78 206 14 206 Z`,
+  );
+  diagram.querySelector(".bn-dec-shape").setAttribute(
+    "d",
+    `M 286 14 C 222 14 200 ${top} 172 ${top} L 172 ${bot} C 200 ${bot} 222 206 286 206 Z`,
+  );
 }
 
 async function update() {
+  const { k, open } = STOPS[stop.value];
   const image = getShowcaseCat(cat);
-  const mine = ++request;
-  const [input, output, heat] = canvases;
-  drawCat(input, image);
+  const mine = ++request; // the slider can move faster than the model: only the latest result is drawn
 
-  // Same counter, every time: nobody had to label this cat.
-  counter.classList.remove("pulse");
-  void counter.offsetWidth;
-  counter.classList.add("pulse");
+  drawCat(inCanvas, image);
+  drawGlass(diagram, open);
+  kEl.textContent = fmt(k ?? INPUT);
+  ratioEl.textContent = k ? `${fmt(INPUT / k)}× smaller` : "no compression: 1×";
+  copier.hidden = k !== null;
 
+  if (k === null) {
+    // Nothing to squeeze through: the network can just copy.
+    await inSlot(outSlot, async () => drawCat(outCanvas, image));
+    return;
+  }
   await inSlot(outSlot, async () => {
-    const out = await reconstruct("ae_64", [image]);
-    if (mine !== request) return;
-    drawCat(output, out);
-    drawErrorHeatmap(heat, image, out);
-
-    const x = toTensor(image).data;
-    const y = out.data;
-    let sq = 0;
-    let bce = 0;
-    for (let i = 0; i < x.length; i++) {
-      const p = Math.min(1 - EPS, Math.max(EPS, y[i]));
-      sq += (y[i] - x[i]) ** 2;
-      bce -= x[i] * Math.log(p) + (1 - x[i]) * Math.log(1 - p);
-    }
-    readouts.mse.set(sq / x.length);
-    readouts.sum.set(sq);
-    readouts.bce.set(bce / x.length);
+    const out = await reconstruct(`ae_${k}`, [image]);
+    if (mine === request) drawCat(outCanvas, out);
   });
 }

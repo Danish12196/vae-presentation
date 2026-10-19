@@ -498,6 +498,33 @@
   }
 }
 
+/* Zoomed laptops: the side picker plus the probability bars no longer fit in one row. */
+@media (max-width: 1150px) and (max-height: 720px) {
+  .s02-picker .image-picker {
+    --picker-cols: 2 !important;
+  }
+  .s02-picker .cat-pick canvas {
+    width: 40px;
+    height: 40px;
+  }
+  .flow {
+    gap: 8px;
+  }
+  .flow-image .cat-canvas {
+    --cat-size: 140px;
+  }
+  .flow-box {
+    width: 88px;
+    height: 88px;
+  }
+  .flow-box .box-gen {
+    font-size: 40px;
+  }
+  .flow-out {
+    width: 200px;
+  }
+}
+
 /* ================================================================ phones (portrait) */
 
 @media (max-width: 760px) {

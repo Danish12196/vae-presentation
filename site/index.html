@@ -103,7 +103,6 @@
         </header>
         <div class="slide-body net-body">
           <div class="net-controls">
-            <button type="button" class="btn primary" data-next>next layer</button>
             <div class="net-switch"></div>
           </div>
           <div class="net-stage"></div>
@@ -131,15 +130,31 @@
       <section class="slide" id="s06" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>Where autoencoders come from</h2>
+        </header>
+        <div class="slide-body">
+          <ol class="history">
+            <li><span class="hy">1986</span><span><strong>Rumelhart, Hinton &amp; Williams.</strong> The commonly cited origin: train a network to rebuild its input, so a hidden layer has to learn a code. (The backpropagation paper, and the PDP chapter the same year.)</span></li>
+            <li><span class="hy">2006</span><span><strong>Hinton &amp; Salakhutdinov,</strong> Science. Deep autoencoders that compress images, after a long quiet period.</span></li>
+            <li><span class="hy">2008</span><span><strong>Vincent, Larochelle, Bengio &amp; Manzagol.</strong> Denoising autoencoders: corrupt the input, still ask for the clean original.</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="slide" id="s07" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
           <h2>The bottleneck</h2>
         </header>
         <div class="slide-body s05-body">
           <div class="bn-row">
             <figure class="bn-img"><canvas class="cat-canvas" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
             <div class="bn-diagram" aria-hidden="true">
-              <div class="bn-enc"></div>
-              <div class="bn-z"><span class="mono">z</span></div>
-              <div class="bn-dec"></div>
+              <svg class="bn-glass" viewBox="0 0 300 220">
+                <path class="bn-enc-shape" />
+                <path class="bn-dec-shape" />
+                <text class="bn-z-label" x="150" y="108" text-anchor="middle" dominant-baseline="middle">z</text>
+              </svg>
             </div>
             <figure class="bn-img bn-out">
               <canvas class="cat-canvas" width="64" height="64" aria-label="Reconstruction"></canvas>
@@ -158,7 +173,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s07" data-accent="sunflower">
+      <section class="slide" id="s08" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>Reconstruction loss</h2>
@@ -183,12 +198,12 @@
           </div>
         </div>
         <div class="formula-bar" aria-label="Loss formulas">
-          <p class="formula is-active" data-loss="mse">MSE = <sup>1</sup>&frasl;<sub>n</sub> Σ<sub>i</sub> (x̂<sub>i</sub> − x<sub>i</sub>)²</p>
-          <p class="formula" data-loss="bce">BCE = −<sup>1</sup>&frasl;<sub>n</sub> Σ<sub>i</sub> [ x<sub>i</sub> log x̂<sub>i</sub> + (1 − x<sub>i</sub>) log(1 − x̂<sub>i</sub>) ]</p>
+          <p class="formula is-active" data-loss="mse"><button type="button" class="sym">MSE<span class="tip">Mean squared error: the average of the squared mistakes.</span></button> = <sup>1</sup>&frasl;<sub><button type="button" class="sym">n<span class="tip">How many numbers we average. Here, every pixel of the cat.</span></button></sub> <button type="button" class="sym">Σ<span class="tip">Add them up.</span></button><sub><button type="button" class="sym">i<span class="tip">One pixel at a time.</span></button></sub> (<button type="button" class="sym">x̂<span class="tip">The rebuilt pixel, “x-hat”.</span></button><sub>i</sub> − <button type="button" class="sym">x<span class="tip">The original pixel.</span></button><sub>i</sub>)²</p>
+          <p class="formula" data-loss="bce"><button type="button" class="sym">BCE<span class="tip">Binary cross-entropy. It treats each pixel as a probability between 0 and 1.</span></button> = −<sup>1</sup>&frasl;<sub><button type="button" class="sym">n<span class="tip">How many numbers we average. Here, every pixel of the cat.</span></button></sub> <button type="button" class="sym">Σ<span class="tip">Add them up.</span></button><sub><button type="button" class="sym">i<span class="tip">One pixel at a time.</span></button></sub> [ <button type="button" class="sym">x<span class="tip">The original pixel, as a probability.</span></button><sub>i</sub> <button type="button" class="sym">log<span class="tip">How surprised the model is. A confident wrong pixel costs a lot.</span></button> <button type="button" class="sym">x̂<span class="tip">The rebuilt pixel.</span></button><sub>i</sub> + (1 − x<sub>i</sub>) log(1 − x̂<sub>i</sub>) ]</p>
         </div>
       </section>
 
-      <section class="slide" id="s08" data-accent="sunflower">
+      <section class="slide" id="s09" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>PCA vs autoencoder</h2>
@@ -204,27 +219,49 @@
         </div>
       </section>
 
-      <section class="slide" id="s09" data-accent="sunflower">
+      <section class="slide" id="s10" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>What autoencoders are good for</h2>
         </header>
         <div class="slide-body s08-body">
-          <div class="uses">
-            <article class="card use">
-              <div class="use-vis use-compress" aria-hidden="true"><span class="sq big mono">12,288</span><span class="arrow">→</span><span class="sq small mono">64</span></div>
-              <h3>Compression</h3>
-            </article>
-            <article class="card use">
-              <div class="use-vis use-denoise"><canvas width="64" height="64" aria-label="Noisy cat"></canvas><span class="arrow" aria-hidden="true">→</span><canvas width="64" height="64" aria-label="Clean cat"></canvas></div>
-              <h3>Denoising</h3>
-            </article>
-            <article class="card use">
-              <div class="use-vis use-features" aria-hidden="true"><span class="box">encoder</span><span class="arrow">→</span><span class="z mono">z</span><span class="arrow">→</span><span class="box other">your model</span></div>
-              <h3>Feature extraction</h3>
-            </article>
+          <div class="s08-tabs"></div>
+          <div class="use-panel" data-tab="compress">
+            <div class="use-row">
+              <figure><canvas class="cat-canvas uc-in" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
+              <div class="uc-mid">
+                <p class="uc-ratio">12,288 → 64</p>
+                <div class="uc-slider"></div>
+              </div>
+              <figure><canvas class="cat-canvas uc-out" width="64" height="64" aria-label="Reconstructed cat"></canvas><figcaption>rebuilt</figcaption></figure>
+            </div>
+            <div class="uc-picker"></div>
+            <p class="use-caption">Live ae_2, ae_16, ae_64 and ae_256. A smaller code is more compression, and a blurrier cat.</p>
           </div>
-          <article class="card anomaly">
+          <div class="use-panel" data-tab="denoise" hidden>
+            <div class="ud-slider"></div>
+            <div class="use-row">
+              <figure><canvas class="cat-canvas ud-noisy" width="64" height="64" aria-label="Noisy input"></canvas><figcaption>noisy input</figcaption></figure>
+              <figure><canvas class="cat-canvas ud-clean" width="64" height="64" aria-label="Denoised cat"></canvas><figcaption>dae_128</figcaption></figure>
+            </div>
+            <div class="ud-picker"></div>
+            <p class="use-caption">Noise is added here. dae_128 was trained to rebuild the clean cat.</p>
+          </div>
+          <div class="use-panel" data-tab="features" hidden>
+            <div class="use-row">
+              <figure><canvas class="cat-canvas uf-in" width="64" height="64" aria-label="Input cat"></canvas><figcaption class="mono uf-z">this cat</figcaption></figure>
+              <div class="uf-map map-host"></div>
+              <div class="uf-neighbours" aria-label="Decoded neighbours">
+                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="Neighbour 1"></canvas></figure>
+                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="Neighbour 2"></canvas></figure>
+                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="Neighbour 3"></canvas></figure>
+                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="Neighbour 4"></canvas></figure>
+              </div>
+            </div>
+            <div class="uf-picker"></div>
+            <p class="use-caption">ae_2's code is a feature. These are the four nearest training codes, decoded. Hand z to another model and you can throw the decoder away.</p>
+          </div>
+          <article class="card anomaly use-panel" data-tab="anomaly" hidden>
             <h3>Anomaly detection <span class="live-pill">live</span></h3>
             <div class="anomaly-main">
               <div class="draw-col">
@@ -246,10 +283,11 @@
         </div>
       </section>
 
-      <section class="slide" id="s10" data-accent="mint">
+      <section class="slide" id="s11" data-accent="mint">
         <header class="slide-head">
           <p class="part-label">Part 3 · Other types of autoencoders</p>
           <h2>Other kinds of autoencoders</h2>
+          <p class="kind-lead">Same job as the last slides: rebuild the cat. Each tab adds one extra rule about the code.</p>
         </header>
         <div class="slide-body s09-body">
           <div class="s09-top">
@@ -273,7 +311,7 @@
                 </div>
               </div>
             </div>
-            <p class="s09-caption">L1 penalty → most neurons stay off</p>
+            <p class="s09-caption">A big code is allowed, but a penalty keeps most neurons off. Each one that fires has to earn its place.</p>
           </div>
 
           <div class="s09-panel" data-tab="denoise" hidden>
@@ -283,7 +321,7 @@
               <figure class="dn-dae"><canvas class="cat-canvas" width="64" height="64" aria-label="Denoising autoencoder output"></canvas><figcaption>denoising AE</figcaption></figure>
               <figure class="dn-ae"><canvas class="cat-canvas" width="64" height="64" aria-label="Plain autoencoder output"></canvas><figcaption>plain AE</figcaption></figure>
             </div>
-            <p class="s09-caption">noisy in, clean out</p>
+            <p class="s09-caption">Same noisy cat, two models. The denoising AE was trained to predict the clean original. The plain AE was not.</p>
           </div>
 
           <div class="s09-panel" data-tab="contract" hidden>
@@ -296,20 +334,20 @@
                 <figure class="ct-cae"><canvas class="cat-canvas small" width="64" height="64" aria-label="Contractive autoencoder output"></canvas><figcaption>contractive AE</figcaption></figure>
               </div>
             </div>
-            <p class="s09-caption">small change in, small change in z</p>
+            <p class="s09-caption">Jiggle the pixels. The bars show how far z moves. The contractive model is punished if a small jiggle moves the code a lot.</p>
           </div>
 
           <div class="s09-panel" data-tab="conv" hidden>
             <div class="net-stage cv-stage"></div>
             <div class="cv-notes">
               <span class="sticker">plot twist: you've been watching one all along</span>
-              <p class="cv-note">dae_128 is a convolutional denoising autoencoder</p>
+              <p class="cv-note">Every model in this deck is already convolutional. dae_128 is a convolutional denoising autoencoder.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="slide" id="s11" data-accent="sky">
+      <section class="slide" id="s12" data-accent="sky">
         <header class="slide-head">
           <p class="part-label">Part 4 · Why autoencoders can't generate</p>
           <h2>Holes in the latent space</h2>
@@ -331,7 +369,21 @@
         <p class="s10-caption">the decoder never saw anything from the gaps</p>
       </section>
 
-      <section class="slide" id="s12" data-accent="lilac">
+      <section class="slide" id="s13" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Where VAEs come from</h2>
+        </header>
+        <div class="slide-body">
+          <ol class="history">
+            <li><span class="hy">2013</span><span><strong>Kingma &amp; Welling,</strong> “Auto-Encoding Variational Bayes”. Posted in December 2013, then at ICLR 2014. Encoder outputs a distribution, and the reparameterization trick lets you train it.</span></li>
+            <li><span class="hy">2014</span><span><strong>Rezende, Mohamed &amp; Wierstra,</strong> “Stochastic Backpropagation and Approximate Inference in Deep Generative Models”, ICML 2014. Independent, and almost the same idea, at the same time.</span></li>
+          </ol>
+        </div>
+        <p class="slide-caption">two papers, one trick: keep the randomness where a gradient can get past it</p>
+      </section>
+
+      <section class="slide" id="s14" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Encode a cloud, not a point</h2>
@@ -352,7 +404,7 @@
         <p class="slide-caption">one image → a small cloud, not a point</p>
       </section>
 
-      <section class="slide" id="s13" data-accent="lilac">
+      <section class="slide" id="s15" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Loss = reconstruction + KL</h2>
@@ -379,7 +431,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s14" data-accent="lilac">
+      <section class="slide" id="s16" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Turning the KL dial</h2>
@@ -398,7 +450,47 @@
         </div>
       </section>
 
-      <section class="slide" id="s15" data-accent="lilac">
+      <section class="slide" id="s17" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Backpropagation, briefly</h2>
+        </header>
+        <div class="slide-body bp-body">
+          <ol class="bp-steps">
+            <li><strong>Forward.</strong> A conv layer mixes each pixel with its neighbours. Stack them and the image becomes a code, then an output.</li>
+            <li><strong>Loss.</strong> Compare that output with the target. One number: how wrong it was.</li>
+            <li><strong>Backward.</strong> The chain rule hands each layer only the gradient from the layer above it. That layer updates its own weights. A plain autoencoder is a smooth function the whole way, so this works.</li>
+          </ol>
+          <div class="bp-chain" aria-hidden="true">
+            <span>image</span><span>→ conv</span><span>→ conv</span><span>→ output</span>
+            <span class="bp-back">then ∂loss walks back, one layer at a time</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" id="s18" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>A dice roll has no gradient</h2>
+        </header>
+        <div class="slide-body sample-body">
+          <div class="sample-pair">
+            <article>
+              <h3>Plain autoencoder</h3>
+              <p class="mono">z = encoder(x)</p>
+              <p>z is a plain function of the weights. The chain rule goes straight through it. Backprop is fine.</p>
+            </article>
+            <article>
+              <h3>VAE, if you sample directly</h3>
+              <p class="mono">z ~ N(μ, σ)</p>
+              <p>μ and σ themselves are fine to differentiate. The random draw is not a smooth function of them, so the gradient stops at the dice. That is the only break.</p>
+            </article>
+          </div>
+        </div>
+        <p class="slide-caption">next: move the dice outside the graph. That is the reparameterization trick.</p>
+      </section>
+
+      <section class="slide" id="s19" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>The reparameterization trick</h2>
@@ -415,7 +507,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s16" data-accent="lilac">
+      <section class="slide" id="s20" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Generating cats</h2>
@@ -439,7 +531,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s17" data-accent="lilac">
+      <section class="slide" id="s21" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Interpolation</h2>
@@ -462,7 +554,7 @@
         <p class="slide-caption">a straight walk between two real codes stays near the data for both. The plain AE fails on random samples, not here.</p>
       </section>
 
-      <section class="slide" id="s18" data-accent="coral">
+      <section class="slide" id="s22" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Why VAE cats are blurry</h2>
@@ -487,7 +579,7 @@
         <p class="slide-caption">MSE's best guess is the average of the sharp cats that fit, and the KL term also caps how much detail the code can hold</p>
       </section>
 
-      <section class="slide" id="s19" data-accent="coral">
+      <section class="slide" id="s23" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Extensions</h2>
@@ -497,7 +589,7 @@
             <article class="card ext beta">
               <h3>β-VAE</h3>
               <p>a bigger KL weight: a tidier, more disentangled latent space, and blurrier cats</p>
-              <button type="button" class="btn" data-goto="s14">remember this?</button>
+              <button type="button" class="btn" data-remember>remember this?</button>
             </article>
             <article class="card ext vq">
               <h3>VQ-VAE <span class="tag">illustration</span></h3>
@@ -533,7 +625,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s20" data-accent="coral">
+      <section class="slide" id="s24" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>VAE vs GAN vs diffusion</h2>
@@ -550,32 +642,33 @@
             </div>
           </div>
           <div class="gary">
-            <div class="gary-mascot"><div data-mascot="happy"></div><span class="sticker">Gary (a GAN)</span></div>
+            <div class="gary-mascot"><div data-mascot="happy"></div><span class="sticker">Gary · illustration</span></div>
             <button type="button" class="btn primary" data-gary>generate 9 cats</button>
-            <figure class="gary-grid-fig"><canvas class="gary-grid" width="204" height="204" aria-label="Gary's nine cats"></canvas><figcaption>Gary (illustration)</figcaption></figure>
-            <figure class="gary-grid-fig vae"><canvas class="gary-grid" width="204" height="204" aria-label="Nine VAE cats"></canvas><figcaption>VAE</figcaption></figure>
-            <p class="gary-caption">mode collapse: one cat that fools the critic, again and again</p>
+            <figure class="gary-grid-fig"><canvas class="gary-grid" width="204" height="204" aria-label="Nine decodes of one code"></canvas><figcaption>one code, nine times</figcaption></figure>
+            <figure class="gary-grid-fig vae"><canvas class="gary-grid" width="204" height="204" aria-label="Nine VAE cats"></canvas><figcaption>nine different codes</figcaption></figure>
+            <p class="gary-caption">Not a GAN photograph. This repo has no GAN checkpoint, so Gary is our VAE decoding one code nine times with a little jitter. A real GAN sample would be sharper. This only shows mode collapse: one picture, over and over.</p>
           </div>
         </div>
       </section>
 
-      <section class="slide" id="s21" data-accent="coral">
+      <section class="slide" id="s25" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Wrap-up</h2>
         </header>
         <div class="slide-body s20-body">
           <ol class="wrap-rows">
-            <li class="wrap-row" data-step="1"><span class="wrap-model">Plain encoder-decoder</span><span class="wrap-arrow">→</span><span class="wrap-result">copies the input</span><span class="wrap-mascot" data-mascot="photocopier"></span></li>
-            <li class="wrap-row" data-step="2"><span class="wrap-model">Autoencoder</span><span class="wrap-arrow">→</span><span class="wrap-result">learns features, but its space has gaps</span><span class="wrap-mascot" data-mascot="monster"></span></li>
-            <li class="wrap-row" data-step="3"><span class="wrap-model">VAE</span><span class="wrap-arrow">→</span><span class="wrap-result">smooth latent space: generates cats</span><span class="wrap-mascot" data-mascot="happy"></span></li>
+            <li class="wrap-row" data-step="1"><span class="wrap-year mono">1989</span><span class="wrap-model">CNN</span><span class="wrap-result">LeCun et al. 1989 and 1998, then AlexNet in 2012. Tells images apart. Does not draw them.</span></li>
+            <li class="wrap-row" data-step="2"><span class="wrap-year mono">1986</span><span class="wrap-model">Autoencoder</span><span class="wrap-result">Rumelhart, Hinton &amp; Williams. A bottleneck code. Deep ones in 2006. Denoising in 2008.</span></li>
+            <li class="wrap-row" data-step="3"><span class="wrap-year mono">2013</span><span class="wrap-model">VAE</span><span class="wrap-result">Kingma &amp; Welling, and Rezende, Mohamed &amp; Wierstra. A cloud you can sample.</span></li>
+            <li class="wrap-row" data-step="4"><span class="wrap-year mono">2014</span><span class="wrap-model">GAN</span><span class="wrap-result">Goodfellow et al. Sharp, and it can collapse to one picture.</span></li>
+            <li class="wrap-row" data-step="5"><span class="wrap-year mono">2015</span><span class="wrap-model">Diffusion</span><span class="wrap-result">Sohl-Dickstein et al. 2015, then Ho, Jain &amp; Abbeel’s DDPM in 2020. Many steps, high quality.</span></li>
           </ol>
-          <p class="wrap-cnn" data-step="4">and the CNN classifier? It recognises cats, but can't make them.</p>
           <div class="wrap-dots" aria-hidden="true"></div>
         </div>
       </section>
 
-      <section class="slide" id="s22" data-accent="coral">
+      <section class="slide" id="s26" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Questions?</h2>
@@ -597,6 +690,15 @@
     </main>
 
     <!-- Keyboard help, toggled with ? -->
+    <div class="overlay" id="remember" hidden role="dialog" aria-modal="true" aria-labelledby="remember-title">
+      <div class="help-card">
+        <h2 id="remember-title">β-VAE, the KL dial</h2>
+        <p>β is the weight on the KL term. β = 0 is a plain autoencoder: the codes scatter. β = 1 is an ordinary VAE. β = 4 packs every code toward zero, and the cats get blurrier.</p>
+        <p>That is the slider on “Turning the KL dial”: beta 0, 0.1, 1 and 4, on the same cats.</p>
+        <button type="button" class="btn primary" data-close>close</button>
+      </div>
+    </div>
+
     <div class="overlay" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
       <div class="help-card">
         <h2 id="help-title">Keyboard</h2>

@@ -1,4 +1,38 @@
-/* Part 5: s11 core idea, s12 loss, s13 KL dial, s14 reparameterization, s15 generating, s16 interpolation. */
+/* Part 5, plus the two slides that set up the reparameterization trick. */
+
+.bp-body, .sample-body { flex-direction: column; align-items: stretch; }
+.bp-steps, .sample-pair {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+}
+.bp-steps { display: flex; flex-direction: column; gap: 12px; padding: 0; list-style: none; }
+.bp-steps li, .sample-pair article {
+  padding: 14px 18px;
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
+}
+.bp-chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.bp-chain span:not(.bp-back) {
+  padding: 8px 12px;
+  border: 3px solid var(--line);
+  background: var(--bg-raised);
+}
+.bp-back { flex-basis: 100%; text-align: center; color: var(--coral); }
+.sample-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.sample-pair h3 { color: var(--accent); }
+@media (max-width: 760px) {
+  .sample-pair { grid-template-columns: 1fr; }
+  .history li { grid-template-columns: 1fr; }
+}
 
 .map-host {
   position: relative;
@@ -77,12 +111,18 @@
   color: var(--sky);
 }
 .gauss-wrap {
-  width: min(980px, 100%);
+  width: min(860px, 100%);
+  max-height: min(280px, 36vh);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
 }
 svg.gauss {
   display: block;
-  width: 100%;
-  height: auto;
+  width: auto;
+  height: min(280px, 36vh);
+  max-width: 100%;
   overflow: visible;
 }
 .g-axis {
@@ -347,15 +387,17 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   gap: 8px;
 }
 .gen .flip .toggle-track {
-  width: 60px;
-  height: 34px;
+  width: 64px;
+  height: 32px;
 }
 .gen .flip .toggle-track::after {
-  width: 24px;
-  height: 24px;
+  top: 6px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
 }
 .gen .flip .toggle input:checked + .toggle-track::after {
-  transform: translateX(26px);
+  transform: translateX(32px);
 }
 .gen-canvas {
   display: block;
