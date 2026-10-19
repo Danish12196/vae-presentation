@@ -29,7 +29,7 @@ manual DNS record.
   `tools/stamp_site.py`, which sets the service worker's cache version from a hash of
   `files.json`, `manifest.json` and the other site files. It also checks the limits (every file
   under 25 MiB, at most 15,000 files) and prints the 10 largest files.
-- **`site/404.html`**: Vercel serves it for any missing URL.
+- **`site/404.html`**: Vercel serves it for any missing URL. Once the service worker is installed it does the same, online and offline, and `stamp_site.py` includes the page in the shell cache.
 - **Link previews**: `og:` and `twitter:` tags in `index.html`, image `site/img/og.jpg` (1200x630).
 
 ## Your steps

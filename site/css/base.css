@@ -130,16 +130,6 @@ input {
   align-items: center;
 }
 
-/* Placeholder until a slide module takes over. */
-.coming-soon {
-  display: flex;
-  align-items: center;
-  gap: calc(var(--gap) * 1.5);
-}
-.coming-soon .mascot {
-  width: min(32vh, 300px);
-}
-
 .title-slide .slide-body {
   flex-direction: column;
   gap: calc(var(--gap) * 1.5);
@@ -163,11 +153,6 @@ input {
     flex-direction: column;
     align-items: stretch;
   }
-  .coming-soon {
-    flex-direction: column;
-    text-align: center;
-  }
-  .coming-soon .mascot,
   .title-slide .mascot {
     width: 170px;
   }

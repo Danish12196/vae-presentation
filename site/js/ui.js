@@ -16,7 +16,7 @@ const h = (tag, attrs = {}, ...children) => {
 
 /** A grid of images to choose from: items = [{ image: ImageData, label }]. onPick(index, item). */
 export function imagePicker(el, { items, selected = 0, columns = items.length, onPick = () => {} } = {}) {
-  const grid = h("div", { class: "cat-picker image-picker", role: "group", "aria-label": "Pick an image" });
+  const grid = h("div", { class: "image-picker", role: "group", "aria-label": "Pick an image" });
   grid.style.setProperty("--picker-cols", columns);
   const buttons = items.map((item, i) => {
     const canvas = h("canvas", { width: 64, height: 64 });

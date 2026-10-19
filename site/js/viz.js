@@ -14,7 +14,7 @@ const STOPS = [
   [1, [255, 255, 255]],
 ];
 
-export function heatColour(t) {
+function heatColour(t) {
   t = Math.max(0, Math.min(1, t));
   for (let i = 1; i < STOPS.length; i++) {
     const [t1, c1] = STOPS[i];
@@ -28,7 +28,7 @@ export function heatColour(t) {
 }
 
 /** CSS gradient matching the heatmap colours, for legends. */
-export const HEAT_GRADIENT = `linear-gradient(90deg, ${STOPS.map(([t, c]) => `rgb(${c}) ${t * 100}%`).join(", ")})`;
+const HEAT_GRADIENT = `linear-gradient(90deg, ${STOPS.map(([t, c]) => `rgb(${c}) ${t * 100}%`).join(", ")})`;
 
 /**
  * Paint the squared error per pixel (averaged over R, G, B) between an image and its

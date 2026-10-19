@@ -5,11 +5,11 @@
 // No classifier scores: cnn_cls calls every decoder output "cat" (see SPEC), so the images speak.
 // Below: a small vae_2d_b1 map where any click decodes a plausible cat.
 
-import { decode, drawCat, fromTensor, inSlot, loadManifest, randn, ort } from "../models.js";
+import { decode, drawCat, drawTiles, inSlot, loadManifest, randn, ort } from "../models.js";
 import { flipSwitch } from "../ui.js";
 import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
 
-const COLS = 6, ROWS = 4, N = COLS * ROWS, LATENT = 128, TILE = 64, GAP = 4;
+const COLS = 6, ROWS = 4, N = COLS * ROWS, LATENT = 128, GAP = 4;
 
 let vaeCanvas, aeCanvas, vaeFig, aeFig, fair = false, aeStats = null, dice, pickCanvas, map;
 let request = 0;
@@ -73,7 +73,7 @@ async function rollVAE() {
   const mine = ++request;
   await inSlot(vaeFig, async () => {
     const images = await decode("vae_128", new ort.Tensor("float32", randn(N * LATENT), [N, LATENT]));
-    if (mine === request) drawGrid(vaeCanvas, images);
+    if (mine === request) drawTiles(vaeCanvas, images, { cols: COLS, gap: GAP, inset: GAP / 2 });
   });
 }
 
@@ -85,13 +85,5 @@ async function rollAE() {
       z[i] = aeStats.mean[d] + aeStats.std[d] * z[i];
     }
   }
-  await inSlot(aeFig, async () => drawGrid(aeCanvas, await decode("ae_128", new ort.Tensor("float32", z, [N, LATENT]))));
-}
-
-function drawGrid(canvas, images) {
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let i = 0; i < N; i++) {
-    ctx.putImageData(fromTensor(images, i), (i % COLS) * (TILE + GAP) + GAP / 2, Math.floor(i / COLS) * (TILE + GAP) + GAP / 2);
-  }
+  await inSlot(aeFig, async () => drawTiles(aeCanvas, await decode("ae_128", new ort.Tensor("float32", z, [N, LATENT])), { cols: COLS, gap: GAP, inset: GAP / 2 }));
 }

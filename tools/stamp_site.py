@@ -22,8 +22,9 @@ import sys
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent / "site"
-# Not precached: the worker itself, its file list, the 404 page, the link-preview image.
-SKIP_NAMES = {"sw.js", "precache.json", ".gitkeep", "404.html", "og.jpg"}
+# Not precached: the worker itself, its file list, and the link-preview image.
+# 404.html is part of the shell so a missing address can show it offline.
+SKIP_NAMES = {"sw.js", "precache.json", ".gitkeep", "og.jpg"}
 SKIP_SUFFIXES = {".map", ".txt"}
 HASHED = re.compile(r"^(models|data)/.+\.[0-9a-f]{6}\.[^./]+$")  # content hash already in the name
 

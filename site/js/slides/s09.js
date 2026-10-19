@@ -17,6 +17,13 @@ const PIXELS = 3 * SIZE * SIZE;
 const JIGGLE_EVERY = 250; // ms
 const BAR_MAX = 0.5;      // code movement / code spread that fills a bar
 
+/** base + scale * noise, each value clamped into [0, 1], as one image tensor. */
+function noisyImage(base, scale, noise) {
+  const noisy = new Float32Array(PIXELS);
+  for (let i = 0; i < PIXELS; i++) noisy[i] = Math.min(1, Math.max(0, base[i] + scale * noise[i]));
+  return new ort.Tensor("float32", noisy, [1, 3, SIZE, SIZE]);
+}
+
 let section, cat = 0, tab = "sparse", active = false;
 let manifest;
 
@@ -160,10 +167,7 @@ const denoise = {
       this.noiseCat = cat;
     }
     const x = toTensor(getShowcaseCat(cat)).data;
-    const s = this.sigma.value;
-    const noisy = new Float32Array(PIXELS);
-    for (let i = 0; i < PIXELS; i++) noisy[i] = Math.min(1, Math.max(0, x[i] + s * this.noise[i]));
-    const input = new ort.Tensor("float32", noisy, [1, 3, SIZE, SIZE]);
+    const input = noisyImage(x, this.sigma.value, this.noise);
     drawCat(this.panel.querySelector(".dn-noisy"), input);
     for (const [cls, model] of [[".dn-dae", "dae_128"], [".dn-ae", "ae_128"]]) {
       const fig = this.panel.querySelector(cls);
@@ -229,10 +233,7 @@ const contract = {
       this.baseCat = cat;
     }
     const level = this.level.value;
-    const noisy = new Float32Array(PIXELS);
-    const eps = randn(PIXELS);
-    for (let i = 0; i < PIXELS; i++) noisy[i] = Math.min(1, Math.max(0, x.data[i] + level * eps[i]));
-    const jiggled = new ort.Tensor("float32", noisy, [1, 3, SIZE, SIZE]);
+    const jiggled = noisyImage(x.data, level, randn(PIXELS));
     drawCat(this.panel.querySelector(".ct-input"), jiggled);
 
     for (const [model, cls] of [["ae_64", ".ct-ae"], ["cae_64", ".ct-cae"]]) {

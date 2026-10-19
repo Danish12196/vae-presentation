@@ -64,7 +64,7 @@ and stores the biggest models' weights in float16 until the site fits in 60 MB.
 
 | name | kind | latent | what it shows |
 | --- | --- | --- | --- |
-| `cnn_cls` | classifier | - | the encoder + label head twin; classifies cat/dog/wild and judges generated cats |
+| `cnn_cls` | classifier | - | the encoder + label head twin; classifies cat/dog/wild |
 | `ae_2`, `ae_16`, `ae_64`, `ae_256` | plain AE | 2-256 | how the bottleneck size trades compression for detail; `ae_2` draws the latent map, `ae_64` detects anomalies |
 | `ae_128` | plain AE | 128 | why an AE can't generate: random codes decode to nonsense |
 | `dae_128` | denoising AE | 128 | noisy input, clean target: it learns to remove noise |

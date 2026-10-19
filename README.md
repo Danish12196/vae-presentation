@@ -2,7 +2,7 @@
 
 An interactive, scrollable web presentation about autoencoders and variational autoencoders, made for MAAI901 Deep Learning for Visual Data. Every key idea is shown live with small models trained on 64x64 cat faces, running right in your browser.
 
-Live at **https://autoencoders.danishali.dev**
+Live at **https://autoencoders.danishali.dev** (the Vercel project is also at https://vae-presentation.vercel.app).
 
 ## Two halves
 

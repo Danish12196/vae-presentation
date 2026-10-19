@@ -7,6 +7,7 @@
 //   await decode("ae_64", z)         -> image tensor [B, 3, 64, 64]
 //   await classify(imgs)             -> [{ probs: {cat, dog, wild}, top }]
 //   drawCat(canvas, image)           -> paints a 64x64 image
+//   drawTiles(canvas, batch, opts)   -> paints a grid of those images
 //
 // Sessions are created on first use and cached. If a model hasn't been exported,
 // the helpers throw ModelMissing and the demo can call renderTraining().
@@ -235,6 +236,18 @@ export function drawCat(canvas, image, index = 0) {
   }
   const img = image instanceof ImageData ? image : fromTensor(image, index);
   canvas.getContext("2d").putImageData(img, 0, 0);
+}
+
+/**
+ * Paint a batch of images (an [N, 3, 64, 64] tensor) as a grid of native-size tiles.
+ * `gap` is the space between tiles; `inset` shifts the grid so tiles sit in the middle of their cells.
+ */
+export function drawTiles(canvas, images, { cols, gap = 0, inset = 0, tile = SIZE } = {}) {
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < images.dims[0]; i++) {
+    ctx.putImageData(fromTensor(images, i), (i % cols) * (tile + gap) + inset, Math.floor(i / cols) * (tile + gap) + inset);
+  }
 }
 
 function asImageTensor(imgs) {

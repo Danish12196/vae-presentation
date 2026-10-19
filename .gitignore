@@ -5,6 +5,7 @@ training/runs/
 
 # Python
 __pycache__/
+*.py[cod]
 .venv/
 
 # Node
@@ -12,7 +13,12 @@ node_modules/
 
 # Note: site/models and site/data are committed on purpose (exported models are deployed).
 
-# Local Cloudflare emulator state (npx wrangler pages dev)
+# OS junk and local secrets
+.DS_Store
+Thumbs.db
+.env
+
+# Not used by this project. Keeps a local Wrangler cache out of git.
 .wrangler/
 
 # Vercel CLI project link

@@ -45,7 +45,7 @@ class Run:
 
 
 RUN_LIST = [
-    Run("cnn_cls", "cls", epochs=15, purpose="cat/dog/wild classifier; judges generated cats"),
+    Run("cnn_cls", "cls", epochs=15, purpose="cat/dog/wild classifier"),
     Run("ae_2", "ae", 2, purpose="bottleneck slider; Part 4 latent map"),
     Run("ae_16", "ae", 16, purpose="bottleneck slider"),
     Run("ae_64", "ae", 64, purpose="bottleneck slider; anomaly detector; contractive baseline"),

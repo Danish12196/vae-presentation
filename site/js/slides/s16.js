@@ -2,7 +2,7 @@
 // every step, for ae_128 (z) and vae_128 (mu). Two strips of 8 frames, and a scrubber with a big
 // live frame per model at the current t.
 
-import { encode, decode, drawCat, fromTensor, inSlot, loadShowcase, getShowcaseCat, ort } from "../models.js";
+import { encode, decode, drawCat, drawTiles, inSlot, loadShowcase, getShowcaseCat, ort } from "../models.js";
 import { catPicker, slider } from "../ui.js";
 
 const MODELS = ["ae_128", "vae_128"];
@@ -55,9 +55,7 @@ async function refresh() {
       for (let f = 0; f < FRAMES; f++) batch.set(lerp(codes[model].a, codes[model].b, f / (FRAMES - 1)), f * n);
       const strip = await decode(model, new ort.Tensor("float32", batch, [FRAMES, n]));
       if (mine !== request) return;
-      const ctx = row.querySelector("canvas").getContext("2d");
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      for (let f = 0; f < FRAMES; f++) ctx.putImageData(fromTensor(strip, f), f * (TILE + GAP), 0);
+      drawTiles(row.querySelector("canvas"), strip, { cols: FRAMES, gap: GAP });
     });
   }
   if (mine === request) await showFrame();

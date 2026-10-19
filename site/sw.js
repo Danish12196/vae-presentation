@@ -4,12 +4,14 @@
 // - the big files (models, data, the ONNX runtime) are cached as the loading screen downloads
 //   them through this worker; a "status" message tops up anything still missing
 // - every request is served cache-first
+// - a navigation to / or /index.html (any query string) is the presentation, cached as "./"
+// - any other navigation that isn't a real file is 404.html with status 404, online and offline
 // - a new VERSION means a new cache; old caches are deleted on activation
 //
 // VERSION is rewritten by tools/stamp_site.py whenever any site file changes (models and data
 // have a content hash in their names, so a hash of data/files.json covers them).
 
-const VERSION = "299012653300";
+const VERSION = "4aca79b23514";
 const CACHE = `cats-${VERSION}`;
 const BIG = /^(models|data)\/|\.wasm$/;
 
@@ -63,15 +65,47 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(cacheFirst(req, url));
 });
 
+// The presentation lives at the scope root and at index.html. Slide numbers are hashes
+// (#s05), so a path like /s05 is a missing address, not a slide.
+function isAppNavigation(url) {
+  const scopePath = new URL(self.registration.scope).pathname;
+  const withSlash = scopePath.endsWith("/") ? scopePath : `${scopePath}/`;
+  const noSlash = withSlash.replace(/\/$/, "") || "/";
+  return url.pathname === withSlash || url.pathname === noSlash || url.pathname === `${withSlash}index.html`;
+}
+
+// A cached 404.html was stored as HTTP 200. Rebuild it so the address still reports 404,
+// and never store that copy under the missing URL.
+async function notFoundResponse() {
+  const cached = await (await caches.open(CACHE)).match(key("404.html"));
+  if (!cached) {
+    return new Response("Not found", {
+      status: 404,
+      statusText: "Not Found",
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+  }
+  const headers = new Headers(cached.headers);
+  headers.delete("Content-Length");
+  return new Response(await cached.blob(), { status: 404, statusText: "Not Found", headers });
+}
+
 async function cacheFirst(req, url) {
   const cache = await caches.open(CACHE);
-  // Every page navigation is the one-page presentation; query strings don't matter.
-  const k = req.mode === "navigate" ? key("index.html") : url.origin + url.pathname;
+  const navigate = req.mode === "navigate";
+  const app = navigate && isAppNavigation(url);
+  const k = app ? key("index.html") : url.origin + url.pathname;
   const hit = await cache.match(k);
   if (hit) return hit;
-  const res = await fetch(req);
-  if (res.ok && res.type === "basic" && !res.redirected) cache.put(k, res.clone());
-  return res;
+  try {
+    const res = await fetch(req);
+    if (res.ok && res.type === "basic" && !res.redirected) cache.put(k, res.clone());
+    if (navigate && !app && !res.ok) return notFoundResponse();
+    return res;
+  } catch {
+    if (navigate && !app) return notFoundResponse();
+    return Response.error();
+  }
 }
 
 // The page asks "is everything cached?" after loading; fetch whatever is missing, then answer.

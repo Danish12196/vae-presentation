@@ -19,7 +19,7 @@ const sy = (p) => Y0 - p * (Y0 - Y1);
 const pdf = (x, mu, s) => Math.exp(-(((x - mu) / s) ** 2) / 2) / (s * Math.sqrt(2 * Math.PI));
 const clamp = (v, [a, b]) => Math.min(b, Math.max(a, v));
 
-export const kl = (mu, sigma) => 0.5 * (sigma ** 2 + mu ** 2 - 1 - Math.log(sigma ** 2));
+const kl = (mu, sigma) => 0.5 * (sigma ** 2 + mu ** 2 - 1 - Math.log(sigma ** 2));
 
 let svg, qPath, qFill, peak, sides, klOut, paramsEl;
 let mu = 1.4;
