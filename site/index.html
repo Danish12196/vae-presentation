@@ -19,6 +19,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="vendor/katex-0.16.47/katex.min.css" />
     <link rel="stylesheet" href="css/tokens.css" />
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
@@ -144,6 +145,18 @@
       <section class="slide" id="s07" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>A cat is 12,288 numbers</h2>
+        </header>
+        <div class="slide-body num-body">
+          <p class="num-question">Describe a stranger with two numbers, like height and hair length? An autoencoder learns its own two.</p>
+          <svg class="num-stage" role="img" aria-label="A cat's pixels become a column of 12,288 numbers; the encoder squeezes them into two neurons, and those two numbers become a point in a 2-D latent space"></svg>
+          <div class="num-picker"></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s08" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
           <h2>The bottleneck</h2>
         </header>
         <div class="slide-body s05-body">
@@ -173,7 +186,19 @@
         </div>
       </section>
 
-      <section class="slide" id="s08" data-accent="sunflower">
+      <section class="slide" id="s09" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>More numbers, more room</h2>
+        </header>
+        <div class="slide-body size-body">
+          <div class="size-grid"></div>
+          <div class="size-picker"></div>
+        </div>
+        <p class="slide-caption">more numbers rebuild sharper cats, but a flat picture of a 16-D space shows only a third of it: high-dimensional latent spaces can't be seen directly</p>
+      </section>
+
+      <section class="slide" id="s10" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>Reconstruction loss</h2>
@@ -197,13 +222,22 @@
             </div>
           </div>
         </div>
-        <div class="formula-bar" aria-label="Loss formulas">
-          <p class="formula is-active" data-loss="mse"><button type="button" class="sym">MSE<span class="tip">Mean squared error: the average of the squared mistakes.</span></button> = <sup>1</sup>&frasl;<sub><button type="button" class="sym">n<span class="tip">How many numbers we average. Here, every pixel of the cat.</span></button></sub> <button type="button" class="sym">Σ<span class="tip">Add them up.</span></button><sub><button type="button" class="sym">i<span class="tip">One pixel at a time.</span></button></sub> (<button type="button" class="sym">x̂<span class="tip">The rebuilt pixel, “x-hat”.</span></button><sub>i</sub> − <button type="button" class="sym">x<span class="tip">The original pixel.</span></button><sub>i</sub>)²</p>
-          <p class="formula" data-loss="bce"><button type="button" class="sym">BCE<span class="tip">Binary cross-entropy. It treats each pixel as a probability between 0 and 1.</span></button> = −<sup>1</sup>&frasl;<sub><button type="button" class="sym">n<span class="tip">How many numbers we average. Here, every pixel of the cat.</span></button></sub> <button type="button" class="sym">Σ<span class="tip">Add them up.</span></button><sub><button type="button" class="sym">i<span class="tip">One pixel at a time.</span></button></sub> [ <button type="button" class="sym">x<span class="tip">The original pixel, as a probability.</span></button><sub>i</sub> <button type="button" class="sym">log<span class="tip">How surprised the model is. A confident wrong pixel costs a lot.</span></button> <button type="button" class="sym">x̂<span class="tip">The rebuilt pixel.</span></button><sub>i</sub> + (1 − x<sub>i</sub>) log(1 − x̂<sub>i</sub>) ]</p>
+        <div class="formula-bar" role="group" aria-label="Loss formulas" data-tips='{"mse": "Mean squared error: the average of the squared mistakes.", "bce": "Binary cross-entropy. It treats each pixel as a probability between 0 and 1.", "n": "How many numbers we average. Here, every pixel of the cat.", "sum": "Add them up, one pixel i at a time.", "xhat": "The rebuilt pixel, “x-hat”.", "x": "The original pixel.", "xp": "The original pixel, as a probability.", "log": "How surprised the model is. A confident wrong pixel costs a lot."}'>
+          <p class="formula is-active" data-loss="mse"><span data-tex="\htmlData{tip=mse}{\text{MSE}} = \frac{1}{\htmlData{tip=n}{n}}\, \htmlData{tip=sum}{\sum_{i}} \big(\htmlData{tip=xhat}{\hat{x}_i} - \htmlData{tip=x}{x_i}\big)^2"></span></p>
+          <p class="formula" data-loss="bce"><span data-tex="\htmlData{tip=bce}{\text{BCE}} = -\frac{1}{\htmlData{tip=n}{n}}\, \htmlData{tip=sum}{\sum_{i}} \big[\, \htmlData{tip=xp}{x_i}\, \htmlData{tip=log}{\log}\, \htmlData{tip=xhat}{\hat{x}_i} + (1 - x_i)\log(1 - \hat{x}_i) \,\big]"></span></p>
         </div>
       </section>
 
-      <section class="slide" id="s09" data-accent="sunflower">
+      <section class="slide" id="s11" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>Watch it learn</h2>
+        </header>
+        <div class="slide-body learn-body"></div>
+        <p class="slide-caption">a replay of ae_2's training: the loss falls, the cats sharpen, and the latent space organises itself</p>
+      </section>
+
+      <section class="slide" id="s12" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>PCA vs autoencoder</h2>
@@ -219,7 +253,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s10" data-accent="sunflower">
+      <section class="slide" id="s13" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>What autoencoders are good for</h2>
@@ -283,7 +317,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s11" data-accent="mint">
+      <section class="slide" id="s14" data-accent="mint">
         <header class="slide-head">
           <p class="part-label">Part 3 · Other types of autoencoders</p>
           <h2>Other kinds of autoencoders</h2>
@@ -347,7 +381,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s12" data-accent="sky">
+      <section class="slide" id="s15" data-accent="sky">
         <header class="slide-head">
           <p class="part-label">Part 4 · Why autoencoders can't generate</p>
           <h2>Holes in the latent space</h2>
@@ -364,12 +398,13 @@
             <div class="s10-verdict" aria-live="polite"><span class="verdict-chip"></span><span class="s10-dist mono"></span></div>
             <button type="button" class="btn primary" data-random>random point</button>
             <p class="s10-tally mono">in the data: 0 / in the gaps: 0</p>
+            <button type="button" class="btn grid-toggle" aria-pressed="false" data-grid>what lives here?</button>
           </div>
         </div>
         <p class="s10-caption">the decoder never saw anything from the gaps</p>
       </section>
 
-      <section class="slide" id="s13" data-accent="lilac">
+      <section class="slide" id="s16" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Where VAEs come from</h2>
@@ -383,7 +418,47 @@
         <p class="slide-caption">two papers, one trick: keep the randomness where a gradient can get past it</p>
       </section>
 
-      <section class="slide" id="s14" data-accent="lilac">
+      <section class="slide" id="s17" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Probability in one minute</h2>
+        </header>
+        <div class="slide-body prob-body">
+          <svg class="prob-stage" role="img" aria-label="A joint distribution of an image x and a code z as a heatmap, with its marginals on the edges and two conditional slices you can drag"></svg>
+          <div class="prob-notes">
+            <p data-step="0"><span data-tex="p(x, z)"></span> <strong>joint:</strong> how likely an image and a code are together.</p>
+            <p data-step="1"><span class="px-ink" data-tex="p(x)"></span>, <span class="pz-ink" data-tex="p(z)"></span> <strong>marginals:</strong> add up the other variable, <span data-tex="p(x) = \int p(x, z)\, dz"></span>.</p>
+            <p data-step="2"><span data-tex="p(x \mid z) = \dfrac{p(x, z)}{p(z)}"></span> <strong>a slice, rescaled:</strong> the images one code can make. That is the decoder.</p>
+            <p data-step="3"><span data-tex="p(z \mid x) = \dfrac{p(x, z)}{p(x)}"></span> <strong>the posterior:</strong> which codes explain this image. That is the encoder's job.</p>
+            <p data-step="4" class="prob-punch">For real cats, <span data-tex="p(x)"></span> is an integral over every possible code in 12,288-D: no one can compute it. So the VAE <strong>approximates</strong> the posterior with a Gaussian <span data-tex="q(z \mid x)"></span>. That approximation is the <em>variational</em> in VAE.</p>
+          </div>
+        </div>
+        <p class="slide-caption">drag across the heatmap: the horizontal slice is p(x | z), the vertical slice is p(z | x)</p>
+      </section>
+
+      <section class="slide" id="s18" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Two worlds</h2>
+        </header>
+        <div class="slide-body worlds-body">
+          <div class="worlds-stage">
+            <svg class="worlds-svg" role="img" aria-label="Left: the data distribution p(x), a lumpy shape of cat photos. Right: the latent distribution p(z), a round Gaussian glow. The decoder maps a code to a cat; the encoder maps a cat to a small cloud of codes."></svg>
+            <div class="worlds-label px" style="left: 24.5%; top: 0%"><span data-tex="p(x)"></span><small>cat photos, 12,288-D</small></div>
+            <div class="worlds-label pz" style="left: 75%; top: 0%"><span data-tex="p(z) = \mathcal{N}(0, I)"></span><small>codes: a shape we choose</small></div>
+            <div class="worlds-label dec" data-from="1" style="left: 49%; top: 86%"><span data-tex="\text{decoder}\; p(x \mid z)"></span></div>
+            <div class="worlds-label enc" data-from="2" style="left: 49%; top: 6%"><span data-tex="\text{encoder}\; q(z \mid x) \approx p(z \mid x)"></span></div>
+          </div>
+          <div class="worlds-controls">
+            <button type="button" class="btn primary" data-sample>sample z ~ N(0, I)</button>
+            <span class="worlds-hint">or tap anywhere in p(z) · pick a cat to encode it:</span>
+            <div class="worlds-picker"></div>
+          </div>
+        </div>
+        <p class="slide-caption">generate = sample the round world, decode into the strange one. The encoder only helps us train.</p>
+      </section>
+
+      <section class="slide" id="s19" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Encode a cloud, not a point</h2>
@@ -401,20 +476,24 @@
             <p class="s11-params mono"></p>
           </div>
         </div>
-        <p class="slide-caption">one image → a small cloud, not a point</p>
+        <div class="vae-pipe" aria-label="The VAE pipeline with the current numbers">
+          <span class="pipe-trap enc">encoder</span>
+          <span class="pipe-pair"><span class="pipe-box mu"><span data-tex="\mu"></span> <b class="mono" data-mu></b></span><span class="pipe-box sig"><span data-tex="\sigma"></span> <b class="mono" data-sigma></b></span></span>
+          <span class="pipe-box gauss" data-tex="\mathcal{N}(\mu, \sigma^2)"></span>
+          <span class="pipe-op" data-tex="\sim"></span>
+          <span class="pipe-box z"><span data-tex="z"></span> <b class="mono" data-z></b></span>
+          <span class="pipe-trap dec">decoder</span>
+        </div>
       </section>
 
-      <section class="slide" id="s15" data-accent="lilac">
+      <section class="slide" id="s20" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Loss = reconstruction + KL</h2>
         </header>
         <div class="slide-body s12-body">
           <div class="loss-eq" role="group" aria-label="The VAE loss">
-            <span>Loss</span><span class="eq-op">=</span>
-            <span class="eq-term recon">‖x − x̂‖²</span>
-            <span class="eq-op">+</span>
-            <span class="eq-term kl">KL( N(μ, σ²) ‖ N(0, 1) )</span>
+            <div class="loss-tex" data-display data-tex="\text{Loss} = \underbrace{\htmlClass{recon}{\lVert x - \hat{x} \rVert^2}}_{\displaystyle\text{rebuild the cat}} + \underbrace{\htmlClass{kl}{\mathrm{KL}\big(\mathcal{N}(\mu, \sigma^2) \,\Vert\, \mathcal{N}(0, 1)\big)}}_{\displaystyle\text{keep the clouds near } \mathcal{N}(0,1)}"></div>
           </div>
           <div class="gauss-wrap">
             <svg class="gauss interactive" viewBox="0 0 800 300" role="group" aria-label="A Gaussian you can drag, drawn against N(0,1)"></svg>
@@ -426,12 +505,12 @@
           </div>
         </div>
         <div class="formula-bar">
-          <p class="formula"><span class="recon">‖x − x̂‖²</span> reconstruction: how far the rebuilt cat is from the input</p>
-          <p class="formula"><span class="kl">KL</span> = ½(μ² + σ² − 1 − ln σ²) per dimension, summed over the code. Zero only when μ = 0 and σ = 1</p>
+          <p class="formula"><span data-tex="\htmlClass{recon}{\lVert x - \hat{x} \rVert^2}"></span> reconstruction: how far the rebuilt cat is from the input</p>
+          <p class="formula"><span data-tex="\htmlClass{kl}{\mathrm{KL}} = \tfrac{1}{2}\left(\mu^2 + \sigma^2 - 1 - \ln \sigma^2\right)"></span> per dimension, summed over the code. Zero only when <span data-tex="\mu = 0,\ \sigma = 1"></span></p>
         </div>
       </section>
 
-      <section class="slide" id="s16" data-accent="lilac">
+      <section class="slide" id="s21" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Turning the KL dial</h2>
@@ -445,12 +524,25 @@
               <span class="tug-team kl">KL</span>
             </div>
             <div class="s13-slider"></div>
-            <p class="callout"><strong>loss = −ELBO</strong> (Evidence Lower BOund): negative log-likelihood plus KL. Fixed-variance MSE matches that up to a constant and a scale. The true likelihood is intractable, so we maximise the ELBO.</p>
+            <button type="button" class="btn grid-toggle" aria-pressed="false" data-grid>what lives here?</button>
+            <div class="callout elbo">
+              <div class="elbo-tex" data-display data-tex="\mathcal{L}(x) = \underbrace{\mathbb{E}_{q(z \mid x)}\big[\log p(x \mid z)\big]}_{\displaystyle\text{data consistency (our L2)}} - \overbrace{\mathrm{KL}\big(q(z \mid x) \,\Vert\, p(z)\big)}^{\displaystyle\text{latent-space regularisation}}"></div>
+              <p><strong>loss = −ELBO</strong> (Evidence Lower BOund). The true likelihood is intractable, so we maximise this lower bound instead. With a fixed-variance Gaussian decoder, the first term is our L2 up to a constant and a scale.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="slide" id="s17" data-accent="lilac">
+      <section class="slide" id="s22" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <h2>Watch a VAE learn</h2>
+        </header>
+        <div class="slide-body learn-body"></div>
+        <p class="slide-caption">KL warm-up lets the cats spread out first; then KL pulls every cloud into one round N(0, 1)</p>
+      </section>
+
+      <section class="slide" id="s23" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Backpropagation, briefly</h2>
@@ -468,7 +560,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s18" data-accent="lilac">
+      <section class="slide" id="s24" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>A dice roll has no gradient</h2>
@@ -490,7 +582,7 @@
         <p class="slide-caption">next: move the dice outside the graph. That is the reparameterization trick.</p>
       </section>
 
-      <section class="slide" id="s19" data-accent="lilac">
+      <section class="slide" id="s25" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>The reparameterization trick</h2>
@@ -507,7 +599,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s20" data-accent="lilac">
+      <section class="slide" id="s26" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Generating cats</h2>
@@ -531,7 +623,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s21" data-accent="lilac">
+      <section class="slide" id="s27" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Interpolation</h2>
@@ -554,7 +646,7 @@
         <p class="slide-caption">a straight walk between two real codes stays near the data for both. The plain AE fails on random samples, not here.</p>
       </section>
 
-      <section class="slide" id="s22" data-accent="coral">
+      <section class="slide" id="s28" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Why VAE cats are blurry</h2>
@@ -579,7 +671,7 @@
         <p class="slide-caption">MSE's best guess is the average of the sharp cats that fit, and the KL term also caps how much detail the code can hold</p>
       </section>
 
-      <section class="slide" id="s23" data-accent="coral">
+      <section class="slide" id="s29" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Extensions</h2>
@@ -590,6 +682,7 @@
               <h3>β-VAE</h3>
               <p>a bigger KL weight: a tidier, more disentangled latent space, and blurrier cats</p>
               <button type="button" class="btn" data-remember>remember this?</button>
+              <p class="cvae"><strong>Conditional VAE:</strong> feed in a label too, then ask for <em>a tabby</em>. A plain VAE can't take requests.</p>
             </article>
             <article class="card ext vq">
               <h3>VQ-VAE <span class="tag">illustration</span></h3>
@@ -625,7 +718,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s24" data-accent="coral">
+      <section class="slide" id="s30" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>VAE vs GAN vs diffusion</h2>
@@ -651,7 +744,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s25" data-accent="coral">
+      <section class="slide" id="s31" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Wrap-up</h2>
@@ -668,7 +761,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s26" data-accent="coral">
+      <section class="slide" id="s32" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Questions?</h2>

@@ -568,3 +568,61 @@
     padding: 6px 12px;
   }
 }
+
+/* ---------------------------------------------------------------- KaTeX maths (js/math.js) */
+
+.katex {
+  font-size: 1.1em;
+}
+.formula-bar .katex {
+  font-size: 1.3em;
+}
+.katex .recon {
+  color: var(--coral);
+}
+.katex .kl {
+  color: var(--sky);
+}
+/* Explainable symbols inside typeset maths keep the dashed underline and the tip bubble. */
+.katex .sym {
+  display: inline-block;
+  padding: 0 1px;
+  border-bottom: 2px dashed currentColor;
+}
+.katex .sym:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.katex .tip {
+  font-style: normal;
+}
+
+/* "What lives here?" decoded tiles laid over a latent map (js/decodegrid.js). */
+.latent-map {
+  position: relative;
+}
+.decode-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  image-rendering: auto;
+}
+
+/* Phones: wide formulas scroll sideways inside their box instead of overflowing the slide,
+   and the cat pickers on the explainer slides wrap to two rows. */
+@media (max-width: 760px) {
+  .katex-display,
+  .formula-bar .formula,
+  .loss-tex {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .num-picker .image-picker,
+  .size-picker .image-picker,
+  .worlds-picker .image-picker {
+    --picker-cols: 4 !important; /* beats the inline column count */
+  }
+}

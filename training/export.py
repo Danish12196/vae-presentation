@@ -336,6 +336,60 @@ def export_latent_maps(loaded, map_cats, device):
                                           "thumbs": {"file": "map_thumbs.jpg", **meta}})
 
 
+N_SIZE_CATS = 600  # dots per map on the latent-size slide (the first 600 map cats)
+
+
+def export_latent_sizes(loaded, map_cats, device):
+    """The same 600 cats in ae_2, ae_16, ae_64 and ae_256's latent spaces, flattened to 2-D by PCA
+    (ae_2 needs none), plus how much of the code's variance those 2 axes keep."""
+    x = to_tensor(map_cats[:N_SIZE_CATS], device)
+    out = {"count": N_SIZE_CATS, "maps": {}, "kept": {}}
+    for name in ("ae_2", "ae_16", "ae_64", "ae_256"):
+        if name not in loaded:
+            continue
+        run, model, _ = loaded[name]
+        z = codes(run, model, x).cpu().numpy().astype(np.float64)
+        if z.shape[1] > 2:
+            z = z - z.mean(0)
+            _, s, vt = np.linalg.svd(z, full_matrices=False)
+            out["kept"][name] = round(float((s[:2] ** 2).sum() / (s ** 2).sum()), 3)
+            z = z @ vt[:2].T
+        else:
+            out["kept"][name] = 1.0
+        out["maps"][name] = rounded(z, 3)
+    write_json(OUT / "latent_sizes.json", out)
+
+
+def export_training():
+    """The snapshot replays (snapshots.py): loss per epoch, the latent map after every epoch and
+    four showcase cats rebuilt after every epoch, for the "Watch it learn" slides."""
+    out = {"models": {}}
+    rows = []
+    for name in ("ae_2", "vae_2d_b1"):
+        path = RUNS / "snapshots" / f"{name}.npz"
+        if not path.exists():
+            print(f"skipping training replay of {name}: run snapshots.py first")
+            continue
+        npz = np.load(path)
+        history = npz["history"]
+        out["models"][name] = {
+            "epochs": int(len(npz["codes"]) - 1),  # snapshot 0 is before training
+            "loss": rounded(history[:, 0], 2), "recon": rounded(history[:, 1], 2),
+            "kl": None if np.isnan(history[:, 2]).all() else rounded(history[:, 2], 2),
+            "codes": [rounded(c, 2) for c in npz["codes"]],
+        }
+        if not rows:
+            rows.append(npz["originals"])
+        out["models"][name]["recon_row"] = len(rows)
+        rows.extend(npz["recons"])  # one row of 4 cats per snapshot
+    if not out["models"]:
+        return
+    cols = len(rows[0])
+    meta = save_sprite(np.concatenate(rows), OUT / "training_recon.jpg", cols=cols, quality=85)
+    out["recons"] = {"file": "training_recon.jpg", **meta, "note": "row 0: originals; then one row per snapshot"}
+    write_json(OUT / "training.json", out)
+
+
 def export_anomaly(ae64, held_out, device):
     """How well ae_64 rebuilds normal (held-out) cats. Returns the (low, high) flag thresholds.
 
@@ -486,6 +540,9 @@ def main():
         export_dream(model("cnn_cls"), loaded["cnn_cls"][2]["classes"], device)
     if any(n == "ae_2" or n.startswith("vae_2d_b") for n in loaded):
         export_latent_maps(loaded, map_cats, device)
+    if "ae_2" in loaded:
+        export_latent_sizes(loaded, map_cats, device)
+    export_training()
     if SPARSE & loaded.keys():
         export_sparse_codes(loaded, held_out, device)
     write_manifest(loaded, {}, map_cats, device)  # placeholder so its size counts below

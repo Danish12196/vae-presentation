@@ -700,3 +700,268 @@ figure > figcaption {
     --picker-cols: 4 !important;
   }
 }
+
+/* ================================================================ s07 a cat is 12,288 numbers */
+
+.num-body {
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--gap) * 0.6);
+}
+.num-question {
+  max-width: 90ch;
+  margin: 0;
+  text-align: center;
+  color: var(--text-soft);
+  font-size: var(--fs-small);
+}
+svg.num-stage {
+  width: min(1200px, 100%);
+  height: auto;
+  max-height: calc(100dvh - 330px);
+  overflow: visible;
+  cursor: pointer;
+}
+.num-step {
+  opacity: 0;
+  transition: opacity var(--t-med) linear;
+}
+.num-step.on {
+  opacity: 1;
+}
+.num-frame {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 4;
+}
+.num-grid {
+  stroke: var(--bg-raised);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+.num-pick {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+.num-label {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 24px;
+  fill: var(--text);
+}
+.num-small {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 20px;
+  fill: var(--text-soft);
+}
+.num-big {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 32px;
+  fill: var(--accent);
+}
+.num-mono {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 22px;
+  fill: var(--text);
+}
+.num-value {
+  font-size: 26px;
+  fill: var(--accent);
+}
+.num-dots {
+  font-size: 34px;
+  fill: var(--text-soft);
+}
+.num-neuron {
+  stroke: var(--line);
+  stroke-width: 2.5;
+}
+.num-brace,
+.num-axis {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 3;
+}
+.num-arrowhead {
+  fill: var(--line);
+}
+.num-encoder {
+  fill: color-mix(in srgb, var(--accent) 14%, var(--bg-raised));
+  stroke: var(--line);
+  stroke-width: 3;
+}
+.num-wire {
+  stroke: var(--line);
+  stroke-width: 1.2;
+  opacity: 0.35;
+}
+.num-code {
+  fill: var(--bg-raised);
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+.num-cat {
+  stroke: rgba(36, 23, 15, 0.35);
+  stroke-width: 0.6;
+}
+.num-cloud.on .num-cat {
+  animation: num-pop var(--t-med) ease-out both;
+}
+@keyframes num-pop {
+  from { opacity: 0; }
+  to { opacity: 0.85; }
+}
+.num-dot {
+  fill: var(--accent);
+  stroke: var(--line);
+  stroke-width: 3;
+}
+.num-flyer {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+@media (max-width: 760px) {
+  .num-question {
+    font-size: 15px;
+  }
+}
+
+/* ================================================================ s09 more numbers, more room */
+
+.size-body {
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
+}
+.size-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(var(--gap) * 1.2);
+  width: min(1280px, 100%);
+  cursor: pointer;
+}
+.size-col {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: opacity var(--t-med) linear;
+}
+.size-col:not(.shown) {
+  opacity: 0.12;
+}
+.size-col figcaption {
+  font-family: var(--font-head);
+  font-size: var(--fs-h3);
+}
+.size-col figcaption strong {
+  color: var(--accent);
+}
+.size-map {
+  width: 100%;
+  max-width: 270px;
+  aspect-ratio: 1;
+  background: var(--bg-sunken);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
+}
+.size-note {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+  text-align: center;
+}
+.size-cat {
+  --cat-size: 110px;
+}
+@media (max-height: 820px), (max-width: 1500px) {
+  .size-map { max-width: 220px; }
+  .size-cat { --cat-size: 84px; }
+}
+@media (max-width: 760px) {
+  .size-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .size-cat { --cat-size: 64px; }
+}
+
+/* ================================================================ s11 / s22 watch it learn */
+
+.learn-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: calc(var(--gap) * 1.4);
+}
+.learn-svg {
+  width: 100%;
+  height: auto;
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
+}
+.learn-axis { stroke: var(--line); stroke-width: 2.5; }
+.learn-tick { font-family: var(--font-mono); font-size: 21px; fill: var(--text-soft); }
+.learn-line { fill: none; stroke-width: 3.5; }
+.learn-line.recon, .learn-dot.recon { stroke: var(--coral); }
+.learn-line.kl, .learn-dot.kl { stroke: var(--sky); }
+.learn-dot { fill: var(--bg-raised); stroke-width: 4; }
+.learn-read { font-family: var(--font-mono); font-weight: 700; font-size: 21px; }
+.learn-read.recon { fill: var(--coral); }
+.learn-read.kl { fill: var(--sky); }
+.learn-cursor { stroke: var(--text-soft); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.learn-middle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+.learn-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.learn-row .cat-canvas {
+  --cat-size: 88px;
+}
+.learn-row-label {
+  margin: 6px 0 2px;
+  text-align: center;
+  font-size: var(--fs-label);
+  color: var(--text-soft);
+}
+.learn-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.learn-map {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.learn-canvas {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1;
+  background: var(--bg-sunken);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
+}
+.learn-map-label {
+  margin: 0;
+  font-size: var(--fs-label);
+}
+@media (max-height: 820px), (max-width: 1500px) {
+  .learn-row .cat-canvas { --cat-size: 70px; }
+  .learn-canvas { max-width: 300px; }
+}
+@media (max-width: 760px) {
+  .learn-body { grid-template-columns: 1fr; }
+  .learn-row .cat-canvas { --cat-size: 60px; }
+  .learn-canvas { max-width: 260px; }
+}

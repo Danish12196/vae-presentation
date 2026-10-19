@@ -90,11 +90,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 14px 18px;
+  font-size: 34px;
+}
+.loss-tex .katex-display {
+  margin: 0;
+}
+.loss-tex .mord.text,
+.loss-tex .text {
   font-family: var(--font-head);
-  font-weight: 600;
-  font-size: var(--fs-h2);
+}
+/* The ELBO with labelled braces (s16 callout). */
+.callout.elbo .elbo-tex {
+  font-size: 15px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+}
+.callout.elbo .katex-display {
+  margin: 0;
 }
 .eq-op {
   color: var(--text-soft);
@@ -569,16 +581,22 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     gap: calc(var(--gap) * 2);
   }
   .s11-map {
-    --map-size: min(62vh, 520px);
+    --map-size: min(51vh, 450px);
+  }
+  .vae-pipe {
+    font-size: 17px;
+  }
+  .pipe-box {
+    padding: 3px 10px;
   }
   .s11-now .cat-canvas {
-    --cat-size: 150px;
+    --cat-size: 124px;
   }
   .s11-row .cat-canvas.small {
     --cat-size: 58px;
   }
   .loss-eq {
-    font-size: 40px;
+    font-size: 28px;
   }
   .gauss-wrap,
   svg.gauss {
@@ -596,7 +614,7 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     --cat-size: 140px;
   }
   .s14-map {
-    --map-size: 160px;
+    --map-size: 190px;
   }
   .gen {
     max-width: 360px;
@@ -654,8 +672,7 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     --cat-size: 40px;
   }
   .loss-eq {
-    font-size: 26px;
-    gap: 8px;
+    font-size: 13px;
   }
   .eq-term {
     padding: 2px 10px;
@@ -694,7 +711,7 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     --cat-size: 72px;
   }
   .s14-map {
-    --map-size: 84px;
+    --map-size: 140px;
   }
   .s14-note {
     font-size: 12px;
@@ -777,4 +794,152 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     width: 34px;
     height: 34px;
   }
+}
+
+/* ================================================================ s17 probability in one minute */
+
+.prob-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: calc(var(--gap) * 2);
+}
+svg.prob-stage {
+  width: min(100%, calc((100dvh - 300px) * 640 / 600));
+  justify-self: center;
+  overflow: visible;
+}
+.prob-step { opacity: 0; transition: opacity var(--t-med) linear; }
+.prob-step.on { opacity: 1; }
+.prob-cell { fill: color-mix(in srgb, var(--lilac) calc(var(--t) * 100%), var(--bg-raised)); }
+.prob-frame { fill: none; stroke: var(--line); stroke-width: 3; }
+.prob-axis { font-family: var(--font-body); font-weight: 600; font-size: 18px; fill: var(--text-soft); }
+.prob-name { font-family: "KaTeX_Math", var(--font-mono); font-style: italic; font-size: 30px; fill: var(--text); }
+.prob-name.px { fill: var(--coral); }
+.prob-name.pz { fill: var(--sky); }
+.prob-px { fill: var(--coral); opacity: 0.85; }
+.prob-pz { fill: var(--sky); opacity: 0.85; }
+.prob-row, .prob-col { fill: none; stroke: var(--text); stroke-width: 2.5; stroke-dasharray: 6 4; }
+.prob-cond-x { fill: var(--sunflower); stroke: var(--line); stroke-width: 1; }
+.prob-cond-z { fill: var(--mint); stroke: var(--line); stroke-width: 1; }
+.prob-hit { fill: transparent; cursor: crosshair; touch-action: none; }
+.prob-notes { display: flex; flex-direction: column; gap: 12px; font-size: var(--fs-small); }
+.prob-notes p { margin: 0; opacity: 0.15; transition: opacity var(--t-med) linear; }
+.prob-notes p.on { opacity: 1; }
+.prob-notes .katex { font-size: 1.15em; }
+.px-ink { color: var(--coral); }
+.pz-ink { color: var(--sky); }
+.prob-punch { padding: 12px 16px; border: 3px solid var(--line); background: var(--bg-raised); box-shadow: 4px 4px 0 var(--line); }
+@media (max-width: 760px) {
+  .prob-body { grid-template-columns: 1fr; }
+  .prob-notes { font-size: 15px; }
+}
+
+/* ================================================================ s18 two worlds */
+
+.worlds-body {
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--gap) * 0.6);
+}
+.worlds-stage {
+  position: relative;
+  width: min(1200px, 100%, calc((100dvh - 330px) * 1200 / 510));
+}
+svg.worlds-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.worlds-blob { fill: none; stroke: var(--coral); stroke-width: 5; }
+.worlds-axis { stroke: var(--line); stroke-width: 1.5; opacity: 0.4; }
+.worlds-hit { fill: transparent; cursor: crosshair; }
+.worlds-arrow { fill: none; stroke-width: 5; stroke-linecap: round; }
+.worlds-arrow.dec { stroke: var(--coral); }
+.worlds-arrow.enc { stroke: var(--sky); }
+.worlds-head { fill: var(--line); }
+.worlds-step { opacity: 0; transition: opacity var(--t-med) linear; }
+.worlds-step.on { opacity: 1; }
+.worlds-dot { fill: var(--sunflower); stroke: var(--line); stroke-width: 3; }
+.worlds-dot.enc { fill: var(--sky); }
+.worlds-mark { fill: var(--sunflower); stroke: var(--line); stroke-width: 2; opacity: 0.8; }
+.worlds-cloud { fill: color-mix(in srgb, var(--lilac) 45%, transparent); stroke: var(--lilac); stroke-width: 2; }
+.worlds-mu { fill: var(--line); }
+.worlds-label {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-size: 26px;
+  pointer-events: none;
+}
+.worlds-label small { font-size: var(--fs-label); color: var(--text-soft); }
+.worlds-label.px { color: var(--coral); }
+.worlds-label.pz { color: var(--sky); }
+.worlds-label.dec { color: var(--coral); font-size: 22px; }
+.worlds-label.enc { color: var(--sky); font-size: 22px; }
+.worlds-label[data-from] { opacity: 0; transition: opacity var(--t-med) linear; }
+.worlds-label[data-from].on { opacity: 1; }
+.worlds-cat {
+  position: absolute;
+  --cat-size: clamp(56px, 7vw, 96px);
+  transform: translate(-50%, -50%);
+  animation: worlds-pop var(--t-med) ease-out both;
+}
+@keyframes worlds-pop { from { transform: translate(-50%, -50%) scale(0.3); } to { transform: translate(-50%, -50%) scale(1); } }
+.worlds-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 16px;
+}
+.worlds-hint { font-size: var(--fs-label); color: var(--text-soft); }
+@media (max-width: 760px) {
+  .worlds-label { font-size: 15px; }
+  .worlds-label small { display: none; }
+  .worlds-label.dec, .worlds-label.enc { display: none; } /* the arrow colours say which is which */
+  .worlds-cat { --cat-size: 40px; }
+}
+
+/* ================================================================ s19 the VAE pipeline strip */
+
+.vae-pipe {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  font-size: var(--fs-small);
+}
+.pipe-box {
+  padding: 6px 12px;
+  border: 3px solid currentColor;
+  background: var(--bg-raised);
+  white-space: nowrap;
+}
+.pipe-box b { color: var(--text); font-size: 0.85em; }
+.pipe-pair { display: flex; gap: 6px; }
+.pipe-box.mu, .pipe-box.sig { color: var(--sunflower); }
+.pipe-box.gauss { color: var(--coral); }
+.pipe-box.z { color: var(--sky); }
+.pipe-op { font-size: 1.4em; }
+.pipe-trap {
+  padding: 8px 22px;
+  color: var(--bg);
+  background: var(--lilac);
+  font-family: var(--font-head);
+  font-weight: 700;
+}
+.pipe-trap.enc { clip-path: polygon(0 0, 100% 22%, 100% 78%, 0 100%); padding-right: 30px; }
+.pipe-trap.dec { clip-path: polygon(0 22%, 100% 0, 100% 100%, 0 78%); padding-left: 30px; }
+.vae-pipe.pulse .pipe-box.z { animation: pipe-pulse 500ms ease-out; }
+@keyframes pipe-pulse { from { background: color-mix(in srgb, var(--sky) 35%, var(--bg-raised)); } }
+@media (max-width: 760px) {
+  .vae-pipe { font-size: 13px; gap: 6px; }
+  .pipe-trap { padding: 6px 14px; }
 }

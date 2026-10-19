@@ -1,89 +1,133 @@
-// Generating new cats. Left: 24 samples from vae_128 with z ~ N(0, I), the distribution its KL term
-// organised the latent space around. Right: 24 samples from ae_128, either naive (z ~ N(0, I)) or
-// fair (z drawn with the AE's own per-dimension code mean and std). Fair is still mostly nonsense:
-// a plain AE has no reason for the space between its codes to decode to cats.
-// No classifier scores: cnn_cls calls every decoder output "cat" (see SPEC), so the images speak.
-// Below: a small vae_2d_b1 map where any click decodes a plausible cat.
+// Loss = reconstruction + KL. The two terms stay written out at the bottom of the slide.
+// Below the equation: drag a Gaussian against N(0, 1) (its peak moves mu, its side handles
+// change sigma) and watch KL( N(mu, sigma^2) || N(0, 1) ) = 0.5 * (sigma^2 + mu^2 - 1 - ln sigma^2).
 
-import { decode, drawCat, drawTiles, inSlot, loadManifest, randn } from "../models.js";
-import { flipSwitch } from "../ui.js";
-import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
+import { readout } from "../ui.js";
 
-const COLS = 6, ROWS = 4, N = COLS * ROWS, LATENT = 128, GAP = 4;
+// Plot geometry (SVG units): x from -4 to 4, density from 0 to 1.
+const W = 800, H = 300, X0 = 40, X1 = 760, Y0 = 262, Y1 = 22;
+const MU = [-3, 3], SIGMA = [0.4, 2.5];
+const sx = (x) => X0 + ((x + 4) / 8) * (X1 - X0);
+const ux = (px) => ((px - X0) / (X1 - X0)) * 8 - 4;
+const sy = (p) => Y0 - p * (Y0 - Y1);
+const pdf = (x, mu, s) => Math.exp(-(((x - mu) / s) ** 2) / 2) / (s * Math.sqrt(2 * Math.PI));
+const clamp = (v, [a, b]) => Math.min(b, Math.max(a, v));
 
-let vaeCanvas, aeCanvas, vaeFig, aeFig, fair = false, aeStats = null, dice, pickCanvas, map;
-let request = 0;
+const kl = (mu, sigma) => 0.5 * (sigma ** 2 + mu ** 2 - 1 - Math.log(sigma ** 2));
 
-export async function init(section) {
-  vaeFig = section.querySelector(".gen-vae");
-  aeFig = section.querySelector(".gen-ae");
-  vaeCanvas = vaeFig.querySelector("canvas");
-  aeCanvas = aeFig.querySelector("canvas");
-  dice = section.querySelector(".reroll");
-  pickCanvas = section.querySelector(".s15-pick");
+let svg, qPath, qFill, peak, sides, klOut, paramsEl;
+let mu = 1.4;
+let sigma = 0.6;
+let snapFrame = 0;
 
-  const ae = (await loadManifest()).models.ae_128;
-  if (ae?.code_mean) aeStats = { mean: ae.code_mean, std: ae.code_std };
+export function init(section) {
+  // The plot.
+  svg = section.querySelector("svg.gauss");
+  svg.innerHTML = `
+    <line class="g-axis" x1="${X0}" x2="${X1}" y1="${Y0}" y2="${Y0}" />
+    ${[-3, -2, -1, 0, 1, 2, 3].map((t) => `<text class="g-tick" x="${sx(t)}" y="${Y0 + 26}" text-anchor="middle">${t}</text>`).join("")}
+    <path class="g-prior-fill" d="${area(0, 1)}" />
+    <path class="g-prior" d="${curve(0, 1)}" />
+    <text class="g-label prior" x="${sx(0)}" y="${sy(pdf(0, 0, 1)) - 10}" text-anchor="middle">N(0, 1)</text>
+    <path class="g-q-fill" />
+    <path class="g-q" />
+    <circle class="g-handle side" r="13" tabindex="0" role="slider" aria-label="spread σ" data-side="-1" />
+    <circle class="g-handle side" r="13" tabindex="0" role="slider" aria-label="spread σ" data-side="1" />
+    <circle class="g-handle peak" r="15" tabindex="0" role="slider" aria-label="mean μ" />`;
+  qPath = svg.querySelector(".g-q");
+  qFill = svg.querySelector(".g-q-fill");
+  peak = svg.querySelector(".peak");
+  sides = [...svg.querySelectorAll(".side")];
+  draggable(peak, (x) => (mu = clamp(x, MU)));
+  for (const s of sides) draggable(s, (x) => (sigma = clamp(Math.abs(x - mu), SIGMA)));
+  keyboard(peak, (d) => (mu = clamp(mu + d * 0.1, MU)));
+  for (const s of sides) keyboard(s, (d) => (sigma = clamp(sigma + d * Number(s.dataset.side) * 0.05, SIGMA)));
 
-  flipSwitch(section.querySelector(".ae-mode"), {
-    left: "naive N(0,1)",
-    right: "fair: its own stats",
-    label: "Sample the AE with its own code statistics",
-    onChange: (on) => {
-      fair = on;
-      rollAE();
-    },
-  });
-  dice.addEventListener("click", reroll);
-
-  await inSlot(section.querySelector(".s15-pick-fig"), async () => {
-    map = await loadLatentMap(section.querySelector(".s15-map"), "vae_2d_b1", {
-      view: VAE_VIEW,
-      dot: 1.6,
-      label: "The VAE's latent map: click anywhere to decode a cat",
-      onPick: async (z) => {
-        map.setCrosshair(z);
-        drawCat(pickCanvas, await decode("vae_2d_b1", z));
-      },
-    });
-    const z = [0.4, -0.3];
-    map.setCrosshair(z);
-    drawCat(pickCanvas, await decode("vae_2d_b1", z));
-  });
-  await reroll();
+  klOut = readout(section.querySelector(".kl-readout"), { label: "KL", value: kl(mu, sigma), format: (v) => v.toFixed(3), duration: 150 });
+  paramsEl = section.querySelector(".gauss-params");
+  section.querySelector("[data-snap]").addEventListener("click", snap);
+  update();
 }
 
 export function leave() {
-  dice?.classList.remove("rolling");
+  cancelAnimationFrame(snapFrame);
 }
 
-async function reroll() {
-  // Restart the dice spin even if it is mid-turn.
-  dice.classList.remove("rolling");
-  void dice.offsetWidth;
-  dice.classList.add("rolling");
-  // One grid per frame: each batch of 24 decodes blocks the page for a moment (~30 ms, more on
-  // slow phones), so yielding in between keeps the page responsive while the dice spins.
-  await rollVAE();
-  await new Promise((r) => requestAnimationFrame(() => setTimeout(r)));
-  await rollAE();
+function curve(m, s) {
+  const pts = [];
+  for (let i = 0; i <= 160; i++) {
+    const x = -4 + (i / 160) * 8;
+    pts.push(`${sx(x).toFixed(1)},${sy(Math.min(1.05, pdf(x, m, s))).toFixed(1)}`);
+  }
+  return `M${pts.join(" L")}`;
+}
+function area(m, s) {
+  return `${curve(m, s)} L${X1},${Y0} L${X0},${Y0} Z`;
 }
 
-async function rollVAE() {
-  const mine = ++request;
-  await inSlot(vaeFig, async () => {
-    const images = await decode("vae_128", randn(N * LATENT));
-    if (mine === request) drawTiles(vaeCanvas, images, { cols: COLS, gap: GAP, inset: GAP / 2 });
+function update() {
+  qPath.setAttribute("d", curve(mu, sigma));
+  qFill.setAttribute("d", area(mu, sigma));
+  const top = Math.min(1.05, pdf(mu, mu, sigma));
+  peak.setAttribute("cx", sx(mu));
+  peak.setAttribute("cy", sy(top));
+  peak.setAttribute("aria-valuenow", mu.toFixed(2));
+  sides.forEach((s) => {
+    const x = mu + Number(s.dataset.side) * sigma;
+    s.setAttribute("cx", sx(x));
+    s.setAttribute("cy", sy(Math.min(1.05, pdf(x, mu, sigma))));
+    s.setAttribute("aria-valuenow", sigma.toFixed(2));
+  });
+  klOut.set(kl(mu, sigma));
+  paramsEl.textContent = `μ = ${mu.toFixed(2)}   σ = ${sigma.toFixed(2)}`;
+}
+
+/** Drag a handle horizontally; onX gets the pointer's position in data units. */
+function draggable(el, onX) {
+  el.addEventListener("pointerdown", (e) => {
+    cancelAnimationFrame(snapFrame);
+    el.setPointerCapture(e.pointerId);
+    const move = (ev) => {
+      const r = svg.getBoundingClientRect();
+      onX(ux(((ev.clientX - r.left) / r.width) * W));
+      update();
+    };
+    const up = () => {
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    e.preventDefault();
   });
 }
 
-async function rollAE() {
-  const z = randn(N * LATENT);
-  if (fair && aeStats) {
-    for (let i = 0; i < z.length; i++) {
-      const d = i % LATENT;
-      z[i] = aeStats.mean[d] + aeStats.std[d] * z[i];
-    }
-  }
-  await inSlot(aeFig, async () => drawTiles(aeCanvas, await decode("ae_128", z), { cols: COLS, gap: GAP, inset: GAP / 2 }));
+/** Arrow keys nudge a focused handle (main.js leaves the arrows to role="slider" elements). */
+function keyboard(el, onStep) {
+  el.addEventListener("keydown", (e) => {
+    const d = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+    if (!d) return;
+    onStep(d);
+    update();
+    e.preventDefault();
+  });
+}
+
+/** Animate back to mu = 0, sigma = 1, where KL is exactly zero. */
+function snap() {
+  cancelAnimationFrame(snapFrame);
+  const [m0, s0] = [mu, sigma];
+  const start = performance.now();
+  const ms = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 600;
+  const step = (now) => {
+    const t = ms ? Math.min(1, (now - start) / ms) : 1;
+    const k = 1 - (1 - t) ** 3;
+    mu = m0 + (0 - m0) * k;
+    sigma = s0 + (1 - s0) * k;
+    update();
+    if (t < 1) snapFrame = requestAnimationFrame(step);
+  };
+  snapFrame = requestAnimationFrame(step);
 }

@@ -128,7 +128,8 @@ def make_model(run, num_classes=3):
     return AutoEncoder(run.latent, relu_code=run.kind == "sparse")
 
 
-def train(run, out, train_set, device, workers, previews=None, test=None):
+def train(run, out, train_set, device, workers, previews=None, test=None, on_epoch=None):
+    """on_epoch(model, epoch) runs before training (epoch 0) and after every epoch (snapshots.py)."""
     torch.manual_seed(0)
     out.mkdir(parents=True, exist_ok=True)
     num_classes = len(test["classes"]) if run.kind == "cls" else 3
@@ -138,6 +139,8 @@ def train(run, out, train_set, device, workers, previews=None, test=None):
     opt = torch.optim.Adam(model.parameters(), lr=LR)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=run.epochs * len(loader))
     history = []
+    if on_epoch:
+        on_epoch(model, 0)
 
     for epoch in range(1, run.epochs + 1):
         model.train()
@@ -167,6 +170,8 @@ def train(run, out, train_set, device, workers, previews=None, test=None):
         print(f"[{run.name}] epoch {epoch:3d}/{run.epochs}  "
               + "  ".join(f"{k} {v:.4g}" for k, v in record.items())
               + f"  ({time.time() - start:.1f}s)", flush=True)
+        if on_epoch:
+            on_epoch(model, epoch)
         if previews is not None and (epoch % PREVIEW_EVERY == 0 or epoch == run.epochs):
             save_preview(model, run, previews, out / f"epoch_{epoch:03d}.png")
 

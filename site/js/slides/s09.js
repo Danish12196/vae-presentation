@@ -1,91 +1,72 @@
-// PCA vs autoencoder at the same k: the same four cats, rebuilt from k numbers by PCA
-// (precomputed, site/data/pca_k*.png) and by ae_k (live). Lower error is highlighted.
-// Four cats can go either way, so the side panel also shows the average over all 64 showcase cats.
+// More numbers, more room: the same 600 training cats in the latent spaces of ae_2, ae_16, ae_64
+// and ae_256 (data/latent_sizes.json; codes wider than 2 are flattened to their 2 main PCA axes),
+// each beside the picked cat rebuilt by that model, live. Deepia's "latent dimension" scene, with
+// cats coloured by fur instead of digits coloured by class.
+// Built press by press: one more model per press.
 
-import { drawCat, reconstruct, squaredError, inSlot, loadShowcase, getShowcaseCat, loadPCA } from "../models.js";
-import { tabs } from "../ui.js";
+import { reconstruct, drawCat, hasModel, renderTraining, loadShowcase, getShowcaseCat, loadJSON } from "../models.js";
+import { catPicker } from "../ui.js";
+import { builder } from "../anim.js";
 
-const CATS = [0, 3, 9, 13];
-const KS = [2, 16, 64, 256];
+const NAMES = ["ae_2", "ae_16", "ae_64", "ae_256"];
 
-let rows = [];
-let request = 0;
-let avgEl;
+let cols = [], data, colours, b, cat = 0;
 
 export async function init(section) {
+  const body = section.querySelector(".size-body");
+  if (!(await hasModel("ae_2"))) return renderTraining(body, "ae_2");
+  data = await loadJSON("data/latent_sizes.json");
+  colours = (await loadJSON("data/latent_maps.json")).colours;
+  const grid = section.querySelector(".size-grid");
+  cols = NAMES.filter((n) => data.maps[n]).map((name, i) => {
+    const k = Number(name.split("_")[1]);
+    const col = document.createElement("figure");
+    col.className = "size-col";
+    col.dataset.step = String(i + 1);
+    col.innerHTML = `
+      <figcaption><strong>${k}</strong> number${k > 1 ? "s" : ""}</figcaption>
+      <canvas class="size-map" role="img" aria-label="${k}-number latent space of 600 training cats"></canvas>
+      <p class="size-note mono">${k === 2 ? "the real axes" : `2 of ${k} axes (PCA), ${Math.round(data.kept[name] * 100)}% of the spread`}</p>
+      <canvas class="cat-canvas size-cat" width="64" height="64" aria-label="The picked cat rebuilt from ${k} numbers"></canvas>`;
+    grid.append(col);
+    return { name, el: col, map: col.querySelector(".size-map"), cat: col.querySelector(".size-cat") };
+  });
+  new ResizeObserver(() => cols.forEach(drawMap)).observe(grid);
   await loadShowcase();
-  avgEl = section.querySelector(".pca-avg");
-  const grid = section.querySelector(".pca-grid");
-  // Rows are display: contents, so the grid lays out the cells while screen readers get a table.
-  grid.innerHTML = `<div class="pca-row" role="row">
-    <span role="columnheader" class="pca-head">original</span>
-    <span role="columnheader" class="pca-head">PCA</span>
-    <span role="columnheader" class="pca-head">autoencoder</span></div>`;
-  rows = CATS.map((i) => {
-    const cell = (cls) => {
-      const fig = document.createElement("figure");
-      fig.className = `pca-cell ${cls}`;
-      fig.setAttribute("role", "cell");
-      fig.innerHTML = `<canvas class="cat-canvas small" width="64" height="64"></canvas><figcaption class="mono"></figcaption>`;
-      return fig;
-    };
-    const original = cell("orig");
-    const pca = cell("pca");
-    const ae = cell("ae");
-    drawCat(original.querySelector("canvas"), getShowcaseCat(i));
-    original.querySelector("figcaption").textContent = " "; // keeps the rows aligned
-    const row = document.createElement("div");
-    row.className = "pca-row";
-    row.setAttribute("role", "row");
-    row.append(original, pca, ae);
-    grid.append(row);
-    return { i, pca, ae };
-  });
-
-  tabs(section.querySelector(".k-tabs"), {
-    tabs: KS.map((k) => ({ id: String(k), label: `k = ${k}` })),
-    selected: "16",
-    onChange: (k) => update(Number(k)),
-  });
-  await update(16);
+  await catPicker(section.querySelector(".size-picker"), { onPick: (i) => ((cat = i), rebuild()) });
+  b = builder({ last: cols.length, show, stage: grid });
+  cols.forEach(drawMap);
+  await rebuild();
 }
 
-async function update(k) {
-  const mine = ++request;
-  let pca = null;
-  try {
-    pca = await loadPCA(k);
-  } catch {
-    /* PCA data not exported: leave those cells empty */
-  }
-  for (const row of rows) {
-    const image = getShowcaseCat(row.i);
-    const pcaErr = pca ? pca.errors[row.i] : NaN;
-    if (pca && mine === request) {
-      drawCat(row.pca.querySelector("canvas"), pca.sprite.get(row.i));
-      row.pca.querySelector("figcaption").textContent = pcaErr.toFixed(0);
-    }
-    const aeErr = await inSlot(row.ae, async () => {
-      const out = await reconstruct(`ae_${k}`, [image]);
-      if (mine === request) drawCat(row.ae.querySelector("canvas"), out);
-      return squaredError(image, out);
-    });
-    if (mine !== request) return;
-    row.ae.querySelector("figcaption").textContent = aeErr == null ? "" : aeErr.toFixed(0);
-    row.pca.classList.toggle("better", aeErr != null && pcaErr < aeErr);
-    row.ae.classList.toggle("better", aeErr != null && aeErr < pcaErr);
-  }
-  await showAverage(k, pca, mine);
+export const enter = (info) => b?.enter(info);
+export const step = (dir) => b?.step(dir) ?? false;
+
+function show(n) {
+  for (const c of cols) c.el.classList.toggle("shown", Number(c.el.dataset.step) <= Math.max(1, n));
 }
 
-async function showAverage(k, pca, mine) {
-  if (!pca) return;
-  const cats = Array.from({ length: 64 }, (_, i) => getShowcaseCat(i));
-  const pcaMean = pca.errors.reduce((a, b) => a + b, 0) / pca.errors.length;
-  const aeMean = await inSlot(avgEl, async () => {
-    const out = await reconstruct(`ae_${k}`, cats);
-    return cats.reduce((sum, cat, i) => sum + squaredError(cat, out, i), 0) / cats.length;
+async function rebuild() {
+  const image = getShowcaseCat(cat);
+  for (const c of cols) drawCat(c.cat, await reconstruct(c.name, [image]));
+}
+
+function drawMap(c) {
+  const pts = data.maps[c.name];
+  const size = c.map.clientWidth || 200;
+  const dpr = devicePixelRatio || 1;
+  c.map.width = c.map.height = Math.round(size * dpr);
+  const ctx = c.map.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const q = (arr, p) => [...arr].sort((a, b) => a - b)[Math.round(p * (arr.length - 1))];
+  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+  const half = Math.max(q(xs, 0.99) - q(xs, 0.01), q(ys, 0.99) - q(ys, 0.01)) * 0.62;
+  const cx = (q(xs, 0.99) + q(xs, 0.01)) / 2, cy = (q(ys, 0.99) + q(ys, 0.01)) / 2;
+  ctx.clearRect(0, 0, size, size);
+  pts.forEach((p, i) => {
+    ctx.beginPath();
+    ctx.arc(((p[0] - cx) / half / 2 + 0.5) * size, (0.5 - (p[1] - cy) / half / 2) * size, 2.4, 0, Math.PI * 2);
+    ctx.fillStyle = colours[i];
+    ctx.fill();
   });
-  if (mine !== request || aeMean == null) return;
-  avgEl.textContent = `average of 64 cats: PCA ${Math.round(pcaMean)} · AE ${Math.round(aeMean)}`;
 }

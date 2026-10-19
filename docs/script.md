@@ -2,19 +2,19 @@
 
 Tuesday 20 October 2026 · @Danish
 
-Expect about 26 minutes of speaking, or 31 minutes with slide changes and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip.
+Expect about 34 minutes of speaking, or about 40 minutes with slide changes, demos and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip.
 
 | Part | Approx. words | Approx. time |
 | --- | --- | --- |
 | 1. From classification to generation | 410 | 3 min |
-| 2. Autoencoders | 670 | 5 min |
+| 2. Autoencoders | 1,080 | 8.5 min |
 | 3. Other types of autoencoders | 280 | 2 min |
-| 4. Why autoencoders can't generate | 230 | 2 min |
-| 5. Variational autoencoders | 890 | 7 min |
-| 6. Limitations, extensions, comparison, wrap-up | 910 | 7 min |
-| Total | \~3,400 | \~26 min |
+| 4. Why autoencoders can't generate | 260 | 2 min |
+| 5. Variational autoencoders | 1,400 | 11 min |
+| 6. Limitations, extensions, comparison, wrap-up | 950 | 7.5 min |
+| Total | \~4,400 | \~34 min |
 
-Times assume a steady presenting pace of about 130 words per minute. If you need to cut, Part 3 and the Extensions in Part 6 are the safest to shorten. Keep the comparison, since it sets up the GAN presentation.
+Times assume a steady presenting pace of about 130 words per minute. If you need to cut, Part 3, the Extensions in Part 6, "More numbers, more room" and the two "Watch it learn" replays are the safest to shorten. Keep the comparison, since it sets up the GAN presentation.
 
 ## Part 1: From classification to generation
 
@@ -62,6 +62,16 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - The deep version that people actually used on images is Hinton and Salakhutdinov, Science, 2006.
 - Denoising autoencoders are Vincent, Larochelle, Bengio and Manzagol, 2008.
 
+*Slide: "A cat is 12,288 numbers". Each press builds one more step: the cat; its pixel grid with one pixel's RGB; pixels flying into a column of 12,288 numbers; the encoder squeezing them into two neurons with live values; the two neurons turning into the two axes, with the cat landing as a dot; then 600 training cats on the same axes.*
+
+- Before we squeeze anything, what does the network actually see?
+- Imagine describing a stranger to a friend using just two numbers, say their height and their hair length. You lose a lot of detail, but you keep what matters most. An autoencoder learns to do that for images, and it picks its own two numbers.
+- To the network, this cat is a grid of 64 by 64 pixels, and every pixel is three numbers: red, green and blue.
+- Unroll them all into one long column and you get 12,288 numbers. That column is the input layer.
+- The encoder squeezes that column down. Here it squeezes it all the way to two neurons, and these are the two numbers it chose for this cat.
+- Now the trick: treat those two activations as coordinates. Neuron one is the x axis, neuron two is the y axis, and the cat becomes a single point.
+- Do that for every training cat and you get this cloud of points. That space is the latent space. (Latent just means hidden: nobody labelled these axes, the network invented them.)
+
 *Slide: the encoder-decoder diagram with a narrow middle section labelled "bottleneck" and "z".*
 
 - Autoencoders force the model to learn features by reducing the dimensions between the encoder and the decoder.
@@ -73,6 +83,13 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - The space that all these latent vectors live in is called the latent space. (Latent just means hidden. These are features the model discovers itself, we never label them.)
 - Because the bottleneck is smaller than the input, this is called an undercomplete autoencoder.
 - So to recap the structure: the encoder compresses the image down to z, and the decoder tries to rebuild the original image from z alone.
+
+*Slide: "More numbers, more room". Four maps of the same 600 training cats: ae_2, ae_16, ae_64 and ae_256, each beside the picked cat rebuilt by that model. Codes wider than two are flattened to their two main PCA axes. Each press reveals one more model.*
+
+- How many numbers should the bottleneck have? That is the latent dimension, and it's one of the most important design choices.
+- With 2 numbers the cat comes back as a blurry ghost. With 16, 64 or 256 it gets sharper each time, because there's more room to keep the details apart.
+- But look at the maps. Past 2 numbers we can't draw the space anymore, so these are flattened with PCA, and that flat picture keeps only about a third of the spread.
+- So high-dimensional latent spaces exist and work, we just can't see them directly. That is why the demos in this talk use 2-D versions whenever we want to look at the space.
 
 *Slide: input image, output image, and the loss between them.*
 
@@ -86,6 +103,13 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - The input is the target. The image is its own answer.
 - That makes this self-supervised learning. (Self-supervised means the training signal comes from the data itself, not from human labels.)
 - That's a big deal, because unlabelled images are everywhere and labelled ones are expensive.
+
+*Slide: "Watch it learn". A replay of ae_2's training: the loss curve per epoch, an epoch slider with "replay training", four cats as the model rebuilt them at that epoch, and the latent map at that epoch. Arriving with the keys going forward starts the replay.*
+
+- Here's what training actually looks like. This is a replay of the real run of our 2-number autoencoder, 30 passes over the cats.
+- Before training, every cat comes out as the same grey mush, and all the codes sit on top of each other.
+- Epoch by epoch the loss falls, the rebuilt cats get their colours and their faces, and the map spreads out and organises itself: dark cats drift to one side, light cats to the other.
+- Nobody told it about dark or light fur. It found that this was the most useful thing to remember with only two numbers.
 
 *Slide: PCA versus autoencoder.*
 
@@ -130,7 +154,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 ## Part 4: Why autoencoders can't generate images
 
-*Slide: a 2D latent space plot of MNIST digits, with separate clusters and big empty gaps. (MNIST is the classic dataset of handwritten digits 0 to 9.)*
+*Slide: ae_2's latent map of 2,000 training cats, coloured by fur. Click anywhere to decode that point; "random point" keeps a tally; "what lives here?" covers the map with a grid of decodes.*
 
 - So now we have a model that learns features. But can we generate new images with it?
 - The idea would be to throw away the encoder, pick a random point in the latent space, and pass it through the decoder.
@@ -143,6 +167,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - On top of that, the latent space is irregular.
 - We don't know where the valid regions are, how spread out they are, or what range of values we should sample from.
 - So if we pick a random point, we'll very likely land in a gap and get nonsense.
+- *(Press "what lives here?")* This is every point of the map decoded at once. Away from the training cats the decoder only produces washed-out ghosts: it is guessing.
 - So the bottleneck solved the feature learning problem, but it didn't solve the generation problem.
 - So how do we tackle this?
 - We need the latent space to be continuous and organized, so that any point we pick decodes into something meaningful.
@@ -157,9 +182,28 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - Rezende, Mohamed and Wierstra, ICML 2014: the same idea, worked out independently.
 - Don't merge them into one person or one date.
 
+*Slide: "Probability in one minute". A heatmap of a joint p(x, z), its marginals p(x) and p(z) on the edges, and a crosshair you can drag: the horizontal slice is p(x | z), the vertical slice is p(z | x). The notes build up press by press.*
+
+- To say what a VAE does, we need four words from probability, and this one picture shows all of them.
+- The heatmap is the joint distribution, p of x and z: how likely an image and a code are together. Here x is squashed to one number so we can draw it.
+- Add up each column and you get p of x, the distribution of images. Add up each row and you get p of z, the distribution of codes. Those are the marginals.
+- Take one horizontal slice and rescale it so it adds up to one: that is p of x given z, the images one code can make. That is the decoder's job.
+- Take a vertical slice instead: p of z given x, which codes explain this image. That is called the posterior, and it's the encoder's job.
+- Here's the catch. To get the posterior exactly you need p of x, which means adding up over every possible code. For real cats in 12,288 dimensions, no one can compute that.
+- So the VAE doesn't compute it. It approximates the posterior with a simple Gaussian, called q of z given x. Approximating a distribution you can't compute is called variational inference, and that's the "variational" in variational autoencoder.
+
+*Slide: "Two worlds". Left: p(x), a lumpy shape made of real training-cat photos. Right: p(z) = N(0, I), a round glow. Press for the decoder arrow (a sample is decoded into a new cat), then the encoder arrow. Tap anywhere in p(z) to decode that exact code; pick a cat to see its cloud q(z | x).*
+
+- So picture two worlds.
+- On the left, p of x: real cat photos. In 12,288 dimensions that's a strange, lumpy shape that nobody can write down.
+- On the right, p of z: the latent world. And here's the key assumption: we choose this one. We say the codes should follow a standard normal distribution, N of zero and I, a nice round blob. That is the prior.
+- The decoder, p of x given z, is a bridge from the round world to the lumpy one. *(Tap in p(z).)* Every point I pick here comes out as a cat over there.
+- The encoder, q of z given x, goes the other way: it takes a cat and gives a small cloud of codes, our approximation of the posterior.
+- And that is how a VAE generates: sample the round world, which is easy, and decode it into the strange one. The encoder is only needed for training.
+
 ### The core idea
 
-*Slide: VAE diagram. Encoder outputs two vectors, mu and sigma, then a sampling step, then z, then the decoder.*
+*Slide: the vae_2d_b1 map with the picked cat's cloud drawn as a glowing Gaussian, and a pipeline strip below: encoder → μ, σ → N(μ, σ²) ~ z → decoder, with the live numbers.*
 
 - Instead of encoding each image to a single point, the encoder in a VAE outputs a probability distribution.
 - Specifically, it outputs two vectors. A mean, called mu, and a standard deviation, called sigma.
@@ -180,6 +224,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - The second part is the KL divergence. (KL stands for Kullback–Leibler. KL divergence measures how different one probability distribution is from another. If they're identical, it's zero.)
 - The KL term pushes each encoded distribution to be close to a standard normal distribution, which has a mean of 0 and a standard deviation of 1.
 - For one dimension the closed form is one half of sigma squared plus mu squared, minus 1, minus the log of sigma squared. The training loss sums that over every latent dimension.
+- So the two parts have names. The first is data consistency: rebuild the cat. The second is latent-space regularisation: keep every cloud close to the prior we chose.
 - This pulls all the distributions toward the center of the latent space and makes them overlap, which removes the gaps.
 - It also stops the model from cheating by making sigma tiny, which would turn it back into a normal autoencoder.
 
@@ -195,6 +240,15 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - So instead we maximize the ELBO, which is a practical stand-in that pushes the likelihood up.
 - One caveat: our reconstruction term is mean squared error. For a decoder with a fixed variance, that matches the negative log-likelihood up to a constant and a fixed scale.
 
+- *(Press "what lives here?" at β = 0, then at β = 1.)* Decode a grid over the whole map. With no KL the gaps still decode to junk; with KL, every point in the round region is a cat.
+
+*Slide: "Watch a VAE learn". A replay of vae_2d_b1's training: reconstruction and KL curves on a log scale, four cats per epoch, and the latent map per epoch.*
+
+- Same replay as before, but for a VAE.
+- In the first epochs the KL weight is ramped up slowly. That's called KL warm-up: it lets the decoder learn to draw cats before the latent space gets squeezed.
+- Watch the KL curve fall from the thousands, and the map get pulled into one round blob around zero, the shape of our prior.
+- The reconstruction keeps improving at the same time. That's the balance from the loss slide, happening live.
+
 ### Backprop, then the reparameterization trick
 
 *Slide: forward, loss, chain rule. A plain autoencoder is differentiable the whole way.*
@@ -209,7 +263,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - mu and sigma are ordinary numbers. You can differentiate those.
 - A random draw is not a smooth function of them, so the gradient stops at the dice.
 
-*Slide: z = mu + sigma × epsilon, with epsilon drawn from a standard normal.*
+*Slide: the computation graph, with z = mu + sigma × epsilon. "Resample ε" animates the trick on the mini map: a white unit blob with ε in it is scaled by σ, then shifted by μ.*
 
 - There's one problem with training this.
 - We train neural networks with backpropagation, which needs gradients to flow through every step.
@@ -253,6 +307,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - A higher beta gives a more organized and disentangled latent space, at the cost of reconstruction quality. (Disentangled means each latent dimension controls one separate feature, like rotation, size, or brightness.)
 - A VQ-VAE, which stands for Vector Quantized VAE, uses a learned dictionary of discrete codes instead of a continuous distribution.
 - This produces sharper results, and a close cousin, the discrete VAE or dVAE, powered the first version of DALL-E.
+- One more limitation: a plain VAE can't take requests. You get a random cat, not the cat you asked for. A conditional VAE fixes that by giving the encoder and decoder a label too, so you can ask for a tabby.
 - And VAEs are still a core part of modern image generation today.
 - Stable Diffusion, which we'll cover with generative models, uses a VAE to compress images into a smaller latent space.
 - The diffusion process then runs inside that latent space instead of on full-size images, which makes it much faster.

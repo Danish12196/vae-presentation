@@ -10,6 +10,7 @@
 //                     (e.g. reveal its next row) instead of moving to another slide
 
 import { mountAll } from "./mascot.js";
+import { renderMath } from "./math.js";
 import { runLoader } from "./loader.js";
 import { startOffline, showOfflineStatus } from "./offline.js";
 
@@ -245,6 +246,7 @@ function startModules() {
 // ---------------------------------------------------------------- start
 
 mountAll();
+renderMath();
 const start = indexFromHash();
 if (start !== null) goTo(start, { instant: true });
 

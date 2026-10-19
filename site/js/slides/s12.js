@@ -1,122 +1,91 @@
-// Holes in the latent space. The ae_2 codes of 2,000 training cats, coloured by fur.
-// Click anywhere to decode that point with ae_2. The verdict is about the map, not the picture:
-// is this z somewhere the decoder has seen training cats, or out in a gap? (We tried judging the
-// pictures with cnn_cls, but it calls every decoder output "cat", even flat green noise.)
-// "Random point" samples the view uniformly and keeps score: most of the space is gaps.
+// PCA vs autoencoder at the same k: the same four cats, rebuilt from k numbers by PCA
+// (precomputed, site/data/pca_k*.png) and by ae_k (live). Lower error is highlighted.
+// Four cats can go either way, so the side panel also shows the average over all 64 showcase cats.
 
-import { decode, drawCat, hasModel, renderTraining, loadJSON, loadSprite, loadManifest } from "../models.js";
-import { latentMap } from "../latentmap.js";
-import { mascot } from "../mascot.js";
+import { drawCat, reconstruct, squaredError, inSlot, loadShowcase, getShowcaseCat, loadPCA } from "../models.js";
+import { tabs } from "../ui.js";
 
-let map, out, zLabel, chip, dist, tally, tip, tipCanvas, thumbs;
-let seenRadius = 0; // a z this close to a training cat counts as "seen territory"
-let spread = 1;     // typical size of one code dimension, for readable distances
-const score = { seen: 0, gaps: 0 };
+const CATS = [0, 3, 9, 13];
+const KS = [2, 16, 64, 256];
+
+let rows = [];
 let request = 0;
+let avgEl;
 
 export async function init(section) {
-  const body = section.querySelector(".s10-body");
-  let data;
-  try {
-    data = await loadJSON("data/latent_maps.json");
-  } catch {
-    data = null;
-  }
-  if (!data?.maps?.ae_2 || !(await hasModel("ae_2"))) {
-    renderTraining(body, "ae_2");
-    return;
-  }
-
-  out = section.querySelector(".s10-out canvas");
-  zLabel = section.querySelector(".s10-z");
-  chip = section.querySelector(".verdict-chip");
-  dist = section.querySelector(".s10-dist");
-  tally = section.querySelector(".s10-tally");
-  tip = section.querySelector(".map-tip");
-  tipCanvas = tip.querySelector("canvas");
-
-  const points = data.maps.ae_2;
-  const std = (await loadManifest()).models.ae_2?.code_std ?? [1, 1];
-  spread = (std[0] + std[1]) / 2;
-  seenRadius = typicalSpacing(points);
-
-  map = latentMap(section.querySelector(".s10-map"), {
-    points,
-    colours: data.colours,
-    onPick: (z) => pick(z),
-    onHover: showTip,
+  await loadShowcase();
+  avgEl = section.querySelector(".pca-avg");
+  const grid = section.querySelector(".pca-grid");
+  // Rows are display: contents, so the grid lays out the cells while screen readers get a table.
+  grid.innerHTML = `<div class="pca-row" role="row">
+    <span role="columnheader" class="pca-head">original</span>
+    <span role="columnheader" class="pca-head">PCA</span>
+    <span role="columnheader" class="pca-head">autoencoder</span></div>`;
+  rows = CATS.map((i) => {
+    const cell = (cls) => {
+      const fig = document.createElement("figure");
+      fig.className = `pca-cell ${cls}`;
+      fig.setAttribute("role", "cell");
+      fig.innerHTML = `<canvas class="cat-canvas small" width="64" height="64"></canvas><figcaption class="mono"></figcaption>`;
+      return fig;
+    };
+    const original = cell("orig");
+    const pca = cell("pca");
+    const ae = cell("ae");
+    drawCat(original.querySelector("canvas"), getShowcaseCat(i));
+    original.querySelector("figcaption").textContent = " "; // keeps the rows aligned
+    const row = document.createElement("div");
+    row.className = "pca-row";
+    row.setAttribute("role", "row");
+    row.append(original, pca, ae);
+    grid.append(row);
+    return { i, pca, ae };
   });
-  thumbs = await loadSprite(`data/${data.thumbs.file}`, data.thumbs);
 
-  // Old-map labels in the biggest empty regions.
-  for (const z of map.emptySpots(3)) {
-    const label = document.createElement("div");
-    label.className = "monster-label";
-    label.innerHTML = `${mascot({ expression: "monster" })}<span>here be monsters</span>`;
-    label.setAttribute("aria-hidden", "true");
-    map.addLabel(z, label);
-  }
-
-  section.querySelector("[data-random]").addEventListener("click", () => pick(map.randomPoint(), { counted: true }));
-  // Start in the middle of the crowd, so the output square shows a cat instead of an empty frame.
-  const median = (k) => points.map((p) => p[k]).sort((x, y) => x - y)[points.length >> 1];
-  pick([median(0), median(1)]);
-}
-
-export function leave() {
-  if (tip) tip.hidden = true;
-}
-
-/**
- * How close training cats usually are to their nearest neighbour: the 95th percentile of those
- * distances. A clicked z within this radius of some training cat is in "seen territory".
- */
-function typicalSpacing(points) {
-  const nearest = points.map((p, i) => {
-    let best = Infinity;
-    for (let j = 0; j < points.length; j++) {
-      if (j === i) continue;
-      const d = (p[0] - points[j][0]) ** 2 + (p[1] - points[j][1]) ** 2;
-      if (d < best) best = d;
-    }
-    return Math.sqrt(best);
+  tabs(section.querySelector(".k-tabs"), {
+    tabs: KS.map((k) => ({ id: String(k), label: `k = ${k}` })),
+    selected: "16",
+    onChange: (k) => update(Number(k)),
   });
-  nearest.sort((a, b) => a - b);
-  return nearest[Math.floor(nearest.length * 0.95)];
+  await update(16);
 }
 
-function nearestTraining(z) {
-  let best = Infinity;
-  for (const p of map.points) best = Math.min(best, (p[0] - z[0]) ** 2 + (p[1] - z[1]) ** 2);
-  return Math.sqrt(best);
-}
-
-async function pick(z, { counted = false } = {}) {
+async function update(k) {
   const mine = ++request;
-  map.setCrosshair(z);
-  zLabel.textContent = `z = (${z[0].toFixed(1)}, ${z[1].toFixed(1)})`;
-  const d = nearestTraining(z);
-  const seen = d <= seenRadius;
-  chip.textContent = seen ? "seen territory" : "here be monsters";
-  chip.dataset.level = seen ? "ok" : "bad";
-  dist.textContent = `nearest training cat: ${(d / spread).toFixed(2)}σ away`;
-  if (counted) {
-    score[seen ? "seen" : "gaps"]++;
-    tally.textContent = `in the data: ${score.seen} / in the gaps: ${score.gaps}`;
+  let pca = null;
+  try {
+    pca = await loadPCA(k);
+  } catch {
+    /* PCA data not exported: leave those cells empty */
   }
-  const image = await decode("ae_2", z);
-  if (mine === request) drawCat(out, image);
+  for (const row of rows) {
+    const image = getShowcaseCat(row.i);
+    const pcaErr = pca ? pca.errors[row.i] : NaN;
+    if (pca && mine === request) {
+      drawCat(row.pca.querySelector("canvas"), pca.sprite.get(row.i));
+      row.pca.querySelector("figcaption").textContent = pcaErr.toFixed(0);
+    }
+    const aeErr = await inSlot(row.ae, async () => {
+      const out = await reconstruct(`ae_${k}`, [image]);
+      if (mine === request) drawCat(row.ae.querySelector("canvas"), out);
+      return squaredError(image, out);
+    });
+    if (mine !== request) return;
+    row.ae.querySelector("figcaption").textContent = aeErr == null ? "" : aeErr.toFixed(0);
+    row.pca.classList.toggle("better", aeErr != null && pcaErr < aeErr);
+    row.ae.classList.toggle("better", aeErr != null && aeErr < pcaErr);
+  }
+  await showAverage(k, pca, mine);
 }
 
-/** On hover, the nearest training cat's thumbnail (only when the pointer is close to a dot). */
-function showTip(nearest, at) {
-  if (!nearest || nearest.distance > 28 || !thumbs) {
-    tip.hidden = true;
-    return;
-  }
-  tipCanvas.getContext("2d").putImageData(thumbs.get(nearest.index), 0, 0);
-  const [x, y] = map.toScreen(map.points[nearest.index]);
-  tip.style.left = `${x}px`;
-  tip.style.top = `${y}px`;
-  tip.hidden = false;
+async function showAverage(k, pca, mine) {
+  if (!pca) return;
+  const cats = Array.from({ length: 64 }, (_, i) => getShowcaseCat(i));
+  const pcaMean = pca.errors.reduce((a, b) => a + b, 0) / pca.errors.length;
+  const aeMean = await inSlot(avgEl, async () => {
+    const out = await reconstruct(`ae_${k}`, cats);
+    return cats.reduce((sum, cat, i) => sum + squaredError(cat, out, i), 0) / cats.length;
+  });
+  if (mine !== request || aeMean == null) return;
+  avgEl.textContent = `average of 64 cats: PCA ${Math.round(pcaMean)} · AE ${Math.round(aeMean)}`;
 }

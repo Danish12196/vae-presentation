@@ -1,48 +1,89 @@
-// Questions: the thinking mascot, credits, and new vae_128 cats gently floating up behind it all.
-// Each cat floats with a CSS animation; when one leaves the top it comes back as a fresh cat.
-// Without vae_128 the background just stays empty (it's decoration).
+// Generating new cats. Left: 24 samples from vae_128 with z ~ N(0, I), the distribution its KL term
+// organised the latent space around. Right: 24 samples from ae_128, either naive (z ~ N(0, I)) or
+// fair (z drawn with the AE's own per-dimension code mean and std). Fair is still mostly nonsense:
+// a plain AE has no reason for the space between its codes to decode to cats.
+// No classifier scores: cnn_cls calls every decoder output "cat" (see SPEC), so the images speak.
+// Below: a small vae_2d_b1 map where any click decodes a plausible cat.
 
-import { decode, drawCat, hasModel, randn } from "../models.js";
+import { decode, drawCat, drawTiles, inSlot, loadManifest, randn } from "../models.js";
+import { flipSwitch } from "../ui.js";
+import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
 
-const COUNT = 10;
-const LATENT = 128;
+const COLS = 6, ROWS = 4, N = COLS * ROWS, LATENT = 128, GAP = 4;
 
-let layer, cats = [];
+let vaeCanvas, aeCanvas, vaeFig, aeFig, fair = false, aeStats = null, dice, pickCanvas, map;
+let request = 0;
 
 export async function init(section) {
-  layer = section.querySelector(".float-cats");
-  if (!(await hasModel("vae_128"))) return;
-  const images = await decode("vae_128", randn(COUNT * LATENT));
-  for (let i = 0; i < COUNT; i++) {
-    const c = document.createElement("canvas");
-    c.className = "float-cat";
-    drawCat(c, images, i);
-    place(c, true);
-    c.addEventListener("animationiteration", () => refresh(c));
-    layer.append(c);
-    cats.push(c);
-  }
-}
+  vaeFig = section.querySelector(".gen-vae");
+  aeFig = section.querySelector(".gen-ae");
+  vaeCanvas = vaeFig.querySelector("canvas");
+  aeCanvas = aeFig.querySelector("canvas");
+  dice = section.querySelector(".reroll");
+  pickCanvas = section.querySelector(".s15-pick");
 
-export function enter() {
-  layer?.classList.add("running");
+  const ae = (await loadManifest()).models.ae_128;
+  if (ae?.code_mean) aeStats = { mean: ae.code_mean, std: ae.code_std };
+
+  flipSwitch(section.querySelector(".ae-mode"), {
+    left: "naive N(0,1)",
+    right: "fair: its own stats",
+    label: "Sample the AE with its own code statistics",
+    onChange: (on) => {
+      fair = on;
+      rollAE();
+    },
+  });
+  dice.addEventListener("click", reroll);
+
+  await inSlot(section.querySelector(".s15-pick-fig"), async () => {
+    map = await loadLatentMap(section.querySelector(".s15-map"), "vae_2d_b1", {
+      view: VAE_VIEW,
+      dot: 1.6,
+      label: "The VAE's latent map: click anywhere to decode a cat",
+      onPick: async (z) => {
+        map.setCrosshair(z);
+        drawCat(pickCanvas, await decode("vae_2d_b1", z));
+      },
+    });
+    const z = [0.4, -0.3];
+    map.setCrosshair(z);
+    drawCat(pickCanvas, await decode("vae_2d_b1", z));
+  });
+  await reroll();
 }
 
 export function leave() {
-  layer?.classList.remove("running");
+  dice?.classList.remove("rolling");
 }
 
-/** Random column, size and speed; `first` spreads the starting heights so they don't rise in a line. */
-function place(c, first = false) {
-  const duration = 16 + Math.random() * 12;
-  c.style.left = `${3 + Math.random() * 90}%`;
-  c.style.setProperty("--size", `${56 + Math.random() * 56}px`);
-  c.style.setProperty("--drift", `${(Math.random() - 0.5) * 80}px`);
-  c.style.animationDuration = `${duration}s`;
-  if (first) c.style.animationDelay = `${-Math.random() * duration}s`;
+async function reroll() {
+  // Restart the dice spin even if it is mid-turn.
+  dice.classList.remove("rolling");
+  void dice.offsetWidth;
+  dice.classList.add("rolling");
+  // One grid per frame: each batch of 24 decodes blocks the page for a moment (~30 ms, more on
+  // slow phones), so yielding in between keeps the page responsive while the dice spins.
+  await rollVAE();
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r)));
+  await rollAE();
 }
 
-async function refresh(c) {
-  drawCat(c, await decode("vae_128", randn(LATENT)));
-  c.style.left = `${3 + Math.random() * 90}%`;
+async function rollVAE() {
+  const mine = ++request;
+  await inSlot(vaeFig, async () => {
+    const images = await decode("vae_128", randn(N * LATENT));
+    if (mine === request) drawTiles(vaeCanvas, images, { cols: COLS, gap: GAP, inset: GAP / 2 });
+  });
+}
+
+async function rollAE() {
+  const z = randn(N * LATENT);
+  if (fair && aeStats) {
+    for (let i = 0; i < z.length; i++) {
+      const d = i % LATENT;
+      z[i] = aeStats.mean[d] + aeStats.std[d] * z[i];
+    }
+  }
+  await inSlot(aeFig, async () => drawTiles(aeCanvas, await decode("ae_128", z), { cols: COLS, gap: GAP, inset: GAP / 2 }));
 }

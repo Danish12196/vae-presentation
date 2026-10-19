@@ -1,6 +1,6 @@
 {
- "version": "cc377ed7b71a",
- "total_bytes": 73048922,
+ "version": "88fe140b56f5",
+ "total_bytes": 74627330,
  "files": [
   {
    "path": "404.html",
@@ -12,7 +12,7 @@
   },
   {
    "path": "css/components.css",
-   "bytes": 12837
+   "bytes": 14144
   },
   {
    "path": "css/fonts.css",
@@ -24,7 +24,7 @@
   },
   {
    "path": "css/part2.css",
-   "bytes": 12928
+   "bytes": 18459
   },
   {
    "path": "css/part3.css",
@@ -36,7 +36,7 @@
   },
   {
    "path": "css/part5.css",
-   "bytes": 14381
+   "bytes": 20362
   },
   {
    "path": "css/part6.css",
@@ -68,11 +68,15 @@
   },
   {
    "path": "data/files.json",
-   "bytes": 4080
+   "bytes": 4337
   },
   {
    "path": "data/latent_maps.061a28.json",
    "bytes": 188050
+  },
+  {
+   "path": "data/latent_sizes.a3ebb9.json",
+   "bytes": 37097
   },
   {
    "path": "data/map_thumbs.5d132a.jpg",
@@ -127,16 +131,36 @@
    "bytes": 439915
   },
   {
+   "path": "data/training.1809b8.json",
+   "bytes": 473031
+  },
+  {
+   "path": "data/training_recon.748635.jpg",
+   "bytes": 115561
+  },
+  {
    "path": "img/favicon.svg",
    "bytes": 575
   },
   {
    "path": "index.html",
-   "bytes": 44642
+   "bytes": 51097
+  },
+  {
+   "path": "js/anim.js",
+   "bytes": 2433
+  },
+  {
+   "path": "js/decodegrid.js",
+   "bytes": 1996
   },
   {
    "path": "js/latentmap.js",
    "bytes": 11332
+  },
+  {
+   "path": "js/learnview.js",
+   "bytes": 8576
   },
   {
    "path": "js/loader.js",
@@ -144,11 +168,15 @@
   },
   {
    "path": "js/main.js",
-   "bytes": 9665
+   "bytes": 9719
   },
   {
    "path": "js/mascot.js",
    "bytes": 6713
+  },
+  {
+   "path": "js/math.js",
+   "bytes": 1997
   },
   {
    "path": "js/models.js",
@@ -188,82 +216,106 @@
   },
   {
    "path": "js/slides/s07.js",
-   "bytes": 2762
+   "bytes": 11265
   },
   {
    "path": "js/slides/s08.js",
-   "bytes": 3061
+   "bytes": 2762
   },
   {
    "path": "js/slides/s09.js",
-   "bytes": 3612
+   "bytes": 3369
   },
   {
    "path": "js/slides/s10.js",
-   "bytes": 11188
+   "bytes": 3061
   },
   {
    "path": "js/slides/s11.js",
-   "bytes": 9856
+   "bytes": 576
   },
   {
    "path": "js/slides/s12.js",
-   "bytes": 4582
+   "bytes": 3612
   },
   {
    "path": "js/slides/s13.js",
-   "bytes": 26
+   "bytes": 11188
   },
   {
    "path": "js/slides/s14.js",
-   "bytes": 4324
+   "bytes": 9856
   },
   {
    "path": "js/slides/s15.js",
-   "bytes": 5240
+   "bytes": 5093
   },
   {
    "path": "js/slides/s16.js",
-   "bytes": 2455
-  },
-  {
-   "path": "js/slides/s17.js",
    "bytes": 26
   },
   {
+   "path": "js/slides/s17.js",
+   "bytes": 6567
+  },
+  {
    "path": "js/slides/s18.js",
-   "bytes": 25
+   "bytes": 7544
   },
   {
    "path": "js/slides/s19.js",
-   "bytes": 10971
+   "bytes": 5241
   },
   {
    "path": "js/slides/s20.js",
-   "bytes": 3296
+   "bytes": 5240
   },
   {
    "path": "js/slides/s21.js",
-   "bytes": 2891
+   "bytes": 3148
   },
   {
    "path": "js/slides/s22.js",
-   "bytes": 3699
+   "bytes": 606
   },
   {
    "path": "js/slides/s23.js",
-   "bytes": 5376
+   "bytes": 26
   },
   {
    "path": "js/slides/s24.js",
-   "bytes": 4728
+   "bytes": 25
   },
   {
    "path": "js/slides/s25.js",
-   "bytes": 1490
+   "bytes": 12281
   },
   {
    "path": "js/slides/s26.js",
+   "bytes": 3296
+  },
+  {
+   "path": "js/slides/s27.js",
+   "bytes": 2891
+  },
+  {
+   "path": "js/slides/s28.js",
+   "bytes": 3699
+  },
+  {
+   "path": "js/slides/s29.js",
+   "bytes": 5376
+  },
+  {
+   "path": "js/slides/s30.js",
+   "bytes": 4728
+  },
+  {
+   "path": "js/slides/s31.js",
+   "bytes": 1490
+  },
+  {
+   "path": "js/slides/s32.js",
    "bytes": 1607
   },
   {
@@ -437,6 +489,94 @@
   {
    "path": "vendor/fonts/jetbrains-mono-latin-700-normal.woff2",
    "bytes": 21908
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_AMS-Regular.woff2",
+   "bytes": 28076
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Caligraphic-Bold.woff2",
+   "bytes": 6912
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Caligraphic-Regular.woff2",
+   "bytes": 6908
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Fraktur-Bold.woff2",
+   "bytes": 11348
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Fraktur-Regular.woff2",
+   "bytes": 11316
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Main-Bold.woff2",
+   "bytes": 25324
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Main-BoldItalic.woff2",
+   "bytes": 16780
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Main-Italic.woff2",
+   "bytes": 16988
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Main-Regular.woff2",
+   "bytes": 26272
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Math-BoldItalic.woff2",
+   "bytes": 16400
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Math-Italic.woff2",
+   "bytes": 16440
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_SansSerif-Bold.woff2",
+   "bytes": 12216
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_SansSerif-Italic.woff2",
+   "bytes": 12028
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_SansSerif-Regular.woff2",
+   "bytes": 10344
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Script-Regular.woff2",
+   "bytes": 9644
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Size1-Regular.woff2",
+   "bytes": 5468
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Size2-Regular.woff2",
+   "bytes": 5208
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Size3-Regular.woff2",
+   "bytes": 3624
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Size4-Regular.woff2",
+   "bytes": 4928
+  },
+  {
+   "path": "vendor/katex-0.16.47/fonts/KaTeX_Typewriter-Regular.woff2",
+   "bytes": 13568
+  },
+  {
+   "path": "vendor/katex-0.16.47/katex.min.css",
+   "bytes": 23827
+  },
+  {
+   "path": "vendor/katex-0.16.47/katex.mjs",
+   "bytes": 601155
   },
   {
    "path": "vendor/ort-1.30.0/ort-wasm-simd-threaded.wasm",

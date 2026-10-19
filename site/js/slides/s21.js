@@ -1,78 +1,92 @@
-// Interpolation: encode cat A and cat B, walk the straight line between their codes and decode
-// every step, for ae_128 (z) and vae_128 (mu). Two strips of 8 frames, and a scrubber with a big
-// live frame per model at the current t.
+// Turning the KL dial: the same 2,000 cats encoded by four 2D VAEs trained with
+// beta = 0, 0.1, 1 and 4. The slider glides the dots between the four precomputed mu scatters:
+// beta 0 is a plain autoencoder (spread out, gaps), beta 4 packs everything around N(0, 1).
+// The rope above leans towards whichever term is winning.
 
-import { encode, decode, drawCat, drawTiles, inSlot, loadShowcase, getShowcaseCat } from "../models.js";
-import { catPicker, slider } from "../ui.js";
+import { decodeGrid } from "../decodegrid.js";
+import { loadJSON, renderTraining } from "../models.js";
+import { slider } from "../ui.js";
+import { latentMap } from "../latentmap.js";
 
-const MODELS = ["ae_128", "vae_128"];
-const FRAMES = 8, TILE = 64, GAP = 4;
+const BETAS = [
+  { beta: "0", key: "vae_2d_b0", pull: -0.85 },
+  { beta: "0.1", key: "vae_2d_b0.1", pull: -0.45 },
+  { beta: "1", key: "vae_2d_b1", pull: 0.05 },
+  { beta: "4", key: "vae_2d_b4", pull: 0.6 },
+];
 
-let section, scrub;
-let picked = { a: 0, b: 5 };
-const codes = {}; // model -> { a: Float32Array, b: Float32Array }
-let request = 0;
+let map, tug, grid, beta = 0;
 
-export async function init(el) {
-  section = el;
-  await loadShowcase();
-  for (const ab of ["a", "b"]) {
-    await catPicker(el.querySelector(`.ab-picker[data-ab="${ab}"]`), {
-      selected: picked[ab],
-      onPick: (i) => {
-        picked[ab] = i;
-        refresh();
-      },
-    });
-  }
-  scrub = slider(el.querySelector(".s16-slider"), {
-    label: "t",
-    min: 0,
-    max: 1,
-    step: 0.01,
-    value: 0.5,
-    format: (v) => v.toFixed(2),
-    ticks: ["A", "B"],
-    onInput: () => showFrame(),
+export async function init(section) {
+  const body = section.querySelector(".s13-body");
+  const data = await loadJSON("data/latent_maps.json").catch(() => null);
+  const missing = BETAS.find((b) => !data?.maps?.[b.key]);
+  if (missing) return renderTraining(body, missing.key);
+
+  // One fixed view for all four, fitted to the widest (beta = 0), so the packing is visible.
+  map = latentMap(section.querySelector(".s13-map"), {
+    points: data.maps[BETAS[0].key],
+    colours: data.colours,
+    extent: 1.15,
+    dot: 2.6,
+    label: "Latent maps of four VAEs, from beta 0 to beta 4",
   });
-  await refresh();
+  map.overlay = drawPrior;
+  tug = section.querySelector(".tug");
+
+  slider(section.querySelector(".s13-slider"), {
+    label: "KL weight β",
+    min: 0,
+    max: BETAS.length - 1,
+    step: 1,
+    value: 0,
+    format: (i) => `β = ${BETAS[i].beta}`,
+    ticks: BETAS.map((b) => b.beta),
+    onInput: (i) => {
+      beta = i;
+      map.setPoints(data.maps[BETAS[i].key]);
+      grid?.refresh();
+      tug.style.setProperty("--pull", BETAS[i].pull);
+    },
+  });
+  tug.style.setProperty("--pull", BETAS[0].pull);
+  // Decodes with whichever beta is selected: beta 0 has junk in its gaps, beta 1 is cats everywhere.
+  grid = decodeGrid(map, () => BETAS[beta].key, { n: 12 });
+  gridButton(section, grid);
 }
 
-const lerp = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
-
-async function refresh() {
-  const mine = ++request;
-  const images = [getShowcaseCat(picked.a), getShowcaseCat(picked.b)];
-  for (const model of MODELS) {
-    const row = section.querySelector(`.interp-row[data-model="${model}"]`);
-    await inSlot(row.querySelector(".strip-wrap"), async () => {
-      const out = await encode(model, images);
-      const z = out.z ?? out.mu; // the VAE's mean, the AE's code
-      const n = z.dims[1];
-      codes[model] = { a: z.data.slice(0, n), b: z.data.slice(n, 2 * n) };
-      // All 8 frames in one batch.
-      const batch = new Float32Array(FRAMES * n);
-      for (let f = 0; f < FRAMES; f++) batch.set(lerp(codes[model].a, codes[model].b, f / (FRAMES - 1)), f * n);
-      const strip = await decode(model, batch);
-      if (mine !== request) return;
-      drawTiles(row.querySelector("canvas"), strip, { cols: FRAMES, gap: GAP });
-    });
-  }
-  if (mine === request) await showFrame();
+/** "What lives here?": the button covers the map with a grid of decodes, and back. */
+function gridButton(section, grid) {
+  const btn = section.querySelector("[data-grid]");
+  btn.addEventListener("click", async () => {
+    const on = !grid.on;
+    btn.setAttribute("aria-pressed", String(on));
+    btn.textContent = on ? "back to the dots" : "what lives here?";
+    await grid.show(on);
+  });
 }
 
-async function showFrame() {
-  const t = scrub.value;
-  // The marker sits over the frame position for t along each strip.
-  const width = FRAMES * (TILE + GAP) - GAP;
-  const centre = (TILE / 2 + t * (FRAMES - 1) * (TILE + GAP)) / width;
-  for (const m of section.querySelectorAll(".strip-marker")) m.style.left = `${centre * 100}%`;
-  for (const model of MODELS) {
-    const fig = section.querySelector(`.s16-live figure[data-model="${model}"]`);
-    await inSlot(fig, async () => {
-      // Without codes the model is missing: decoding anyway lets inSlot show the training card.
-      const z = codes[model] ? lerp(codes[model].a, codes[model].b, t) : new Float32Array(128);
-      drawCat(fig.querySelector("canvas"), await decode(model, z));
-    });
+
+export function leave() {
+  map?.stop(); // jump to the end of any glide in progress
+}
+
+/** N(0, 1) as dashed 1 and 2 sigma rings: where the KL term pulls every cloud. */
+function drawPrior(ctx, m) {
+  const [ox, oy] = m.toScreen([0, 0]);
+  const [r1] = m.toScreen([1, 0]);
+  ctx.save();
+  ctx.setLineDash([6, 6]);
+  ctx.strokeStyle = "rgba(196, 98, 45, 0.9)";
+  ctx.lineWidth = 2;
+  for (const k of [1, 2]) {
+    ctx.beginPath();
+    ctx.arc(ox, oy, (r1 - ox) * k, 0, Math.PI * 2);
+    ctx.stroke();
   }
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#24170f";
+  ctx.font = "600 14px 'JetBrains Mono', monospace";
+  ctx.fillText("N(0, 1)", ox + (r1 - ox) * 2 + 6, oy - 6);
+  ctx.restore();
 }
