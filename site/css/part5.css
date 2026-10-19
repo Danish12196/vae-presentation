@@ -590,6 +590,10 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   .s13-map {
     --map-size: min(92vw, 420px);
   }
+  /* The ELBO callout sits under this map; keep the whole slide on a phone screen. */
+  .s13-map {
+    --map-size: min(68vw, 260px);
+  }
   .s11-side,
   .s13-side {
     flex-basis: auto;

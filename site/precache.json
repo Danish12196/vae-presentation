@@ -1,6 +1,6 @@
 {
- "version": "22727d0679d3",
- "total_bytes": 72515971,
+ "version": "6cb0ec9e6977",
+ "total_bytes": 72516185,
  "files": [
   {
    "path": "404.html",
@@ -36,7 +36,7 @@
   },
   {
    "path": "css/part5.css",
-   "bytes": 12561
+   "bytes": 12698
   },
   {
    "path": "css/part6.css",
@@ -132,7 +132,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 36323
+   "bytes": 36286
   },
   {
    "path": "js/latentmap.js",
@@ -161,6 +161,10 @@
   {
    "path": "js/offline.js",
    "bytes": 2135
+  },
+  {
+   "path": "js/slides/s01.js",
+   "bytes": 114
   },
   {
    "path": "js/slides/s02.js",
