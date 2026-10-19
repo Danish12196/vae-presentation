@@ -253,6 +253,10 @@ input {
 .nav-buttons.idle {
   opacity: 0;
 }
+/* Keys don't wake them (main.js), so show them while one has keyboard focus. */
+.nav-buttons:focus-within {
+  opacity: 1;
+}
 .nav-buttons button {
   width: 48px;
   height: 48px;
