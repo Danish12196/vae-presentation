@@ -78,11 +78,11 @@ function buildTriangle() {
   const edge = (a, b, k) => `<line class="tri-edge" data-edge="${k}" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" />`;
   const corner = (name, [x, y], label, nameDy, whoDy) =>
     `<g class="tri-corner" data-corner="${name}"><circle cx="${x}" cy="${y}" r="8" /><text class="tri-name" x="${x}" y="${y + nameDy}" text-anchor="middle">${label}</text><text class="tri-who" x="${x}" y="${y + whoDy}" text-anchor="middle">${WHO[name]}</text></g>`;
-  tri.setAttribute("viewBox", "-24 -28 368 340");
+  tri.setAttribute("viewBox", "-80 -46 480 358");
   tri.innerHTML = `
     <polygon class="tri-fill" points="${q} ${v} ${s}" />
     ${edge(q, v, "quality-variety")}${edge(v, s, "speed-variety")}${edge(q, s, "quality-speed")}
-    ${corner("quality", q, "Quality", -28, -12)}${corner("variety", v, "Variety", 28, 46)}${corner("speed", s, "Speed", 28, 46)}`;
+    ${corner("quality", q, "Quality", -52, -18)}${corner("variety", v, "Variety", 36, 66)}${corner("speed", s, "Speed", 36, 66)}`;
 }
 
 function highlight(model) {

@@ -16,14 +16,16 @@ export async function init(section) {
   await loadShowcase();
   avgEl = section.querySelector(".pca-avg");
   const grid = section.querySelector(".pca-grid");
-  grid.innerHTML = `
+  // Rows are display: contents, so the grid lays out the cells while screen readers get a table.
+  grid.innerHTML = `<div class="pca-row" role="row">
     <span role="columnheader" class="pca-head">original</span>
     <span role="columnheader" class="pca-head">PCA</span>
-    <span role="columnheader" class="pca-head">autoencoder</span>`;
+    <span role="columnheader" class="pca-head">autoencoder</span></div>`;
   rows = CATS.map((i) => {
     const cell = (cls) => {
       const fig = document.createElement("figure");
       fig.className = `pca-cell ${cls}`;
+      fig.setAttribute("role", "cell");
       fig.innerHTML = `<canvas class="cat-canvas small" width="64" height="64"></canvas><figcaption class="mono"></figcaption>`;
       return fig;
     };
@@ -32,7 +34,11 @@ export async function init(section) {
     const ae = cell("ae");
     drawCat(original.querySelector("canvas"), getShowcaseCat(i));
     original.querySelector("figcaption").textContent = " "; // keeps the rows aligned
-    grid.append(original, pca, ae);
+    const row = document.createElement("div");
+    row.className = "pca-row";
+    row.setAttribute("role", "row");
+    row.append(original, pca, ae);
+    grid.append(row);
     return { i, pca, ae };
   });
 

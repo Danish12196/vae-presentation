@@ -188,7 +188,9 @@ function wake() {
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => navButtons.classList.add("idle"), 2500);
 }
-for (const type of ["pointermove", "pointerdown", "touchstart", "keydown", "scroll"]) {
+// Only a mouse or a finger wakes them. Keys and clickers move without them, so they don't sit on
+// top of a slide's bottom caption for the first seconds after every press while presenting.
+for (const type of ["pointermove", "pointerdown", "touchstart", "wheel"]) {
   addEventListener(type, wake, { passive: true });
 }
 wake();

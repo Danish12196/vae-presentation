@@ -230,6 +230,9 @@ figure > figcaption {
   gap: 6px 34px;
   justify-items: center;
 }
+.pca-row {
+  display: contents;
+}
 .pca-head {
   font-family: var(--font-head);
   font-weight: 600;

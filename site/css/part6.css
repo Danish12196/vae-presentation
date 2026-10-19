@@ -95,7 +95,7 @@
   border: 2px solid var(--line);
   color: var(--text-soft);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   vertical-align: middle;
 }
@@ -286,7 +286,7 @@
   gap: 10px;
 }
 svg.tri {
-  width: 300px;
+  width: 380px;
   height: auto;
   overflow: visible;
 }
@@ -317,13 +317,13 @@ svg.tri {
   fill: var(--text-soft);
   font-family: var(--font-head);
   font-weight: 600;
-  font-size: 20px;
+  font-size: 32px; /* SVG units: about 21-25px on screen */
 }
 .tri-corner.on .tri-name { fill: var(--accent); }
 .tri-who {
   fill: var(--text);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 27px;
   font-weight: 700;
 }
 .gary-caption { max-width: 42ch; }
@@ -348,7 +348,7 @@ svg.tri {
   bottom: -10px;
   translate: -50% 0;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 17px;
   padding: 4px 10px;
 }
 .gary-grid {
@@ -508,8 +508,11 @@ svg.tri {
   align-items: center;
   gap: 4px;
   padding: 14px 26px;
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  position: relative; /* above the floating cats, which used to show through the text */
+  z-index: 1;
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
+  background: var(--bg-raised);
   font-size: var(--fs-label);
   color: var(--text-soft);
   text-align: center;
@@ -567,7 +570,7 @@ svg.tri {
     padding: 4px 10px;
   }
   svg.tri {
-    width: 230px;
+    width: 320px;
   }
   .gary-grid {
     width: 140px;
@@ -581,7 +584,8 @@ svg.tri {
     gap: 8px 12px;
   }
   .wrap-result {
-    font-size: 16px;
+    font-size: 20px;
+    line-height: 1.3;
   }
   .wrap-model {
     font-size: 22px;
@@ -665,6 +669,8 @@ svg.tri {
   }
   .s19-top {
     flex-direction: row;
+    flex-wrap: wrap; /* the triangle drops below the table, big enough to read */
+    justify-content: center;
     align-items: flex-start;
     gap: 8px;
   }
@@ -701,7 +707,7 @@ svg.tri {
     font-size: 13px;
   }
   svg.tri {
-    width: 132px;
+    width: 240px;
   }
   .sd-step {
     width: 36px;
@@ -720,11 +726,11 @@ svg.tri {
     display: none;
   }
   .wrap-model {
-    font-size: 20px;
+    font-size: 16px; /* "Autoencoder" fits its column */
   }
   .wrap-result {
     grid-column: auto;
-    font-size: 13px;
+    font-size: 15px;
   }
   .wrap-mascot {
     grid-column: 2;

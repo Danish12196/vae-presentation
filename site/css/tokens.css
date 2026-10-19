@@ -12,7 +12,7 @@
 
   /* Dark stamps so paper-coloured labels stay readable on a fill. */
   --coral: #9d2f28;
-  --sunflower: #a85b12;
+  --sunflower: #94500f; /* 4.5:1 or better on all three paper shades */
   --mint: #1f5c3a;
   --sky: #1e3f66;
   --lilac: #6b3050;

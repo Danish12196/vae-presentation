@@ -2,17 +2,17 @@
 
 Tuesday 20 October 2026 · @Danish
 
-Expect about 24 minutes of speaking, or 29 minutes with slide changes and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip.
+Expect about 26 minutes of speaking, or 31 minutes with slide changes and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip.
 
 | Part | Approx. words | Approx. time |
 | --- | --- | --- |
-| 1. From classification to generation | 430 | 3.5 min |
-| 2. Autoencoders | 580 | 4.5 min |
-| 3. Other types of autoencoders | 260 | 2 min |
-| 4. Why autoencoders can't generate | 240 | 2 min |
-| 5. Variational autoencoders | 760 | 6 min |
-| 6. Limitations, extensions, comparison, wrap-up | 820 | 6.5 min |
-| Total | \~3,100 | \~24 min |
+| 1. From classification to generation | 410 | 3 min |
+| 2. Autoencoders | 670 | 5 min |
+| 3. Other types of autoencoders | 280 | 2 min |
+| 4. Why autoencoders can't generate | 230 | 2 min |
+| 5. Variational autoencoders | 890 | 7 min |
+| 6. Limitations, extensions, comparison, wrap-up | 910 | 7 min |
+| Total | \~3,400 | \~26 min |
 
 Times assume a steady presenting pace of about 130 words per minute. If you need to cut, Part 3 and the Extensions in Part 6 are the safest to shorten. Keep the comparison, since it sets up the GAN presentation.
 
@@ -252,7 +252,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - A β-VAE, or beta-VAE, adds a weight called beta to the KL term.
 - A higher beta gives a more organized and disentangled latent space, at the cost of reconstruction quality. (Disentangled means each latent dimension controls one separate feature, like rotation, size, or brightness.)
 - A VQ-VAE, which stands for Vector Quantized VAE, uses a learned dictionary of discrete codes instead of a continuous distribution.
-- This produces sharper results, and it was used in the first version of DALL-E.
+- This produces sharper results, and a close cousin, the discrete VAE or dVAE, powered the first version of DALL-E.
 - And VAEs are still a core part of modern image generation today.
 - Stable Diffusion, which we'll cover with generative models, uses a VAE to compress images into a smaller latent space.
 - The diffusion process then runs inside that latent space instead of on full-size images, which makes it much faster.
@@ -300,10 +300,10 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 ### Wrap-up
 
-*Slide: a timeline. CNN, autoencoder, VAE, GAN, diffusion. Each row is a main point, revealed on the next press.*
+*Slide: a timeline in date order. Autoencoder, CNN, VAE, GAN, diffusion. Each row is a main point, revealed on the next press.*
 
 - So to wrap up, as a timeline, not a footnote.
-- CNNs, from LeCun in 1989 and 1998 through AlexNet in 2012, tell images apart. They do not draw them.
+- Autoencoders go back to 1986. CNNs, from LeCun in 1989 and 1998 through AlexNet in 2012, tell images apart. They do not draw them.
 - We started with discriminative models that understand images, and asked how we could generate them instead.
 - A plain encoder-decoder would just learn to copy the input, so we added a bottleneck.
 - That gave us the autoencoder, which learns useful features without any labels, by minimizing the reconstruction loss.

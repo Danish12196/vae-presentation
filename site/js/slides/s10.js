@@ -6,7 +6,7 @@
 //   below the 1st percentile         -> ANOMALY (suspiciously easy: flat or blurry images)
 // The upside-down and colour-inverted cats pass as normal: the honest blind spot.
 
-import { drawCat, reconstruct, squaredError, inSlot, loadShowcase, getShowcaseCat, loadNotCats, loadJSON, encode, decode, toTensor, randn, SIZE } from "../models.js";
+import { drawCat, reconstruct, squaredError, inSlot, loadShowcase, getShowcaseCat, loadNotCats, loadJSON, loadSprite, encode, toTensor, randn, SIZE } from "../models.js";
 import { imagePicker, catPicker, slider, tabs } from "../ui.js";
 import { drawErrorHeatmap, histogram } from "../viz.js";
 import { loadLatentMap } from "../latentmap.js";
@@ -230,6 +230,7 @@ let jobCat = 0;
 let jobTab = "compress";
 let noise = null;
 let featureMap = null;
+let featureThumbs = null; // the map cats' own photos (data/map_thumbs.jpg, 32px tiles)
 
 async function initJobs(section) {
   const panels = [...section.querySelectorAll(".use-panel")];
@@ -279,6 +280,8 @@ async function initJobs(section) {
       dot: 2.2,
       label: "ae_2 codes of training cats. The crosshair is this cat.",
     });
+    const maps = await loadJSON("data/latent_maps.json");
+    featureThumbs = await loadSprite(`data/${maps.thumbs.file}`, maps.thumbs);
   }
   show("compress");
 }
@@ -313,12 +316,15 @@ async function refreshJob() {
     featureMap.setCrosshair(code);
     const label = document.querySelector(".uf-z");
     if (label) label.textContent = `z = (${code[0].toFixed(2)}, ${code[1].toFixed(2)})`;
+    // The real training cats whose codes sit nearest: decoding them through ae_2 would give the
+    // same blur four times, while the photos show what a shared code means.
     const nearest = featureMap.points
-      .map((p) => ({ p, d: (p[0] - code[0]) ** 2 + (p[1] - code[1]) ** 2 }))
+      .map((p, index) => ({ index, d: (p[0] - code[0]) ** 2 + (p[1] - code[1]) ** 2 }))
       .sort((a, b) => a.d - b.d)
       .slice(0, 4);
-    const images = await decode("ae_2", nearest.flatMap((n) => n.p));
-    if (mine !== jobRequest) return;
-    document.querySelectorAll(".uf-neighbours canvas").forEach((c, i) => drawCat(c, images, i));
+    if (mine !== jobRequest || !featureThumbs) return;
+    document.querySelectorAll(".uf-neighbours canvas").forEach((c, i) => {
+      c.getContext("2d").putImageData(featureThumbs.get(nearest[i].index), 0, 0);
+    });
   }
 }

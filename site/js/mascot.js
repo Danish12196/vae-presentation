@@ -28,7 +28,7 @@ const FACES = {
   confused: {
     eyes: roundEyes(72, 100, 128, 100, 11, 0, 0, 7),
     mouth: `<path d="M86 132 Q93 126 100 132 Q107 138 114 130" />`,
-    extra: `<text x="168" y="54" font-family="Fredoka, sans-serif" font-weight="700" font-size="46" fill="#a85b12">?</text>`,
+    extra: `<text x="168" y="54" font-family="Fredoka, sans-serif" font-weight="700" font-size="46" fill="#94500f">?</text>`,
   },
   sleepy: {
     eyes: `<path d="M60 102 Q72 110 84 102" /><path d="M116 102 Q128 110 140 102" />`,

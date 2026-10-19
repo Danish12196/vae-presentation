@@ -133,6 +133,10 @@ input {
   letter-spacing: -0.03em;
   text-shadow: 6px 6px 0 var(--stamp);
 }
+/* The plural "s" of VAEs stays small: "VAES" reads like a different acronym. */
+.title-slide h1 .keep-case {
+  text-transform: none;
+}
 .title-slide h1 .sub {
   display: block;
   margin-top: 0.35em;

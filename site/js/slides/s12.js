@@ -58,6 +58,9 @@ export async function init(section) {
   }
 
   section.querySelector("[data-random]").addEventListener("click", () => pick(map.randomPoint(), { counted: true }));
+  // Start in the middle of the crowd, so the output square shows a cat instead of an empty frame.
+  const median = (k) => points.map((p) => p[k]).sort((x, y) => x - y)[points.length >> 1];
+  pick([median(0), median(1)]);
 }
 
 export function leave() {

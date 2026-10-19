@@ -52,7 +52,7 @@
           <p class="part-label">MAAI901 · Deep Learning for Visual Data</p>
         </header>
         <div class="slide-body">
-          <h1>Autoencoders &amp; VAEs<span class="sub">teaching a network to imagine cats</span></h1>
+          <h1>Autoencoders &amp; VAE<span class="keep-case">s</span><span class="sub">teaching a network to imagine cats</span></h1>
           <p class="byline">Danish · MAAI901 · Tuesday 20 October 2026</p>
         </div>
         <p class="scroll-hint">scroll, swipe or use the arrow keys <span aria-hidden="true">↓</span></p>
@@ -251,15 +251,15 @@
             <div class="use-row">
               <figure><canvas class="cat-canvas uf-in" width="64" height="64" aria-label="Input cat"></canvas><figcaption class="mono uf-z">this cat</figcaption></figure>
               <div class="uf-map map-host"></div>
-              <div class="uf-neighbours" aria-label="Decoded neighbours">
-                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="Neighbour 1"></canvas></figure>
-                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="Neighbour 2"></canvas></figure>
-                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="Neighbour 3"></canvas></figure>
-                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="Neighbour 4"></canvas></figure>
+              <div class="uf-neighbours" aria-label="The four training cats with the nearest codes">
+                <figure><canvas class="cat-canvas small" width="32" height="32" aria-label="Nearest training cat 1"></canvas></figure>
+                <figure><canvas class="cat-canvas small" width="32" height="32" aria-label="Nearest training cat 2"></canvas></figure>
+                <figure><canvas class="cat-canvas small" width="32" height="32" aria-label="Nearest training cat 3"></canvas></figure>
+                <figure><canvas class="cat-canvas small" width="32" height="32" aria-label="Nearest training cat 4"></canvas></figure>
               </div>
             </div>
             <div class="uf-picker"></div>
-            <p class="use-caption">ae_2's code is a feature. These are the four nearest training codes, decoded. Hand z to another model and you can throw the decoder away.</p>
+            <p class="use-caption">ae_2's code is a feature. These are the training cats with the nearest codes. With only 2 numbers they share broad traits like lighting and pose, not the exact cat. Hand z to another model and you can throw the decoder away.</p>
           </div>
           <article class="card anomaly use-panel" data-tab="anomaly" hidden>
             <h3>Anomaly detection <span class="live-pill">live</span></h3>
@@ -571,7 +571,7 @@
             <h3 class="s17-title">the averaging problem</h3>
             <div class="s17-avg-row">
               <figure><canvas class="cat-canvas s17-avg" width="64" height="64" aria-label="Pixel average of the sharp cats"></canvas><figcaption class="s17-avg-label">average</figcaption></figure>
-              <div class="s17-strip" aria-label="The sharp cats being averaged"></div>
+              <div class="s17-strip" role="group" aria-label="The sharp cats being averaged"></div>
             </div>
             <div class="s17-slider"></div>
           </div>
@@ -598,7 +598,7 @@
                 <span class="arrow" aria-hidden="true">→</span>
                 <canvas class="cat-canvas small vq-mosaic" width="16" height="16" aria-label="A cat rebuilt from the 16 codes"></canvas>
               </div>
-              <p>discrete codes instead of a cloud. Used in the first DALL-E.</p>
+              <p>discrete codes instead of a cloud. A close cousin (dVAE) powered the first DALL-E.</p>
             </article>
           </div>
           <article class="card ext sd">
@@ -658,8 +658,8 @@
         </header>
         <div class="slide-body s20-body">
           <ol class="wrap-rows">
-            <li class="wrap-row" data-step="1"><span class="wrap-year mono">1989</span><span class="wrap-model">CNN</span><span class="wrap-result">LeCun et al. 1989 and 1998, then AlexNet in 2012. Tells images apart. Does not draw them.</span></li>
-            <li class="wrap-row" data-step="2"><span class="wrap-year mono">1986</span><span class="wrap-model">Autoencoder</span><span class="wrap-result">Rumelhart, Hinton &amp; Williams. A bottleneck code. Deep ones in 2006. Denoising in 2008.</span></li>
+            <li class="wrap-row" data-step="1"><span class="wrap-year mono">1986</span><span class="wrap-model">Autoencoder</span><span class="wrap-result">Rumelhart, Hinton &amp; Williams. A bottleneck code. Deep ones in 2006. Denoising in 2008.</span></li>
+            <li class="wrap-row" data-step="2"><span class="wrap-year mono">1989</span><span class="wrap-model">CNN</span><span class="wrap-result">LeCun et al. 1989 and 1998, then AlexNet in 2012. Tells images apart. Does not draw them.</span></li>
             <li class="wrap-row" data-step="3"><span class="wrap-year mono">2013</span><span class="wrap-model">VAE</span><span class="wrap-result">Kingma &amp; Welling, and Rezende, Mohamed &amp; Wierstra. A cloud you can sample.</span></li>
             <li class="wrap-row" data-step="4"><span class="wrap-year mono">2014</span><span class="wrap-model">GAN</span><span class="wrap-result">Goodfellow et al. Sharp, and it can collapse to one picture.</span></li>
             <li class="wrap-row" data-step="5"><span class="wrap-year mono">2015</span><span class="wrap-model">Diffusion</span><span class="wrap-result">Sohl-Dickstein et al. 2015, then Ho, Jain &amp; Abbeel’s DDPM in 2020. Many steps, high quality.</span></li>

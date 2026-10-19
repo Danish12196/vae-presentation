@@ -1,6 +1,6 @@
 {
- "version": "761500db7152",
- "total_bytes": 73046891,
+ "version": "96b6aeb8151d",
+ "total_bytes": 73048797,
  "files": [
   {
    "path": "404.html",
@@ -8,7 +8,7 @@
   },
   {
    "path": "css/base.css",
-   "bytes": 8599
+   "bytes": 8735
   },
   {
    "path": "css/components.css",
@@ -24,7 +24,7 @@
   },
   {
    "path": "css/part2.css",
-   "bytes": 12894
+   "bytes": 12928
   },
   {
    "path": "css/part3.css",
@@ -40,11 +40,11 @@
   },
   {
    "path": "css/part6.css",
-   "bytes": 14059
+   "bytes": 14380
   },
   {
    "path": "css/tokens.css",
-   "bytes": 1792
+   "bytes": 1840
   },
   {
    "path": "data/animals.790a2e.json",
@@ -132,7 +132,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 44418
+   "bytes": 44642
   },
   {
    "path": "js/latentmap.js",
@@ -144,7 +144,7 @@
   },
   {
    "path": "js/main.js",
-   "bytes": 9486
+   "bytes": 9665
   },
   {
    "path": "js/mascot.js",
@@ -196,11 +196,11 @@
   },
   {
    "path": "js/slides/s09.js",
-   "bytes": 3300
+   "bytes": 3612
   },
   {
    "path": "js/slides/s10.js",
-   "bytes": 10758
+   "bytes": 11188
   },
   {
    "path": "js/slides/s11.js",
@@ -208,7 +208,7 @@
   },
   {
    "path": "js/slides/s12.js",
-   "bytes": 4360
+   "bytes": 4582
   },
   {
    "path": "js/slides/s13.js",
