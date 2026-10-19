@@ -1,6 +1,6 @@
 {
- "version": "dfbf24fee59b",
- "total_bytes": 72516192,
+ "version": "01e50d181f88",
+ "total_bytes": 72513631,
  "files": [
   {
    "path": "404.html",
@@ -20,7 +20,7 @@
   },
   {
    "path": "css/part1.css",
-   "bytes": 14232
+   "bytes": 13111
   },
   {
    "path": "css/part2.css",
@@ -132,7 +132,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 36293
+   "bytes": 35632
   },
   {
    "path": "js/latentmap.js",
@@ -168,7 +168,7 @@
   },
   {
    "path": "js/slides/s02.js",
-   "bytes": 860
+   "bytes": 81
   },
   {
    "path": "js/slides/s03.js",

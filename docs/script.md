@@ -20,7 +20,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 *Slide: title. Tuesday 20 October 2026. No cats on this one.*
 
-*Slide: warm-up. "How many of you are cat people versus dog people?" Take a quick show of hands and tap the tally, one tap per hand. Then reset if you want a second go.*
+*Slide: warm-up. "Cat people or dog people?" Ask the room to raise hands. Count them yourself; the slide does not keep a tally.*
 
 *Slide: a CNN classifier taking an image and outputting "cat".*
 

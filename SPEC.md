@@ -46,7 +46,7 @@ VAEs use KL warm-up over the first 5 epochs.
 ## Slides (one full-screen section each)
 Part 1: From classification to generation
 1. Title: "Autoencoders & VAEs: teaching a network to imagine cats". Course line MAAI901 · Deep Learning for Visual Data, byline Danish · MAAI901 · Tuesday 20 October 2026. No cats on this slide.
-2. Warm-up: "Cat people or dog people?" A show-of-hands tally (one tap per hand, plus reset). Counts stay in the page; nothing is saved or sent. Cat content starts on the next slide.
+2. Warm-up: "Cat people or dog people?" A question for a show of hands in the room. No tally on the slide. Cat content starts on the next slide.
 3. Discriminative vs generative: the real cnn_cls classifies a picked image (cats plus a few held-out dogs and wild animals) with live probability bars. A flip switch reverses the arrow: "cat" -> a vae_128 cat. A button "ask the classifier to draw a cat" shows the precomputed gradient-ascent image: a psychedelic mess. It knows a cat when it sees one, but can't draw one.
 4. Encoder-decoder: layers build up one by one with real tensor shapes; hover a layer for its shape. A toggle swaps the end of the network: "classifier head" (outputs a label) vs "decoder" (outputs an image), showing they share the same encoder.
 5. The identity trap: toggle "make every layer as wide as the input". The network becomes "Photocopier Cat": loss 0.000, features learned: none.

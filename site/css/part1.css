@@ -1,4 +1,4 @@
-/* Opening slides: title (s01), warm-up tally (s02), discriminative vs generative
+/* Opening slides: title (s01), warm-up question (s02), discriminative vs generative
    (section s03, classes stay .s02-*), and the network diagram shared by s04 and s05. */
 
 /* Slide content sits above any decorative background. */
@@ -56,62 +56,33 @@
   }
 }
 
-/* ================================================================ s02 warm-up tally */
+/* ================================================================ s02 warm-up question */
 
-.hands-body {
+.ice-body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: calc(var(--gap) * 1.1);
-}
-.hands-ask {
-  margin: 0;
   text-align: center;
+  gap: 8px;
 }
-.hands {
-  display: flex;
-  gap: calc(var(--gap) * 1.25);
-  width: min(880px, 100%);
+.ice-body h2 {
+  font-size: clamp(52px, 7.4vw, 108px);
+  line-height: 0.92;
+  max-width: 11ch;
 }
-.hands-side {
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 240px;
-  padding: 18px;
-  border-radius: var(--radius);
-  border: 3px solid var(--line);
-  background: var(--bg-raised);
-  color: var(--text);
-  font-family: var(--font-head);
-  cursor: pointer;
-  transition: transform var(--t-fast) var(--ease), background-color var(--t-fast) linear;
-}
-.hands-side.cat { border-color: var(--coral); }
-.hands-side.dog { border-color: var(--sky); }
-.hands-side:hover { background: color-mix(in srgb, var(--bg-raised) 78%, var(--accent)); }
-.hands-side.dog:hover { background: color-mix(in srgb, var(--bg-raised) 78%, var(--sky)); }
-.hands-side:active { transform: scale(0.98); }
-.hands-name {
-  font-size: var(--fs-h3);
+.ice-or {
+  display: block;
+  margin: 0.18em 0;
+  font-size: 0.38em;
   font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sunflower);
 }
-.hands-count {
-  font-size: clamp(72px, 14vh, 128px);
-  font-weight: 700;
-  line-height: 0.95;
-}
-.hands-side.cat .hands-count { color: var(--coral); }
-.hands-side.dog .hands-count { color: var(--sky); }
-.hands-live {
-  margin: 0;
-  min-height: 1.4em;
-  text-align: center;
+.ice-note {
+  font-family: var(--font-head);
+  font-size: var(--fs-h3);
   color: var(--text-soft);
-  font-size: var(--fs-small);
 }
 
 /* ================================================================ s03 discriminative vs generative (classes .s02-*) */
@@ -516,11 +487,8 @@
   .s04-mascot {
     width: 110px;
   }
-  .hands-side {
-    min-height: 200px;
-  }
-  .hands-count {
-    font-size: clamp(64px, 16vh, 104px);
+  .ice-body h2 {
+    font-size: clamp(48px, 7vw, 84px);
   }
 }
 
@@ -533,18 +501,8 @@
     width: max-content;
     max-width: 90%;
   }
-  .hands {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .hands-side {
-    flex-direction: row;
-    justify-content: space-between;
-    min-height: 0;
-    padding: 14px 22px;
-  }
-  .hands-count {
-    font-size: 56px;
+  .ice-body h2 {
+    font-size: clamp(40px, 12vw, 56px);
   }
 
   .s02-body {
