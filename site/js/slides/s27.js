@@ -1,6 +1,7 @@
 // Interpolation: encode cat A and cat B, walk the straight line between their codes and decode
-// every step, for ae_128 (z) and vae_128 (mu). Two strips of 8 frames, and a scrubber with a big
-// live frame per model at the current t.
+// every step, for ae_128 (z) and vae_128 (mu). On top, the same walk in pixel space (a crossfade):
+// two ghost cats stacked, which is why we interpolate codes, not pixels. Strips of 8 frames, and a
+// scrubber with a big live frame per model at the current t.
 
 import { encode, decode, drawCat, drawTiles, inSlot, loadShowcase, getShowcaseCat } from "../models.js";
 import { catPicker, slider } from "../ui.js";
@@ -40,9 +41,23 @@ export async function init(el) {
 
 const lerp = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 
+/** The pixel crossfade strip: (1 - t) * A + t * B, pixel by pixel. */
+function drawPixels(a, b) {
+  const canvas = section.querySelector('.interp-row[data-model="pixels"] canvas');
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let f = 0; f < FRAMES; f++) {
+    const t = f / (FRAMES - 1);
+    const img = new ImageData(TILE, TILE);
+    for (let i = 0; i < img.data.length; i++) img.data[i] = a.data[i] * (1 - t) + b.data[i] * t;
+    ctx.putImageData(img, f * (TILE + GAP), 0);
+  }
+}
+
 async function refresh() {
   const mine = ++request;
   const images = [getShowcaseCat(picked.a), getShowcaseCat(picked.b)];
+  drawPixels(...images);
   for (const model of MODELS) {
     const row = section.querySelector(`.interp-row[data-model="${model}"]`);
     await inSlot(row.querySelector(".strip-wrap"), async () => {

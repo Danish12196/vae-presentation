@@ -716,7 +716,7 @@ figure > figcaption {
   font-size: var(--fs-small);
 }
 svg.num-stage {
-  width: min(1200px, 100%);
+  width: min(1500px, 100%);
   height: auto;
   max-height: calc(100dvh - 330px);
   overflow: visible;
@@ -965,3 +965,13 @@ svg.num-stage {
   .learn-row .cat-canvas { --cat-size: 60px; }
   .learn-canvas { max-width: 260px; }
 }
+
+/* s07 encoder blocks: front = the feature map, top/side = its depth (channels) */
+.num-block { stroke: var(--line); stroke-width: 2; }
+.num-block.front { fill: color-mix(in srgb, var(--sky) 55%, var(--bg-raised)); }
+.num-block.top { fill: color-mix(in srgb, var(--sky) 30%, var(--bg-raised)); }
+.num-block.side { fill: color-mix(in srgb, var(--sky) 75%, var(--bg-raised)); }
+.num-flow { stroke: var(--line); stroke-width: 2.5; fill: none; }
+.num-tiny { font-family: var(--font-mono); font-weight: 700; font-size: 17px; fill: var(--text-soft); }
+.num-wire.strong { opacity: 0.6; stroke-width: 2; }
+.num-step.on .num-layer { animation: num-pop var(--t-med) ease-out both; animation-delay: var(--delay); }

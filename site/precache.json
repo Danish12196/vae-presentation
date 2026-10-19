@@ -1,6 +1,6 @@
 {
- "version": "88fe140b56f5",
- "total_bytes": 74627330,
+ "version": "80a810e6dc85",
+ "total_bytes": 74337700,
  "files": [
   {
    "path": "404.html",
@@ -24,7 +24,7 @@
   },
   {
    "path": "css/part2.css",
-   "bytes": 18459
+   "bytes": 19164
   },
   {
    "path": "css/part3.css",
@@ -36,11 +36,11 @@
   },
   {
    "path": "css/part5.css",
-   "bytes": 20362
+   "bytes": 20478
   },
   {
    "path": "css/part6.css",
-   "bytes": 14380
+   "bytes": 15207
   },
   {
    "path": "css/tokens.css",
@@ -59,6 +59,14 @@
    "bytes": 3360
   },
   {
+   "path": "data/averages.191c4c.json",
+   "bytes": 78
+  },
+  {
+   "path": "data/averages.af8338.png",
+   "bytes": 10795
+  },
+  {
    "path": "data/cls_dream.4397af.json",
    "bytes": 210
   },
@@ -68,7 +76,7 @@
   },
   {
    "path": "data/files.json",
-   "bytes": 4337
+   "bytes": 4489
   },
   {
    "path": "data/latent_maps.061a28.json",
@@ -131,12 +139,12 @@
    "bytes": 439915
   },
   {
-   "path": "data/training.1809b8.json",
-   "bytes": 473031
+   "path": "data/training.de39e5.json",
+   "bytes": 218532
   },
   {
-   "path": "data/training_recon.748635.jpg",
-   "bytes": 115561
+   "path": "data/training_recon.009f84.jpg",
+   "bytes": 62082
   },
   {
    "path": "img/favicon.svg",
@@ -144,7 +152,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 51097
+   "bytes": 51260
   },
   {
    "path": "js/anim.js",
@@ -160,7 +168,7 @@
   },
   {
    "path": "js/learnview.js",
-   "bytes": 8576
+   "bytes": 9038
   },
   {
    "path": "js/loader.js",
@@ -216,7 +224,7 @@
   },
   {
    "path": "js/slides/s07.js",
-   "bytes": 11265
+   "bytes": 12461
   },
   {
    "path": "js/slides/s08.js",
@@ -292,7 +300,7 @@
   },
   {
    "path": "js/slides/s26.js",
-   "bytes": 3296
+   "bytes": 4417
   },
   {
    "path": "js/slides/s27.js",
@@ -300,7 +308,7 @@
   },
   {
    "path": "js/slides/s28.js",
-   "bytes": 3699
+   "bytes": 4450
   },
   {
    "path": "js/slides/s29.js",
@@ -308,7 +316,7 @@
   },
   {
    "path": "js/slides/s30.js",
-   "bytes": 4728
+   "bytes": 6710
   },
   {
    "path": "js/slides/s31.js",

@@ -4,8 +4,10 @@
 // a plain AE has no reason for the space between its codes to decode to cats.
 // No classifier scores: cnn_cls calls every decoder output "cat" (see SPEC), so the images speak.
 // Below: a small vae_2d_b1 map where any click decodes a plausible cat.
+// When data/gen_pool.json exists, the grids show samples from the bigger models in
+// training/train_v2.py (precomputed: too big for the browser); re-roll draws a fresh 24 from the pool.
 
-import { decode, drawCat, drawTiles, inSlot, loadManifest, randn } from "../models.js";
+import { decode, drawCat, drawTiles, inSlot, loadManifest, randn, loadJSON, loadSprite } from "../models.js";
 import { flipSwitch } from "../ui.js";
 import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
 
@@ -13,6 +15,7 @@ const COLS = 6, ROWS = 4, N = COLS * ROWS, LATENT = 128, GAP = 4;
 
 let vaeCanvas, aeCanvas, vaeFig, aeFig, fair = false, aeStats = null, dice, pickCanvas, map;
 let request = 0;
+let pool = null; // { parts: { vae: [start, n], ae_naive, ae_fair }, sprite }
 
 export async function init(section) {
   vaeFig = section.querySelector(".gen-vae");
@@ -22,6 +25,11 @@ export async function init(section) {
   dice = section.querySelector(".reroll");
   pickCanvas = section.querySelector(".s15-pick");
 
+  const meta = await loadJSON("data/gen_pool.json").catch(() => null);
+  if (meta) {
+    pool = { parts: meta.parts, sprite: await loadSprite(`data/${meta.file}`, meta) };
+    section.querySelector(".gen-note").hidden = false;
+  }
   const ae = (await loadManifest()).models.ae_128;
   if (ae?.code_mean) aeStats = { mean: ae.code_mean, std: ae.code_std };
 
@@ -69,7 +77,18 @@ async function reroll() {
   await rollAE();
 }
 
+/** 24 random tiles from one part of the precomputed pool. */
+function drawPool(canvas, part) {
+  const [start, n] = pool.parts[part];
+  const picks = new Set();
+  while (picks.size < N) picks.add(start + Math.floor(Math.random() * n));
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  [...picks].forEach((idx, i) => ctx.putImageData(pool.sprite.get(idx), (i % COLS) * (64 + GAP) + GAP / 2, Math.floor(i / COLS) * (64 + GAP) + GAP / 2));
+}
+
 async function rollVAE() {
+  if (pool) return drawPool(vaeCanvas, "vae");
   const mine = ++request;
   await inSlot(vaeFig, async () => {
     const images = await decode("vae_128", randn(N * LATENT));
@@ -78,6 +97,7 @@ async function rollVAE() {
 }
 
 async function rollAE() {
+  if (pool) return drawPool(aeCanvas, fair ? "ae_fair" : "ae_naive");
   const z = randn(N * LATENT);
   if (fair && aeStats) {
     for (let i = 0; i < z.length; i++) {

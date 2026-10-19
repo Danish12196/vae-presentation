@@ -4,7 +4,7 @@
 //   Meet Gary, a mode-collapsed GAN (an illustration: his cats are drawn by our VAE from one fixed
 //   code, with tiny jitter), next to nine genuinely different vae_128 samples.
 
-import { decode, drawTiles, inSlot, randn } from "../models.js";
+import { decode, drawTiles, inSlot, randn, loadJSON, loadSprite } from "../models.js";
 import { tabs } from "../ui.js";
 
 const ROWS = [
@@ -36,6 +36,10 @@ export async function init(section) {
   });
   highlight("vae");
 
+  // Real samples from a VAE, a GAN and a diffusion model, all trained on the same cats
+  // (training/train_v2.py, precomputed in data/compare_pool.json). Without them: the Gary illustration.
+  const meta = await loadJSON("data/compare_pool.json").catch(() => null);
+  if (meta) return realSamples(section, meta);
   grids = [...section.querySelectorAll(".gary-grid")];
   section.querySelector("[data-gary]").addEventListener("click", generate);
   await generate();
@@ -105,4 +109,32 @@ async function generate() {
       drawTiles(grids[g], images, { cols: 3, gap: GAP, inset: GAP / 2 });
     });
   }
+}
+
+/** The comparison with real models: nine samples each from the VAE, the GAN (Gary) and diffusion. */
+async function realSamples(section, meta) {
+  const sprite = await loadSprite(`data/${meta.file}`, meta);
+  const labels = { vae: "VAE", gan: "GAN", diffusion: "Diffusion" };
+  const notes = { vae: "one pass, blurry", gan: "one pass, sharp", diffusion: "100 steps, sharp and varied" };
+  const row = section.querySelector(".gary");
+  row.classList.add("trio");
+  row.innerHTML = Object.keys(meta.parts).map((k) => `
+    <figure class="trio-fig ${k}">
+      <figcaption><strong>${labels[k]}</strong> <span>${notes[k]}</span></figcaption>
+      <canvas class="trio-grid" width="${3 * 64 + 4 * GAP}" height="${3 * 64 + 4 * GAP}" data-part="${k}" aria-label="Nine ${labels[k]} samples"></canvas>
+    </figure>`).join("") + `<button type="button" class="btn primary" data-trio>new samples</button>`;
+  section.querySelector(".gary-caption").textContent =
+    "All three were trained on the same 29,331 cats on one GPU. Same data, three ways to generate. The GAN is Gary, now a real one.";
+  const draw = () => {
+    for (const c of row.querySelectorAll(".trio-grid")) {
+      const [start, n] = meta.parts[c.dataset.part];
+      const picks = new Set();
+      while (picks.size < 9) picks.add(start + Math.floor(Math.random() * n));
+      const ctx = c.getContext("2d");
+      ctx.clearRect(0, 0, c.width, c.height);
+      [...picks].forEach((idx, i) => ctx.putImageData(sprite.get(idx), GAP + (i % 3) * (64 + GAP), GAP + Math.floor(i / 3) * (64 + GAP)));
+    }
+  };
+  row.querySelector("[data-trio]").addEventListener("click", draw);
+  draw();
 }

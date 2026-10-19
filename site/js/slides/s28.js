@@ -3,12 +3,12 @@
 // Right: the averaging problem. If n different sharp cats are all plausible answers, the guess
 // with the lowest MSE is their pixel average, and the average of sharp cats is a blurry cat.
 
-import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat, SIZE } from "../models.js";
+import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat, SIZE, loadJSON, loadSprite } from "../models.js";
 import { catPicker, slider } from "../ui.js";
 
 const LOUPE_PX = 12; // the loupe shows a 12x12 pixel patch of the 64x64 image
 
-let orig, recon, hosts, avgCanvas, avgLabel, strip, count;
+let orig, recon, hosts, avgCanvas, avgLabel, strip, count, stops = [1], bigSprite = null;
 let cat = 0;
 
 export async function init(section) {
@@ -27,13 +27,18 @@ export async function init(section) {
       showAverage();
     },
   });
+  // Up to 64 the average is computed live from the showcase cats; beyond that it was
+  // precomputed from the training cats (data/averages.json), all the way to every one of them.
+  const big = await loadJSON("data/averages.json").catch(() => null);
+  bigSprite = big ? await loadSprite(`data/${big.file}`, big) : null;
+  stops = [1, 2, 4, 8, 16, 32, 64, ...(big?.counts ?? [])];
   count = slider(section.querySelector(".s17-slider"), {
     label: "possible answers to hedge between",
-    min: 1,
-    max: 8,
+    min: 0,
+    max: stops.length - 1,
     step: 1,
-    value: 1,
-    format: (v) => `${v} cat${v > 1 ? "s" : ""}`,
+    value: 0,
+    format: (i) => `${stops[i].toLocaleString("en")} cat${stops[i] > 1 ? "s" : ""}`,
     onInput: showAverage,
   });
 
@@ -83,20 +88,29 @@ function hideLoupe() {
   for (const l of document.querySelectorAll("#s22 .loupe")) l.classList.remove("on");
 }
 
-/** Pixel average of n showcase cats, starting with the picked one. */
+/** Pixel average of n cats, starting with the picked one (precomputed past 64). */
 function showAverage() {
-  const n = count.value;
-  const cats = Array.from({ length: n }, (_, k) => getShowcaseCat((cat + k * 7) % 64));
-  const avg = new ImageData(SIZE, SIZE);
-  for (let i = 0; i < avg.data.length; i++) {
-    let sum = 0;
-    for (const c of cats) sum += c.data[i];
-    avg.data[i] = sum / n;
+  const n = stops[count.value];
+  const cats = Array.from({ length: Math.min(n, 64) }, (_, k) => getShowcaseCat((cat + k * 7) % 64));
+  if (n > 64) {
+    drawCat(avgCanvas, bigSprite.get(stops.indexOf(n) - 7));
+  } else {
+    const avg = new ImageData(SIZE, SIZE);
+    for (let i = 0; i < avg.data.length; i++) {
+      let sum = 0;
+      for (const c of cats) sum += c.data[i];
+      avg.data[i] = sum / n;
+    }
+    drawCat(avgCanvas, avg);
   }
-  drawCat(avgCanvas, avg);
-  avgLabel.textContent = n === 1 ? "one sharp cat" : `average of ${n}`;
+  avgLabel.textContent = n === 1 ? "one sharp cat" : `average of ${n.toLocaleString("en")}${n > 64 ? " training cats" : ""}`;
+  // the strip shows at most 8 of the cats being averaged, then how many more
+  const more = document.createElement("span");
+  more.className = "s17-more mono";
+  more.textContent = n > 8 ? `+ ${(n - 8).toLocaleString("en")} more` : "";
   strip.replaceChildren(
-    ...cats.map((c) => {
+    more,
+    ...cats.slice(0, 8).map((c) => {
       const t = document.createElement("canvas");
       t.className = "cat-canvas small";
       drawCat(t, c);

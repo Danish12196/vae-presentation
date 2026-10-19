@@ -128,8 +128,9 @@ def make_model(run, num_classes=3):
     return AutoEncoder(run.latent, relu_code=run.kind == "sparse")
 
 
-def train(run, out, train_set, device, workers, previews=None, test=None, on_epoch=None):
-    """on_epoch(model, epoch) runs before training (epoch 0) and after every epoch (snapshots.py)."""
+def train(run, out, train_set, device, workers, previews=None, test=None, on_epoch=None, on_step=None):
+    """on_epoch(model, epoch) runs before training (epoch 0) and after every epoch; on_step(model, step, parts)
+    after every optimiser step (snapshots.py uses both)."""
     torch.manual_seed(0)
     out.mkdir(parents=True, exist_ok=True)
     num_classes = len(test["classes"]) if run.kind == "cls" else 3
@@ -162,6 +163,8 @@ def train(run, out, train_set, device, workers, previews=None, test=None, on_epo
             loss.backward()
             opt.step()
             sched.step()
+            if on_step:
+                on_step(model, (epoch - 1) * len(loader) + step + 1, {k: v.item() for k, v in parts.items()})
             for k, v in {"loss": loss, **parts}.items():
                 totals[k] = totals.get(k, 0.0) + v.item()
 

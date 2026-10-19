@@ -943,3 +943,7 @@ svg.worlds-svg {
   .vae-pipe { font-size: 13px; gap: 6px; }
   .pipe-trap { padding: 6px 14px; }
 }
+
+.gen-note { margin: 0; max-width: 26ch; font-size: var(--fs-label); color: var(--text-soft); text-align: center; }
+
+.interp-row[data-model="pixels"] .row-label { color: var(--text-soft); }

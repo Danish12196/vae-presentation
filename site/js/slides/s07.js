@@ -17,8 +17,8 @@ const NS = "http://www.w3.org/2000/svg";
 const LAST = 5;
 const CAT = { x: 40, y: 130, size: 200 };
 const COL = { x: 380, top: 70, bottom: 450, n: 15 };
-const CODE = { x: 700, y: [215, 285], r: 24 };
-const PLOT = { x0: 840, x1: 1160, y0: 430, y1: 70 };
+const CODE = { x: 755, y: [215, 285], r: 24 };
+const PLOT = { x0: 880, x1: 1180, y0: 430, y1: 70 };
 const FLY = 15; // pixels that visibly fly into the column
 
 let svg, els = {}, b, cat = 0, image = null, code = [0, 0], points = [], colours = [], bounds;
@@ -69,6 +69,9 @@ const toPlot = ([zx, zy]) => [
 
 function build() {
   svg.setAttribute("viewBox", "0 0 1200 500");
+  const defs = el("defs");
+  const m = el("marker", { id: "num-arrow", viewBox: "0 0 10 10", refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
+  el("path", { d: "M 0 0 L 10 5 L 0 10 z", class: "num-arrowhead" }, m);
   // 0: the cat (an <image> filled from a canvas) and its frame
   els.catImg = el("image", { x: CAT.x, y: CAT.y, width: CAT.size, height: CAT.size, style: "image-rendering: pixelated" });
   el("rect", { x: CAT.x, y: CAT.y, width: CAT.size, height: CAT.size, class: "num-frame" });
@@ -102,16 +105,30 @@ function build() {
 
   // 3: encoder and the two code neurons with their values
   els.encoder = el("g", { class: "num-step", "data-from": 3 });
-  el("path", { d: `M 430 40 L 620 190 L 620 310 L 430 460 Z`, class: "num-encoder" }, els.encoder);
-  text("encoder", { x: 525, y: 258, class: "num-label", "text-anchor": "middle" }, els.encoder);
+  // The real ae_2 encoder: each conv layer halves the picture and adds channels.
+  // Block height = picture size, depth = channels (both squashed so they fit).
+  const LAYERS = [[32, 32], [64, 16], [128, 8], [256, 4]]; // [channels, pixels wide]
+  let bx = 432;
+  LAYERS.forEach(([c, px], i) => {
+    const h = 60 + px * 5.2, w = 10 + Math.sqrt(c) * 1.6, d = 8 + Math.sqrt(c) * 1.1;
+    const y = 250 - h / 2;
+    const g = el("g", { class: "num-layer", style: `--delay: ${i * 120}ms` }, els.encoder);
+    el("polygon", { points: `${bx},${y} ${bx + d},${y - d} ${bx + d + w},${y - d} ${bx + w},${y}`, class: "num-block top" }, g);
+    el("polygon", { points: `${bx + w},${y} ${bx + d + w},${y - d} ${bx + d + w},${y + h - d} ${bx + w},${y + h}`, class: "num-block side" }, g);
+    el("rect", { x: bx, y, width: w, height: h, class: "num-block front" }, g);
+    text(`${c}×${px}×${px}`, { x: bx + w / 2 + d / 2, y: i % 2 ? 250 + h / 2 + 30 : 250 - h / 2 - d - 12, class: "num-tiny", "text-anchor": "middle" }, g);
+    if (i < LAYERS.length - 1) el("path", { d: `M ${bx + w + d + 4} 250 h 14`, class: "num-flow", "marker-end": "url(#num-arrow)" }, els.encoder);
+    bx += w + d + 24;
+  });
+  text("encoder: 4 conv layers", { x: 532, y: 470, class: "num-label", "text-anchor": "middle" }, els.encoder);
   for (let i = 0; i < 14; i++) {
     const y = COL.top + (i < 7 ? i : i + 1) * gap;
-    el("line", { x1: COL.x + 12, y1: y, x2: 430, y2: lerp(60, 440, i / 13), class: "num-wire" }, els.encoder);
+    el("line", { x1: COL.x + 12, y1: y, x2: 432, y2: lerp(170, 330, i / 13), class: "num-wire" }, els.encoder);
   }
   els.codeGroup = el("g", { class: "num-step", "data-from": 3 });
   els.code = CODE.y.map((y, i) => {
     const g = el("g", {}, els.codeGroup);
-    el("line", { x1: 620, y1: i ? 290 : 210, x2: CODE.x - CODE.r, y2: y, class: "num-wire" }, g);
+    el("line", { x1: 648, y1: 250, x2: CODE.x - CODE.r, y2: y, class: "num-wire strong" }, g);
     const c = el("circle", { cx: CODE.x, cy: y, r: CODE.r, class: "num-code" }, g);
     const v = text("", { x: CODE.x + 36, y: y + 8, class: "num-mono num-value" }, g);
     const name = text(`neuron ${i + 1}`, { x: CODE.x, y: i ? y + 52 : y - 36, class: "num-small", "text-anchor": "middle" }, g);
@@ -123,10 +140,7 @@ function build() {
   els.axes = el("g", { class: "num-step", "data-from": 4 });
   el("line", { x1: PLOT.x0, y1: PLOT.y0, x2: PLOT.x1 + 10, y2: PLOT.y0, class: "num-axis", "marker-end": "url(#num-arrow)" }, els.axes);
   el("line", { x1: PLOT.x0, y1: PLOT.y0, x2: PLOT.x0, y2: PLOT.y1 - 10, class: "num-axis", "marker-end": "url(#num-arrow)" }, els.axes);
-  const defs = el("defs");
-  const m = el("marker", { id: "num-arrow", viewBox: "0 0 10 10", refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
-  el("path", { d: "M 0 0 L 10 5 L 0 10 z", class: "num-arrowhead" }, m);
-  text("z1 = neuron 1", { x: PLOT.x1, y: PLOT.y0 + 34, class: "num-small", "text-anchor": "end" }, els.axes);
+  text("z1 = neuron 1", { x: PLOT.x1, y: PLOT.y0 - 14, class: "num-small", "text-anchor": "end" }, els.axes);
   text("z2 = neuron 2", { x: PLOT.x0 + 12, y: PLOT.y1 - 16, class: "num-small" }, els.axes);
 
   // 5: every training cat
@@ -184,8 +198,9 @@ function show(n, { animate }) {
       nn.c.setAttribute("cx", x);
       nn.c.setAttribute("cy", y);
       nn.c.setAttribute("r", lerp(CODE.r, 12, t));
-      nn.v.setAttribute("x", x + (j === 0 ? -22 : -60));
-      nn.v.setAttribute("y", y + (j === 0 ? 40 : 8));
+      // next to the neuron (t = 0), under / left of its axis (t = 1)
+      nn.v.setAttribute("x", x + lerp(36, j === 0 ? -22 : -66, t));
+      nn.v.setAttribute("y", y + lerp(9, j === 0 ? 40 : 8, t));
       nn.name.setAttribute("opacity", 1 - t);
       nn.g.querySelector("line").setAttribute("opacity", 1 - t);
     });

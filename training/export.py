@@ -360,9 +360,20 @@ def export_latent_sizes(loaded, map_cats, device):
     write_json(OUT / "latent_sizes.json", out)
 
 
+def export_averages(train_cats):
+    """Pixel averages of many training cats for the blur slide: the average of sharp cats is a
+    blurry cat, and of thousands of them a beige ghost. (Up to 64 the site averages live.)"""
+    order = np.random.default_rng(SEED).permutation(len(train_cats))
+    counts = [512, 2048, len(train_cats)]
+    avgs = np.stack([train_cats[order[:n]].astype(np.float64).mean(0).round().astype(np.uint8) for n in counts])
+    meta = save_sprite(avgs, OUT / "averages.png", cols=len(counts))
+    write_json(OUT / "averages.json", {"file": "averages.png", "counts": counts, **meta})
+
+
 def export_training():
-    """The snapshot replays (snapshots.py): loss per epoch, the latent map after every epoch and
-    four showcase cats rebuilt after every epoch, for the "Watch it learn" slides."""
+    """The snapshot replays (snapshots.py) for the "Watch it learn" slides: the loss at about 300
+    log-spaced steps (each averaged over its window), and at every snapshot step the latent map
+    of 600 cats and four showcase cats rebuilt."""
     out = {"models": {}}
     rows = []
     for name in ("ae_2", "vae_2d_b1"):
@@ -371,16 +382,23 @@ def export_training():
             print(f"skipping training replay of {name}: run snapshots.py first")
             continue
         npz = np.load(path)
-        history = npz["history"]
-        out["models"][name] = {
-            "epochs": int(len(npz["codes"]) - 1),  # snapshot 0 is before training
-            "loss": rounded(history[:, 0], 2), "recon": rounded(history[:, 1], 2),
-            "kl": None if np.isnan(history[:, 2]).all() else rounded(history[:, 2], 2),
-            "codes": [rounded(c, 2) for c in npz["codes"]],
-        }
+        per_step = npz["per_step"]  # (steps, 2): recon, kl
+        total = len(per_step)
+        edges = np.unique(np.geomspace(1, total, 300).round().astype(int))
+        lo = np.concatenate([[0], edges[:-1]])
+        curve_steps = edges.tolist()
+        recon = [float(per_step[a:b, 0].mean()) for a, b in zip(lo, edges)]
+        kl = None if np.isnan(per_step[:, 1]).all() else [float(per_step[a:b, 1].mean()) for a, b in zip(lo, edges)]
         if not rows:
             rows.append(npz["originals"])
-        out["models"][name]["recon_row"] = len(rows)
+        out["models"][name] = {
+            "steps": npz["steps"].tolist(),             # snapshot steps (0 = before training)
+            "steps_per_epoch": int(npz["steps_per_epoch"]),
+            "total_steps": int(total),
+            "curve": {"steps": curve_steps, "recon": rounded(recon, 2), "kl": None if kl is None else rounded(kl, 3)},
+            "codes": [rounded(c, 2) for c in npz["codes"]],
+            "recon_row": len(rows),
+        }
         rows.extend(npz["recons"])  # one row of 4 cats per snapshot
     if not out["models"]:
         return
@@ -543,6 +561,7 @@ def main():
     if "ae_2" in loaded:
         export_latent_sizes(loaded, map_cats, device)
     export_training()
+    export_averages(train_cats)
     if SPARSE & loaded.keys():
         export_sparse_codes(loaded, held_out, device)
     write_manifest(loaded, {}, map_cats, device)  # placeholder so its size counts below
