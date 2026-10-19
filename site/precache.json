@@ -1,7 +1,11 @@
 {
- "version": "678f50a7b0b4",
- "total_bytes": 72516526,
+ "version": "4aca79b23514",
+ "total_bytes": 72519189,
  "files": [
+  {
+   "path": "404.html",
+   "bytes": 2663
+  },
   {
    "path": "css/base.css",
    "bytes": 8459
