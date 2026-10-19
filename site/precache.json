@@ -1,6 +1,6 @@
 {
- "version": "ce35c0b364a4",
- "total_bytes": 72519524,
+ "version": "e10b070ab713",
+ "total_bytes": 72517115,
  "files": [
   {
    "path": "404.html",
@@ -12,7 +12,7 @@
   },
   {
    "path": "css/components.css",
-   "bytes": 11253
+   "bytes": 11710
   },
   {
    "path": "css/fonts.css",
@@ -20,11 +20,11 @@
   },
   {
    "path": "css/part1.css",
-   "bytes": 13698
+   "bytes": 13672
   },
   {
    "path": "css/part2.css",
-   "bytes": 12424
+   "bytes": 11969
   },
   {
    "path": "css/part3.css",
@@ -32,7 +32,7 @@
   },
   {
    "path": "css/part4.css",
-   "bytes": 3626
+   "bytes": 3419
   },
   {
    "path": "css/part5.css",
@@ -132,15 +132,15 @@
   },
   {
    "path": "index.html",
-   "bytes": 36596
+   "bytes": 35250
   },
   {
    "path": "js/latentmap.js",
-   "bytes": 11360
+   "bytes": 11350
   },
   {
    "path": "js/loader.js",
-   "bytes": 3576
+   "bytes": 3420
   },
   {
    "path": "js/main.js",
@@ -152,11 +152,11 @@
   },
   {
    "path": "js/models.js",
-   "bytes": 15318
+   "bytes": 15301
   },
   {
    "path": "js/netdiagram.js",
-   "bytes": 6208
+   "bytes": 6174
   },
   {
    "path": "js/offline.js",
@@ -196,7 +196,7 @@
   },
   {
    "path": "js/slides/s09.js",
-   "bytes": 9847
+   "bytes": 9792
   },
   {
    "path": "js/slides/s10.js",
@@ -216,15 +216,15 @@
   },
   {
    "path": "js/slides/s14.js",
-   "bytes": 10996
+   "bytes": 10973
   },
   {
    "path": "js/slides/s15.js",
-   "bytes": 3381
+   "bytes": 3296
   },
   {
    "path": "js/slides/s16.js",
-   "bytes": 2936
+   "bytes": 2891
   },
   {
    "path": "js/slides/s17.js",
@@ -236,7 +236,7 @@
   },
   {
    "path": "js/slides/s19.js",
-   "bytes": 4496
+   "bytes": 4451
   },
   {
    "path": "js/slides/s20.js",
@@ -244,7 +244,7 @@
   },
   {
    "path": "js/slides/s21.js",
-   "bytes": 1656
+   "bytes": 1607
   },
   {
    "path": "js/state.js",
@@ -252,7 +252,7 @@
   },
   {
    "path": "js/ui.js",
-   "bytes": 9815
+   "bytes": 9502
   },
   {
    "path": "js/viz.js",

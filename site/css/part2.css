@@ -216,15 +216,6 @@ figure > figcaption {
 .readout.dim {
   opacity: 0.35;
 }
-.formula {
-  padding: 10px 16px;
-  border-radius: var(--radius-small);
-  background: var(--bg-sunken);
-  border: 2px solid var(--line);
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  line-height: 1.35;
-}
 .labels-used {
   display: flex;
   align-items: center;
@@ -433,18 +424,6 @@ figure > figcaption {
   flex-wrap: wrap;
   gap: 8px 14px;
   min-height: 48px;
-}
-.verdict-chip {
-  padding: 6px 20px;
-  border-radius: 999px;
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: var(--fs-body);
-  color: var(--bg);
-  background: var(--mint);
-}
-.verdict-chip:empty {
-  display: none;
 }
 .verdict-chip[data-level="warn"] {
   background: var(--sunflower);

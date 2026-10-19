@@ -18,6 +18,7 @@ import { loadJSON } from "./models.js";
 
 const DOT = 3.2;          // default dot radius in CSS pixels
 const MORPH_MS = 900;
+const easeInOut = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
 
 function percentile(sorted, q) {
   return sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))))];
@@ -86,7 +87,7 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
   function currentPoints(now = performance.now()) {
     if (!morph) return api.points;
     const t = Math.min(1, (now - morph.start) / MORPH_MS);
-    const k = t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2; // ease in-out
+    const k = easeInOut(t);
     if (t >= 1) {
       morph = null;
       return api.points;
@@ -130,7 +131,7 @@ export function latentMap(container, { points, colours, extent = 2, view = null,
   function stepView(now) {
     if (!viewAnim) return;
     const t = Math.min(1, (now - viewAnim.start) / MORPH_MS);
-    const k = t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+    const k = easeInOut(t);
     const { from, to } = viewAnim;
     // Zoom geometrically, so zooming in and out feel equally fast.
     api.view = {

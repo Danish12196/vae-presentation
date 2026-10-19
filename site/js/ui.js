@@ -36,11 +36,9 @@ export function imagePicker(el, { items, selected = 0, columns = items.length, o
   }
   pick(selected, false);
   return {
-    el: grid,
     get value() {
       return current;
     },
-    set: pick,
   };
 }
 
@@ -50,11 +48,9 @@ export async function catPicker(el, { count = 8, start = 0, selected = 0, onPick
   const items = Array.from({ length: count }, (_, i) => ({ image: getShowcaseCat(start + i), label: `Cat ${start + i + 1}` }));
   const picker = imagePicker(el, { items, selected: selected - start, onPick: (i) => onPick(start + i) });
   return {
-    el: picker.el,
     get value() {
       return start + picker.value;
     },
-    set: (i, notify) => picker.set(i - start, notify),
   };
 }
 
@@ -80,7 +76,6 @@ export function flipSwitch(el, { left, right, value = false, label = `${left} or
   rightEl.addEventListener("click", () => !input.checked && set(true));
   set(value, false);
   return {
-    el: wrap,
     get value() {
       return input.checked;
     },
@@ -138,14 +133,8 @@ export function slider(el, { label, min = 0, max = 1, step = 0.01, value = min, 
   input.addEventListener("input", () => onInput(update()));
   update();
   return {
-    el: wrap,
-    input,
     get value() {
       return Number(input.value);
-    },
-    set value(v) {
-      input.value = v;
-      update();
     },
   };
 }
@@ -158,12 +147,8 @@ export function toggle(el, { label, checked = false, onChange = () => {} } = {})
   const wrap = h("label", { class: "toggle" }, input, h("span", { class: "toggle-track" }), h("span", {}, label));
   el.append(wrap);
   return {
-    el: wrap,
     get checked() {
       return input.checked;
-    },
-    set checked(v) {
-      input.checked = v;
     },
   };
 }
@@ -197,11 +182,9 @@ export function tabs(el, { tabs: items, selected = items[0].id, onChange = () =>
   }
   select(selected, false);
   return {
-    el: bar,
     get value() {
       return current;
     },
-    select,
   };
 }
 
@@ -218,7 +201,6 @@ export function probBars(el, classes, { colours = {} } = {}) {
   });
   el.append(grid);
   return {
-    el: grid,
     update(probs) {
       const best = Math.max(...classes.map((c) => probs[c] ?? 0));
       for (const r of rows) {

@@ -74,6 +74,12 @@
 .formula-bar .formula {
   margin: 0;
   padding: 6px 14px;
+  border-radius: var(--radius-small);
+  background: var(--bg-sunken);
+  border: 2px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  line-height: 1.35;
 }
 .formula-bar:has(.is-active) .formula:not(.is-active) {
   opacity: 0.72;
@@ -442,6 +448,7 @@
 .flip .toggle-track::after {
   width: 32px;
   height: 32px;
+  background: var(--accent);
 }
 .flip .toggle input:checked + .toggle-track::after {
   transform: translateX(40px);
@@ -451,9 +458,6 @@
 .flip .toggle input:checked + .toggle-track {
   background: color-mix(in srgb, var(--accent) 30%, var(--bg-sunken));
   border-color: var(--accent);
-}
-.flip .toggle-track::after {
-  background: var(--accent);
 }
 
 /* A grid of images to choose from (cats, dogs, wild animals). */
@@ -480,6 +484,20 @@
 }
 .missing .training-card.compact {
   max-width: 100%;
+}
+
+/* Verdict chips on the anomaly slide and the latent-map slide. */
+.verdict-chip {
+  padding: 6px 20px;
+  border-radius: 999px;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  color: var(--bg);
+  background: var(--mint);
+}
+.verdict-chip:empty {
+  display: none;
 }
 
 @media (max-width: 760px) {

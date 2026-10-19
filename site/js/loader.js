@@ -69,21 +69,13 @@ async function download(path, onBytes) {
   if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
   const reader = res.body.getReader();
   const chunks = [];
-  let size = 0;
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
     chunks.push(value);
-    size += value.length;
     onBytes(value.length);
   }
-  const out = new Uint8Array(size);
-  let offset = 0;
-  for (const c of chunks) {
-    out.set(c, offset);
-    offset += c.length;
-  }
-  return out.buffer;
+  return new Blob(chunks).arrayBuffer();
 }
 
 /** Run fn over items with at most `limit` running at once. */

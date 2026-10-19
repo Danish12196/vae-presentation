@@ -88,7 +88,7 @@ export function netDiagram(stage, { ending = "decoder", onInfo = null, built = I
       el.tabIndex = 0;
       const show = () => {
         for (const c of columns) c.el.classList.toggle("active", c.el === el);
-        onInfo(infoText(layer, wide), layer);
+        onInfo(infoText(layer, wide));
       };
       el.addEventListener("pointerenter", show);
       el.addEventListener("focus", show);
@@ -143,13 +143,13 @@ export function netDiagram(stage, { ending = "decoder", onInfo = null, built = I
     update();
     const c = columns[shown - 1];
     for (const o of columns) o.el.classList.toggle("active", o === c);
-    onInfo?.(infoText(c.layer, wide), c.layer);
+    onInfo?.(infoText(c.layer, wide));
     return shown < columns.length;
   };
   api.reset = () => {
     shown = 1;
     update();
-    onInfo?.(infoText(columns[0].layer, wide), columns[0].layer);
+    onInfo?.(infoText(columns[0].layer, wide));
   };
   api.showAll = () => {
     shown = Infinity;

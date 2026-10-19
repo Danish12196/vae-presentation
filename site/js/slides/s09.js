@@ -8,7 +8,7 @@
 
 import {
   drawCat, encode, decode, reconstruct, inSlot, renderTraining, loadShowcase, getShowcaseCat,
-  loadManifest, loadJSON, loadSprite, toTensor, randn, ort, SIZE,
+  loadManifest, loadJSON, loadSprite, toTensor, randn, SIZE,
 } from "../models.js";
 import { catPicker, tabs, toggle, slider, readout } from "../ui.js";
 import { netDiagram } from "../netdiagram.js";
@@ -17,11 +17,11 @@ const PIXELS = 3 * SIZE * SIZE;
 const JIGGLE_EVERY = 250; // ms
 const BAR_MAX = 0.5;      // code movement / code spread that fills a bar
 
-/** base + scale * noise, each value clamped into [0, 1], as one image tensor. */
+/** base + scale * noise, each value clamped into [0, 1], as one CHW image. */
 function noisyImage(base, scale, noise) {
   const noisy = new Float32Array(PIXELS);
   for (let i = 0; i < PIXELS; i++) noisy[i] = Math.min(1, Math.max(0, base[i] + scale * noise[i]));
-  return new ort.Tensor("float32", noisy, [1, 3, SIZE, SIZE]);
+  return noisy;
 }
 
 let section, cat = 0, tab = "sparse", active = false;

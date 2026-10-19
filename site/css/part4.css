@@ -107,15 +107,6 @@
 }
 .s10-verdict .verdict-chip {
   padding: 6px 22px;
-  border-radius: 999px;
-  font-family: var(--font-head);
-  font-weight: 700;
-  font-size: var(--fs-body);
-  color: var(--bg);
-  background: var(--mint);
-}
-.s10-verdict .verdict-chip:empty {
-  display: none;
 }
 .s10-verdict .verdict-chip[data-level="bad"] {
   background: var(--lilac);

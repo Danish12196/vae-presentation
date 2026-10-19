@@ -177,14 +177,12 @@
 }
 .flow-bars .prob-bars {
   max-width: none;
+  font-size: var(--fs-small);
 }
 .flow-out > *,
 .flow-caption > span {
   grid-area: 1 / 1;
   transition: opacity var(--t-med) linear;
-}
-.flow-bars .prob-bars {
-  font-size: var(--fs-small);
 }
 .flow-label {
   padding: 10px 34px;
