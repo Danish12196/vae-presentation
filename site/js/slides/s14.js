@@ -178,8 +178,7 @@ function routeLength(route) {
   return total;
 }
 
-function pointOn(route, t) {
-  let d = t * routeLength(route);
+function pointOn(route, d) {
   for (let i = 1; i < route.length; i++) {
     const len = Math.hypot(route[i][0] - route[i - 1][0], route[i][1] - route[i - 1][1]);
     if (d <= len) {
@@ -215,7 +214,7 @@ function tick(now) {
   }
   for (const p of particles) {
     p.t += (dt * PX_SPEED) / p.length;
-    const [x, y] = pointOn(p.route, Math.min(1, p.t));
+    const [x, y] = pointOn(p.route, Math.min(1, p.t) * p.length);
     p.el.setAttribute("cx", x);
     p.el.setAttribute("cy", y);
     if (p.t >= 1) p.el.classList.add(mode === "naive" ? "stuck" : "arrived");

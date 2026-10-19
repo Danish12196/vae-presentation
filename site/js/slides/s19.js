@@ -4,7 +4,7 @@
 //   Meet Gary, a mode-collapsed GAN (an illustration: his cats are drawn by our VAE from one fixed
 //   code, with tiny jitter), next to nine genuinely different vae_128 samples.
 
-import { decode, drawTiles, inSlot, randn, ort } from "../models.js";
+import { decode, drawTiles, inSlot, randn } from "../models.js";
 import { tabs } from "../ui.js";
 
 const ROWS = [
@@ -99,7 +99,7 @@ async function generate() {
   const batches = [garyBatch, randn(9 * LATENT)];
   for (let g = 0; g < 2; g++) {
     await inSlot(grids[g].closest("figure"), async () => {
-      const images = await decode("vae_128", new ort.Tensor("float32", batches[g], [9, LATENT]));
+      const images = await decode("vae_128", batches[g]);
       drawTiles(grids[g], images, { cols: 3, gap: GAP, inset: GAP / 2 });
     });
   }

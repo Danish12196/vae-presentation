@@ -47,13 +47,13 @@
     </nav>
 
     <main id="deck">
-      <section class="slide title-slide" id="s01" data-part="1" data-title="Autoencoders & VAEs" data-accent="coral">
+      <section class="slide title-slide" id="s01" data-accent="coral">
         <!-- Drifting mosaic of held-out cats; js/slides/s01.js swaps in cats freshly made by vae_128 -->
         <div class="mosaic" aria-hidden="true"><div class="mosaic-drift"><canvas class="mosaic-canvas"></canvas></div></div>
         <header class="slide-head">
           <p class="part-label">Part 1 · From classification to generation</p>
         </header>
-        <div class="slide-body" data-demo>
+        <div class="slide-body">
           <div class="title-mascot" data-mascot="happy" data-animate></div>
           <h1>Autoencoders &amp; VAEs<span class="sub">teaching a network to imagine cats</span></h1>
           <p class="byline">Danish · MAAI901 · 16 October 2026</p>
@@ -61,12 +61,12 @@
         <p class="scroll-hint">scroll, swipe or use the arrow keys <span aria-hidden="true">↓</span></p>
       </section>
 
-      <section class="slide" id="s02" data-part="1" data-title="Discriminative vs generative" data-accent="coral">
+      <section class="slide" id="s02" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>Discriminative vs generative</h2>
         </header>
-        <div class="slide-body s02-body" data-demo>
+        <div class="slide-body s02-body">
           <div class="panel s02-picker"></div>
           <div class="panel s02-main">
             <div class="s02-switch"></div>
@@ -89,12 +89,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s03" data-part="1" data-title="Encoder and decoder" data-accent="coral">
+      <section class="slide" id="s03" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>Encoder and decoder</h2>
         </header>
-        <div class="slide-body net-body" data-demo>
+        <div class="slide-body net-body">
           <div class="net-controls">
             <button type="button" class="btn primary" data-next>next layer</button>
             <div class="net-switch"></div>
@@ -105,12 +105,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s04" data-part="1" data-title="The identity trap" data-accent="coral">
+      <section class="slide" id="s04" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>The identity trap</h2>
         </header>
-        <div class="slide-body net-body s04-body" data-demo>
+        <div class="slide-body net-body">
           <div class="net-controls"><div class="s04-toggle"></div></div>
           <div class="net-stage"></div>
           <div class="s04-bottom">
@@ -121,12 +121,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s05" data-part="2" data-title="The bottleneck" data-accent="sunflower">
+      <section class="slide" id="s05" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>The bottleneck</h2>
         </header>
-        <div class="slide-body s05-body" data-demo>
+        <div class="slide-body s05-body">
           <div class="bn-row">
             <figure class="bn-img"><canvas class="cat-canvas" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
             <div class="bn-diagram" aria-hidden="true">
@@ -151,17 +151,17 @@
         </div>
       </section>
 
-      <section class="slide" id="s06" data-part="2" data-title="Reconstruction loss" data-accent="sunflower">
+      <section class="slide" id="s06" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>Reconstruction loss</h2>
         </header>
-        <div class="slide-body s06-body" data-demo>
+        <div class="slide-body s06-body">
           <div class="panel s06-left">
             <div class="loss-row">
               <figure><canvas class="cat-canvas" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
               <figure class="loss-out"><canvas class="cat-canvas" width="64" height="64" aria-label="Reconstruction"></canvas><figcaption>output</figcaption></figure>
-              <figure><canvas class="cat-canvas heat" width="64" height="64" aria-label="Squared error per pixel"></canvas><figcaption>squared error</figcaption><div class="legend"></div></figure>
+              <figure><canvas class="cat-canvas" width="64" height="64" aria-label="Squared error per pixel"></canvas><figcaption>squared error</figcaption><div class="legend"></div></figure>
             </div>
             <div class="s06-picker"></div>
           </div>
@@ -181,12 +181,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s07" data-part="2" data-title="PCA vs autoencoder" data-accent="sunflower">
+      <section class="slide" id="s07" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>PCA vs autoencoder</h2>
         </header>
-        <div class="slide-body s07-body" data-demo>
+        <div class="slide-body s07-body">
           <div class="pca-grid" role="table" aria-label="Original, PCA and autoencoder reconstructions"></div>
           <div class="panel s07-side">
             <div class="k-tabs"></div>
@@ -197,12 +197,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s08" data-part="2" data-title="What autoencoders are good for" data-accent="sunflower">
+      <section class="slide" id="s08" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>What autoencoders are good for</h2>
         </header>
-        <div class="slide-body s08-body" data-demo>
+        <div class="slide-body s08-body">
           <div class="uses">
             <article class="card use">
               <div class="use-vis use-compress" aria-hidden="true"><span class="sq big mono">12,288</span><span class="arrow">→</span><span class="sq small mono">64</span></div>
@@ -226,7 +226,7 @@
               </div>
               <div class="recon-col">
                 <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="ae_64 reconstruction"></canvas><figcaption>rebuilt</figcaption></figure>
-                <figure><canvas class="cat-canvas small heat" width="64" height="64" aria-label="Error heatmap"></canvas><figcaption>error</figcaption></figure>
+                <figure><canvas class="cat-canvas small" width="64" height="64" aria-label="Error heatmap"></canvas><figcaption>error</figcaption></figure>
               </div>
               <div class="verdict-col">
                 <div class="anomaly-hist"></div>
@@ -239,12 +239,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s09" data-part="3" data-title="Other kinds of autoencoders" data-accent="mint">
+      <section class="slide" id="s09" data-accent="mint">
         <header class="slide-head">
           <p class="part-label">Part 3 · Other types of autoencoders</p>
           <h2>Other kinds of autoencoders</h2>
         </header>
-        <div class="slide-body s09-body" data-demo>
+        <div class="slide-body s09-body">
           <div class="s09-top">
             <div class="s09-tabs"></div>
             <div class="s09-picker"></div>
@@ -252,7 +252,7 @@
 
           <div class="s09-panel" data-tab="sparse">
             <div class="s09-row">
-              <figure class="sp-grid-fig">
+              <figure>
                 <canvas class="sp-grid" width="320" height="320" aria-label="The 1024 code neurons as a 32 by 32 grid; brighter means more active"></canvas>
                 <figcaption>1024 code neurons</figcaption>
               </figure>
@@ -302,12 +302,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s10" data-part="4" data-title="Holes in the latent space" data-accent="sky">
+      <section class="slide" id="s10" data-accent="sky">
         <header class="slide-head">
           <p class="part-label">Part 4 · Why autoencoders can't generate</p>
           <h2>Holes in the latent space</h2>
         </header>
-        <div class="slide-body s10-body" data-demo>
+        <div class="slide-body s10-body">
           <div class="s10-map">
             <div class="map-tip" hidden><canvas width="32" height="32"></canvas><span>nearest training cat</span></div>
           </div>
@@ -324,18 +324,18 @@
         <p class="s10-caption">the decoder never saw anything from the gaps</p>
       </section>
 
-      <section class="slide" id="s11" data-part="5" data-title="Encode a cloud, not a point" data-accent="lilac">
+      <section class="slide" id="s11" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Encode a cloud, not a point</h2>
         </header>
-        <div class="slide-body s11-body" data-demo>
+        <div class="slide-body s11-body">
           <div class="s11-map map-host"></div>
           <div class="panel s11-side">
             <div class="s11-picker"></div>
             <div class="s11-now">
               <figure><canvas class="cat-canvas s11-input" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
-              <figure class="s11-out-fig"><canvas class="cat-canvas s11-out" width="64" height="64" aria-label="Decoded sample"></canvas><figcaption>decoded sample</figcaption></figure>
+              <figure><canvas class="cat-canvas s11-out" width="64" height="64" aria-label="Decoded sample"></canvas><figcaption>decoded sample</figcaption></figure>
             </div>
             <button type="button" class="btn primary" data-sample>sample again</button>
             <div class="s11-row" role="list" aria-label="The last six samples"></div>
@@ -345,14 +345,14 @@
         <p class="slide-caption">one image → a small cloud, not a point</p>
       </section>
 
-      <section class="slide" id="s12" data-part="5" data-title="Loss = reconstruction + KL" data-accent="lilac">
+      <section class="slide" id="s12" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Loss = reconstruction + KL</h2>
         </header>
-        <div class="slide-body s12-body" data-demo>
+        <div class="slide-body s12-body">
           <div class="loss-eq" role="group" aria-label="The VAE loss">
-            <span class="eq-word">Loss</span><span class="eq-op">=</span>
+            <span>Loss</span><span class="eq-op">=</span>
             <span class="eq-term recon">‖x − x̂‖²</span>
             <span class="eq-op">+</span>
             <span class="eq-term kl">KL( N(μ, σ²) ‖ N(0, 1) )</span>
@@ -372,12 +372,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s13" data-part="5" data-title="Turning the KL dial" data-accent="lilac">
+      <section class="slide" id="s13" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Turning the KL dial</h2>
         </header>
-        <div class="slide-body s13-body" data-demo>
+        <div class="slide-body s13-body">
           <div class="s13-map map-host"></div>
           <div class="panel s13-side">
             <div class="tug" aria-hidden="true">
@@ -391,12 +391,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s14" data-part="5" data-title="The reparameterization trick" data-accent="lilac">
+      <section class="slide" id="s14" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>The reparameterization trick</h2>
         </header>
-        <div class="slide-body s14-body" data-demo>
+        <div class="slide-body s14-body">
           <div class="s14-switch"></div>
           <div class="graph-wrap"><svg class="rep-graph" viewBox="0 0 1200 290" role="img" aria-label="Computation graph from x through the encoder, mu and sigma, z and the decoder to the loss, with the gradient flowing back"></svg></div>
           <div class="s14-demo">
@@ -408,12 +408,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s15" data-part="5" data-title="Generating cats" data-accent="lilac">
+      <section class="slide" id="s15" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Generating cats</h2>
         </header>
-        <div class="slide-body s15-body" data-demo>
+        <div class="slide-body s15-body">
           <div class="gen-grids">
             <figure class="gen gen-vae">
               <figcaption><strong>VAE</strong> <span class="mono">z ~ N(0, I)</span></figcaption>
@@ -432,12 +432,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s16" data-part="5" data-title="Interpolation" data-accent="lilac">
+      <section class="slide" id="s16" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Interpolation</h2>
         </header>
-        <div class="slide-body s16-body" data-demo>
+        <div class="slide-body s16-body">
           <div class="s16-pickers">
             <div class="ab-picker" data-ab="a"><span class="ab">A</span></div>
             <div class="ab-picker" data-ab="b"><span class="ab">B</span></div>
@@ -455,16 +455,16 @@
         <p class="slide-caption">a continuous space means smooth in-betweens</p>
       </section>
 
-      <section class="slide" id="s17" data-part="6" data-title="Why VAE cats are blurry" data-accent="coral">
+      <section class="slide" id="s17" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Why VAE cats are blurry</h2>
         </header>
-        <div class="slide-body s17-body" data-demo>
+        <div class="slide-body s17-body">
           <div class="panel s17-left">
             <div class="s17-pair">
               <figure class="loupe-host"><canvas class="cat-canvas s17-orig interactive" width="64" height="64" aria-label="Original cat"></canvas><canvas class="loupe" width="120" height="120" aria-hidden="true"></canvas><figcaption>original</figcaption></figure>
-              <figure class="loupe-host s17-recon-fig"><canvas class="cat-canvas s17-recon interactive" width="64" height="64" aria-label="VAE reconstruction"></canvas><canvas class="loupe" width="120" height="120" aria-hidden="true"></canvas><figcaption>VAE reconstruction</figcaption></figure>
+              <figure class="loupe-host"><canvas class="cat-canvas s17-recon interactive" width="64" height="64" aria-label="VAE reconstruction"></canvas><canvas class="loupe" width="120" height="120" aria-hidden="true"></canvas><figcaption>VAE reconstruction</figcaption></figure>
             </div>
             <div class="s17-picker"></div>
           </div>
@@ -480,12 +480,12 @@
         <p class="slide-caption">MSE's best guess is the average, and an average of sharp cats is a blurry cat</p>
       </section>
 
-      <section class="slide" id="s18" data-part="6" data-title="Extensions" data-accent="coral">
+      <section class="slide" id="s18" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Extensions</h2>
         </header>
-        <div class="slide-body s18-body" data-demo>
+        <div class="slide-body s18-body">
           <div class="s18-top">
             <article class="card ext beta">
               <h3>β-VAE</h3>
@@ -516,22 +516,22 @@
             <div class="sd-foot">
             <p class="sd-caption">the VAE compresses; diffusion does the imagining</p>
             <div class="sd-tiny">
-              <span class="sd-tiny-label">same idea, tiny scale:</span>
+              <span>same idea, tiny scale:</span>
               <canvas class="cat-canvas small sd-tiny-in" width="64" height="64" aria-label="Our cat"></canvas>
               <span class="mono">12,288 → 128 → 12,288</span>
-              <figure class="sd-tiny-fig"><canvas class="cat-canvas small sd-tiny-out" width="64" height="64" aria-label="Our VAE's round trip"></canvas></figure>
+              <figure><canvas class="cat-canvas small sd-tiny-out" width="64" height="64" aria-label="Our VAE's round trip"></canvas></figure>
             </div>
             </div>
           </article>
         </div>
       </section>
 
-      <section class="slide" id="s19" data-part="6" data-title="VAE vs GAN vs diffusion" data-accent="coral">
+      <section class="slide" id="s19" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>VAE vs GAN vs diffusion</h2>
         </header>
-        <div class="slide-body s19-body" data-demo>
+        <div class="slide-body s19-body">
           <div class="s19-top">
             <table class="cmp-table">
               <thead><tr><th></th><th>VAE</th><th>GAN</th><th>Diffusion</th></tr></thead>
@@ -552,12 +552,12 @@
         </div>
       </section>
 
-      <section class="slide" id="s20" data-part="6" data-title="Wrap-up" data-accent="coral">
+      <section class="slide" id="s20" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Wrap-up</h2>
         </header>
-        <div class="slide-body s20-body" data-demo>
+        <div class="slide-body s20-body">
           <ol class="wrap-rows">
             <li class="wrap-row" data-step="1"><span class="wrap-model">Plain encoder-decoder</span><span class="wrap-arrow">→</span><span class="wrap-result">copies the input</span><span class="wrap-mascot" data-mascot="photocopier"></span></li>
             <li class="wrap-row" data-step="2"><span class="wrap-model">Autoencoder</span><span class="wrap-arrow">→</span><span class="wrap-result">learns features, but its space has gaps</span><span class="wrap-mascot" data-mascot="monster"></span></li>
@@ -568,13 +568,13 @@
         </div>
       </section>
 
-      <section class="slide" id="s21" data-part="6" data-title="Questions?" data-accent="coral">
+      <section class="slide" id="s21" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Questions?</h2>
         </header>
         <div class="float-cats" aria-hidden="true"></div>
-        <div class="slide-body s21-body" data-demo>
+        <div class="slide-body s21-body">
           <div class="s21-hero">
             <div class="s21-mascot" data-mascot="thinking" data-animate></div>
             <p class="s21-big">Questions?</p>

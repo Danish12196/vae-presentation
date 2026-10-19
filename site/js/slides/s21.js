@@ -2,7 +2,7 @@
 // Each cat floats with a CSS animation; when one leaves the top it comes back as a fresh cat.
 // Without vae_128 the background just stays empty (it's decoration).
 
-import { decode, drawCat, hasModel, randn, ort } from "../models.js";
+import { decode, drawCat, hasModel, randn } from "../models.js";
 
 const COUNT = 10;
 const LATENT = 128;
@@ -12,7 +12,7 @@ let layer, cats = [];
 export async function init(section) {
   layer = section.querySelector(".float-cats");
   if (!(await hasModel("vae_128"))) return;
-  const images = await decode("vae_128", new ort.Tensor("float32", randn(COUNT * LATENT), [COUNT, LATENT]));
+  const images = await decode("vae_128", randn(COUNT * LATENT));
   for (let i = 0; i < COUNT; i++) {
     const c = document.createElement("canvas");
     c.className = "float-cat";

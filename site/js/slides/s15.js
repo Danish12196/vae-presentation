@@ -5,7 +5,7 @@
 // No classifier scores: cnn_cls calls every decoder output "cat" (see SPEC), so the images speak.
 // Below: a small vae_2d_b1 map where any click decodes a plausible cat.
 
-import { decode, drawCat, drawTiles, inSlot, loadManifest, randn, ort } from "../models.js";
+import { decode, drawCat, drawTiles, inSlot, loadManifest, randn } from "../models.js";
 import { flipSwitch } from "../ui.js";
 import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
 
@@ -72,7 +72,7 @@ async function reroll() {
 async function rollVAE() {
   const mine = ++request;
   await inSlot(vaeFig, async () => {
-    const images = await decode("vae_128", new ort.Tensor("float32", randn(N * LATENT), [N, LATENT]));
+    const images = await decode("vae_128", randn(N * LATENT));
     if (mine === request) drawTiles(vaeCanvas, images, { cols: COLS, gap: GAP, inset: GAP / 2 });
   });
 }
@@ -85,5 +85,5 @@ async function rollAE() {
       z[i] = aeStats.mean[d] + aeStats.std[d] * z[i];
     }
   }
-  await inSlot(aeFig, async () => drawTiles(aeCanvas, await decode("ae_128", new ort.Tensor("float32", z, [N, LATENT])), { cols: COLS, gap: GAP, inset: GAP / 2 }));
+  await inSlot(aeFig, async () => drawTiles(aeCanvas, await decode("ae_128", z), { cols: COLS, gap: GAP, inset: GAP / 2 }));
 }

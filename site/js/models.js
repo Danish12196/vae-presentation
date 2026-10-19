@@ -15,8 +15,6 @@
 import * as ort from "../vendor/ort-1.30.0/ort.wasm.bundle.min.js";
 import { mascot } from "./mascot.js";
 
-export { ort };
-
 export const SIZE = 64;
 const PIXELS = SIZE * SIZE;
 const ROOT = new URL("../", import.meta.url); // the site root, wherever it is hosted
