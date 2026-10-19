@@ -4,7 +4,7 @@
 A 25-minute class presentation (MAAI901 Deep Learning for Visual Data) on autoencoders and VAEs, built as a single scrolling web page instead of slides. Every key idea is demonstrated live with small models trained on 64x64 cat faces. The script lives in docs/script.md. After class, the same site stays public at https://autoencoders.danishali.dev for anyone to explore.
 
 ## Setting
-- Presented from any device with a modern browser: a laptop on a projector, a tablet or a phone. Must look right at 1920x1080 and 1366x768, and stay usable on a phone in portrait (layouts stack vertically).
+- Presented from any device with a modern browser: a laptop on a projector, a tablet or a phone. Must look right at 1920x1080 and 1366x768, and stay usable on a phone in portrait. Phone layouts stack when there is room; a demo that would push a model image below the first screen sits side by side instead, at a smaller size.
 - Speaker notes are NOT part of the site (the presenter reads them from the script doc on a phone).
 - Tone: fun, colourful, a bit of humour, still appropriate for a master's class.
 
@@ -87,7 +87,7 @@ Part 6
 - Motion: short and purposeful (200-400 ms); respect prefers-reduced-motion.
 
 ## Navigation
-- CSS scroll-snap, one section per screen. PageDown/PageUp (clickers), arrow keys and space move between sections. Sliders must not swallow navigation keys after you let go of them.
+- CSS scroll-snap, one section per screen. The snap pins the top of the section, so every demo image has to sit inside the viewport (100dvh); a taller section hides the rest. PageDown/PageUp (clickers), arrow keys and space move between sections. Sliders must not swallow navigation keys after you let go of them.
 - Touch: swipe between sections, plus small on-screen prev/next buttons that fade out when idle.
 - F toggles fullscreen. ? shows a small keyboard help overlay. URL hash (#s05) jumps to a slide.
 - A thin progress bar and part label at the top.

@@ -671,11 +671,24 @@ figure > figcaption {
   .verdict-col {
     grid-column: 1 / -1;
   }
+  .use-row {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .use-panel .cat-canvas {
+    --cat-size: 118px;
+  }
+  .uf-map {
+    --map-size: 140px;
+  }
+  .uf-neighbours .cat-canvas {
+    --cat-size: 48px;
+  }
   .cat-canvas.draw {
-    --cat-size: 190px;
+    --cat-size: 132px;
   }
   .recon-col .cat-canvas.small {
-    --cat-size: 76px;
+    --cat-size: 64px;
   }
   .uc-picker .image-picker,
   .ud-picker .image-picker,

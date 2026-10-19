@@ -584,13 +584,16 @@
 
   /* The diagram runs top to bottom: block width follows the spatial size. */
   .net-stage {
-    --u: 0.62;
+    --u: 0.3;
     padding-top: 0;
+  }
+  .s04-mascot {
+    display: none;
   }
   .net,
   .net-group {
     flex-direction: column;
-    --net-gap: 22px;
+    --net-gap: 12px;
   }
   .net.wide,
   .net.wide .net-group {

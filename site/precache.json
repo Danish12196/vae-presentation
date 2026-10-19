@@ -1,6 +1,6 @@
 {
- "version": "746ae77a1ee1",
- "total_bytes": 73044730,
+ "version": "761500db7152",
+ "total_bytes": 73046891,
  "files": [
   {
    "path": "404.html",
@@ -20,27 +20,27 @@
   },
   {
    "path": "css/part1.css",
-   "bytes": 13831
+   "bytes": 13869
   },
   {
    "path": "css/part2.css",
-   "bytes": 12690
+   "bytes": 12894
   },
   {
    "path": "css/part3.css",
-   "bytes": 4510
+   "bytes": 4663
   },
   {
    "path": "css/part4.css",
-   "bytes": 3344
+   "bytes": 3440
   },
   {
    "path": "css/part5.css",
-   "bytes": 13803
+   "bytes": 14381
   },
   {
    "path": "css/part6.css",
-   "bytes": 12967
+   "bytes": 14059
   },
   {
    "path": "css/tokens.css",

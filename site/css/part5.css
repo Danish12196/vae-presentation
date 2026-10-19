@@ -578,10 +578,13 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     --cat-size: 58px;
   }
   .loss-eq {
-    font-size: 46px;
+    font-size: 40px;
   }
-  .gauss-wrap {
+  .gauss-wrap,
+  svg.gauss {
     width: min(640px, 100%);
+    height: min(210px, 28vh);
+    max-height: min(210px, 28vh);
   }
   .s13-map {
     --map-size: min(62vh, 520px);
@@ -630,7 +633,7 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   }
   .s11-map,
   .s13-map {
-    --map-size: min(92vw, 420px);
+    --map-size: 200px;
   }
   /* The ELBO callout sits under this map; keep the whole slide on a phone screen. */
   .s13-map {
@@ -642,10 +645,13 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     width: 100%;
   }
   .s11-now .cat-canvas {
-    --cat-size: 120px;
+    --cat-size: 96px;
+  }
+  .s11-row {
+    min-height: 0;
   }
   .s11-row .cat-canvas.small {
-    --cat-size: 46px;
+    --cat-size: 40px;
   }
   .loss-eq {
     font-size: 26px;
@@ -665,28 +671,55 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   .tug-team.kl {
     text-align: right;
   }
+  .s14-body {
+    gap: 8px;
+  }
+  svg.rep-graph {
+    width: auto;
+    max-width: 100%;
+    max-height: 26vh;
+    margin-inline: auto;
+  }
   .s14-demo {
-    flex-direction: column;
-    gap: var(--gap);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
   }
   .s14-sliders {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     width: 100%;
   }
+  .s14-out-fig .cat-canvas {
+    --cat-size: 72px;
+  }
   .s14-map {
-    --map-size: 200px;
+    --map-size: 84px;
+  }
+  .s14-note {
+    font-size: 12px;
   }
   .gen-grids {
-    flex-direction: column;
-    gap: var(--gap);
+    flex: 0 1 auto;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
     width: 100%;
   }
   .gen,
   .gen-canvas {
-    max-width: none;
+    max-width: 46vw;
   }
-  .gen-canvas {
-    width: 100%;
+  .s15-map {
+    --map-size: 108px;
+  }
+  .s15-pick-fig .cat-canvas.small {
+    --cat-size: 64px;
+  }
+  .gauss-wrap,
+  svg.gauss {
+    height: min(180px, 24vh);
+    max-height: min(180px, 24vh);
   }
   .s15-side {
     width: 100%;
