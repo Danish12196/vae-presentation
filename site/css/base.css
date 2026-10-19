@@ -144,17 +144,11 @@ input {
   font-size: 0.5em;
   color: var(--accent);
 }
-.title-slide .mascot {
-  width: min(34vh, 320px);
-}
 
 @media (max-width: 760px) {
   .slide-body {
     flex-direction: column;
     align-items: stretch;
-  }
-  .title-slide .mascot {
-    width: 170px;
   }
 }
 

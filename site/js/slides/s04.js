@@ -1,85 +1,70 @@
-// The identity trap. With a bottleneck the decoder has to rebuild the cat from a squeezed
-// summary (ae_64, live). Make every layer as wide as the input and the network can just copy:
-// perfect loss, nothing learned. The "on" state is an illustration, not a trained model.
+// Encoder and decoder: build the network one layer at a time with its real shapes,
+// then swap what comes after the encoder: a classifier head (live cnn_cls) or a decoder
+// (transposed convolutions back up to an image, here ae_256's reconstruction).
 
-import { encode, decode, drawCat, squaredError, withModel, SIZE } from "../models.js";
-import { toggle, readout } from "../ui.js";
-import { mountMascot } from "../mascot.js";
+import { classify, encode, decode, drawCat, withModel, hasModel } from "../models.js";
+import { flipSwitch, probBars } from "../ui.js";
 import { netDiagram } from "../netdiagram.js";
 import { getCurrent, onCurrentChange } from "../state.js";
 
-let net, mascotEl, stamp, loss, features, newCats;
-let wide = false;
-let bottleneckLoss = NaN;
+const HINT = "hover or tap a layer";
+
+let net, nextButton, info, ending = "classifier";
 
 export async function init(section) {
-  net = netDiagram(section.querySelector(".net-stage"), { ending: "decoder", note: false });
-  net.showAll();
-  mascotEl = section.querySelector(".s04-mascot [data-mascot]");
-  stamp = section.querySelector(".stamp");
+  info = section.querySelector(".net-info");
+  info.textContent = HINT;
+  nextButton = section.querySelector("[data-next]");
+  net = netDiagram(section.querySelector(".net-stage"), {
+    ending,
+    built: 1,
+    onInfo: (text) => (info.textContent = text),
+  });
 
-  const readouts = section.querySelector(".s04-readouts");
-  loss = readout(readouts, { label: "loss", value: 0, format: (v) => (Number.isFinite(v) ? v.toFixed(3) : "–"), duration: 700 });
-  features = textReadout(readouts, "features learned");
-  newCats = textReadout(readouts, "can make new cats");
-
-  toggle(section.querySelector(".s04-toggle"), {
-    label: "make every layer as wide as the input",
-    onChange: (on) => {
-      wide = on;
-      update();
+  flipSwitch(section.querySelector(".net-switch"), {
+    left: "classifier head",
+    right: "decoder",
+    label: "Decoder ending",
+    onChange: (decoder) => {
+      ending = decoder ? "decoder" : "classifier";
+      net.setEnding(ending);
+      fill();
     },
   });
 
-  onCurrentChange(update);
-  await update();
+  nextButton.addEventListener("click", () => {
+    if (net.complete()) net.reset();
+    else net.next();
+    nextButton.textContent = net.complete() ? "start again" : "next layer";
+  });
+
+  onCurrentChange(fill);
+  await fill();
 }
 
 export function enter() {
-  update();
+  fill();
 }
 
-function textReadout(parent, label) {
-  const wrap = document.createElement("div");
-  wrap.className = "readout";
-  wrap.innerHTML = `<span class="readout-label">${label}</span><span class="readout-value readout-text"></span>`;
-  parent.append(wrap);
-  const value = wrap.lastElementChild;
-  return {
-    set(text, bad) {
-      if (value.textContent === text) return;
-      value.classList.add("swap");
-      setTimeout(() => {
-        value.textContent = text;
-        value.classList.toggle("bad", bad);
-        value.classList.remove("swap");
-      }, 150);
-    },
-  };
-}
-
-async function update() {
+/** Draw the current image into the diagram, and run the ending that is showing. */
+async function fill() {
   const { image } = await getCurrent();
   drawCat(net.input, image);
-  net.setWide(wide);
-  mountMascot(mascotEl, { expression: wide ? "photocopier" : "happy" });
-  stamp.hidden = !wide;
-
-  if (wide) {
-    drawCat(net.output, image); // the pipe copies the input exactly
-    loss.set(0);
-    features.set("none", true);
-    newCats.set("no", true);
-    return;
+  if (ending === "classifier" && net.labels) {
+    const labels = net.labels;
+    if (!labels.firstChild) {
+      if (await hasModel("cnn_cls")) labels.bars = probBars(labels, ["cat", "dog", "wild"]);
+    }
+    await withModel(labels, async () => {
+      const [result] = await classify([image]);
+      labels.bars?.update(result.probs);
+    }, { compact: true });
   }
-  features.set("edges, fur, faces", false);
-  newCats.set("not yet", false);
-  await withModel(net.output.parentElement, async () => {
-    const { z } = await encode("ae_64", [image]);
-    const out = await decode("ae_64", z);
-    drawCat(net.output, out);
-    // Mean squared error per pixel value between the input and the reconstruction.
-    bottleneckLoss = squaredError(image, out) / (3 * SIZE * SIZE);
-  }, { compact: true });
-  loss.set(bottleneckLoss);
+  if (ending === "decoder" && net.output) {
+    const out = net.output;
+    await withModel(out.parentElement, async () => {
+      const { z } = await encode("ae_256", [image]);
+      drawCat(out, await decode("ae_256", z));
+    }, { compact: true });
+  }
 }

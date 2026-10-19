@@ -1,106 +1,78 @@
-// Why VAE cats are blurry.
-// Left: a cat and its vae_128 reconstruction, with a loupe that magnifies the same spot on both.
-// Right: the averaging problem. If n different sharp cats are all plausible answers, the guess
-// with the lowest MSE is their pixel average, and the average of sharp cats is a blurry cat.
+// Interpolation: encode cat A and cat B, walk the straight line between their codes and decode
+// every step, for ae_128 (z) and vae_128 (mu). Two strips of 8 frames, and a scrubber with a big
+// live frame per model at the current t.
 
-import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat, SIZE } from "../models.js";
+import { encode, decode, drawCat, drawTiles, inSlot, loadShowcase, getShowcaseCat } from "../models.js";
 import { catPicker, slider } from "../ui.js";
 
-const LOUPE_PX = 12; // the loupe shows a 12x12 pixel patch of the 64x64 image
+const MODELS = ["ae_128", "vae_128"];
+const FRAMES = 8, TILE = 64, GAP = 4;
 
-let orig, recon, hosts, avgCanvas, avgLabel, strip, count;
-let cat = 0;
+let section, scrub;
+let picked = { a: 0, b: 5 };
+const codes = {}; // model -> { a: Float32Array, b: Float32Array }
+let request = 0;
 
-export async function init(section) {
-  orig = section.querySelector(".s17-orig");
-  recon = section.querySelector(".s17-recon");
-  hosts = [...section.querySelectorAll(".loupe-host")];
-  avgCanvas = section.querySelector(".s17-avg");
-  avgLabel = section.querySelector(".s17-avg-label");
-  strip = section.querySelector(".s17-strip");
-
+export async function init(el) {
+  section = el;
   await loadShowcase();
-  await catPicker(section.querySelector(".s17-picker"), {
-    onPick: (i) => {
-      cat = i;
-      showPair();
-      showAverage();
-    },
-  });
-  count = slider(section.querySelector(".s17-slider"), {
-    label: "possible answers to hedge between",
-    min: 1,
-    max: 8,
-    step: 1,
-    value: 1,
-    format: (v) => `${v} cat${v > 1 ? "s" : ""}`,
-    onInput: showAverage,
-  });
-
-  // The loupe: hover with a mouse, or press and drag with a finger.
-  for (const c of [orig, recon]) {
-    c.addEventListener("pointermove", (e) => (e.pointerType !== "touch" || e.buttons) && loupe(e, c));
-    c.addEventListener("pointerdown", (e) => loupe(e, c));
-    c.addEventListener("pointerleave", hideLoupe);
-    c.addEventListener("pointerup", (e) => e.pointerType === "touch" && hideLoupe());
+  for (const ab of ["a", "b"]) {
+    await catPicker(el.querySelector(`.ab-picker[data-ab="${ab}"]`), {
+      selected: picked[ab],
+      onPick: (i) => {
+        picked[ab] = i;
+        refresh();
+      },
+    });
   }
-
-  await showPair();
-  showAverage();
-}
-
-export function leave() {
-  hideLoupe();
-}
-
-async function showPair() {
-  const image = getShowcaseCat(cat);
-  drawCat(orig, image);
-  await inSlot(recon.closest("figure"), async () => drawCat(recon, await reconstruct("vae_128", [image])));
-}
-
-/** Magnify the same spot on both images. */
-function loupe(e, from) {
-  const r = from.getBoundingClientRect();
-  const u = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-  const v = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
-  const sx = Math.min(SIZE - LOUPE_PX, Math.max(0, u * SIZE - LOUPE_PX / 2));
-  const sy = Math.min(SIZE - LOUPE_PX, Math.max(0, v * SIZE - LOUPE_PX / 2));
-  hosts.forEach((host, i) => {
-    const source = i === 0 ? orig : recon;
-    const lens = host.querySelector(".loupe");
-    const ctx = lens.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, lens.width, lens.height);
-    ctx.drawImage(source, sx, sy, LOUPE_PX, LOUPE_PX, 0, 0, lens.width, lens.height);
-    lens.style.left = `${u * 100}%`;
-    lens.style.top = `${v * 100}%`;
-    lens.classList.add("on");
+  scrub = slider(el.querySelector(".s16-slider"), {
+    label: "t",
+    min: 0,
+    max: 1,
+    step: 0.01,
+    value: 0.5,
+    format: (v) => v.toFixed(2),
+    ticks: ["A", "B"],
+    onInput: () => showFrame(),
   });
+  await refresh();
 }
 
-function hideLoupe() {
-  for (const l of document.querySelectorAll("#s17 .loupe")) l.classList.remove("on");
-}
+const lerp = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 
-/** Pixel average of n showcase cats, starting with the picked one. */
-function showAverage() {
-  const n = count.value;
-  const cats = Array.from({ length: n }, (_, k) => getShowcaseCat((cat + k * 7) % 64));
-  const avg = new ImageData(SIZE, SIZE);
-  for (let i = 0; i < avg.data.length; i++) {
-    let sum = 0;
-    for (const c of cats) sum += c.data[i];
-    avg.data[i] = sum / n;
+async function refresh() {
+  const mine = ++request;
+  const images = [getShowcaseCat(picked.a), getShowcaseCat(picked.b)];
+  for (const model of MODELS) {
+    const row = section.querySelector(`.interp-row[data-model="${model}"]`);
+    await inSlot(row.querySelector(".strip-wrap"), async () => {
+      const out = await encode(model, images);
+      const z = out.z ?? out.mu; // the VAE's mean, the AE's code
+      const n = z.dims[1];
+      codes[model] = { a: z.data.slice(0, n), b: z.data.slice(n, 2 * n) };
+      // All 8 frames in one batch.
+      const batch = new Float32Array(FRAMES * n);
+      for (let f = 0; f < FRAMES; f++) batch.set(lerp(codes[model].a, codes[model].b, f / (FRAMES - 1)), f * n);
+      const strip = await decode(model, batch);
+      if (mine !== request) return;
+      drawTiles(row.querySelector("canvas"), strip, { cols: FRAMES, gap: GAP });
+    });
   }
-  drawCat(avgCanvas, avg);
-  avgLabel.textContent = n === 1 ? "one sharp cat" : `average of ${n}`;
-  strip.replaceChildren(
-    ...cats.map((c) => {
-      const t = document.createElement("canvas");
-      t.className = "cat-canvas small";
-      drawCat(t, c);
-      return t;
-    }),
-  );
+  if (mine === request) await showFrame();
+}
+
+async function showFrame() {
+  const t = scrub.value;
+  // The marker sits over the frame position for t along each strip.
+  const width = FRAMES * (TILE + GAP) - GAP;
+  const centre = (TILE / 2 + t * (FRAMES - 1) * (TILE + GAP)) / width;
+  for (const m of section.querySelectorAll(".strip-marker")) m.style.left = `${centre * 100}%`;
+  for (const model of MODELS) {
+    const fig = section.querySelector(`.s16-live figure[data-model="${model}"]`);
+    await inSlot(fig, async () => {
+      // Without codes the model is missing: decoding anyway lets inSlot show the training card.
+      const z = codes[model] ? lerp(codes[model].a, codes[model].b, t) : new Float32Array(128);
+      drawCat(fig.querySelector("canvas"), await decode(model, z));
+    });
+  }
 }

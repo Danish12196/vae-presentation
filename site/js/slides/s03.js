@@ -1,70 +1,142 @@
-// Encoder and decoder: build the network one layer at a time with its real shapes,
-// then swap what comes after the encoder: a classifier head (live cnn_cls) or a decoder
-// (transposed convolutions back up to an image, here ae_256's reconstruction).
+// Discriminative vs generative.
+// Discriminative: picked image -> CNN -> p(label | image), live with cnn_cls.
+// Generative: the arrows flip: "cat" -> ? -> an image, sampled from vae_128 and resolving from noise.
+// "Ask the classifier to draw a cat" plays the precomputed gradient-ascent frames:
+// the classifier grows ever more confident in a psychedelic mess.
 
-import { classify, encode, decode, drawCat, withModel, hasModel } from "../models.js";
-import { flipSwitch, probBars } from "../ui.js";
-import { netDiagram } from "../netdiagram.js";
-import { getCurrent, onCurrentChange } from "../state.js";
+import { loadShowcase, getShowcaseCat, loadAnimals, loadDream, classify, decode, drawCat, randn, ModelMissing, renderTraining, hasModel } from "../models.js";
+import { imagePicker, flipSwitch, probBars, revealFromNoise } from "../ui.js";
+import { setCurrent } from "../state.js";
 
-const HINT = "hover or tap a layer";
+const DREAM_FRAME_MS = 320;
 
-let net, nextButton, info, ending = "classifier";
+let flow, imageCanvas, imageSlot, bars, barsEl, picker, flip, dreamButton, sticker;
+let items = [];
+let generative = false;
+let busy = null; // AbortController of the running animation
 
 export async function init(section) {
-  info = section.querySelector(".net-info");
-  info.textContent = HINT;
-  nextButton = section.querySelector("[data-next]");
-  net = netDiagram(section.querySelector(".net-stage"), {
-    ending,
-    built: 1,
-    onInfo: (text) => (info.textContent = text),
-  });
+  flow = section.querySelector(".flow");
+  imageSlot = section.querySelector(".flow-image");
+  imageCanvas = imageSlot.querySelector("canvas");
+  barsEl = section.querySelector(".flow-bars");
+  dreamButton = section.querySelector("[data-dream]");
+  sticker = section.querySelector(".dream-sticker");
 
-  flipSwitch(section.querySelector(".net-switch"), {
-    left: "classifier head",
-    right: "decoder",
-    label: "Decoder ending",
-    onChange: (decoder) => {
-      ending = decoder ? "decoder" : "classifier";
-      net.setEnding(ending);
-      fill();
+  // Six held-out cats, then three held-out dogs and three wild animals.
+  await loadShowcase();
+  items = Array.from({ length: 6 }, (_, i) => ({ image: getShowcaseCat(i), label: "cat" }));
+  try {
+    const animals = await loadAnimals();
+    for (const label of ["dog", "wild"]) {
+      animals.labels
+        .map((l, i) => [l, i])
+        .filter(([l]) => l === label)
+        .slice(0, 3)
+        .forEach(([, i]) => items.push({ image: animals.sprite.get(i), label }));
+    }
+  } catch {
+    /* no animals exported: cats only */
+  }
+  picker = imagePicker(section.querySelector(".s02-picker"), {
+    items,
+    columns: 4,
+    onPick: (i) => {
+      setCurrent(items[i]);
+      if (generative) flip.set(false); // picking an image means "classify this"
+      else showDiscriminative();
     },
   });
 
-  nextButton.addEventListener("click", () => {
-    if (net.complete()) net.reset();
-    else net.next();
-    nextButton.textContent = net.complete() ? "start again" : "next layer";
+  if (await hasModel("cnn_cls")) {
+    bars = probBars(barsEl, ["cat", "dog", "wild"]);
+  } else {
+    renderTraining(barsEl, "cnn_cls", { compact: true });
+  }
+
+  flip = flipSwitch(section.querySelector(".s02-switch"), {
+    left: "Discriminative",
+    right: "Generative",
+    label: "Generative mode",
+    onChange: (on) => (on ? showGenerative() : showDiscriminative()),
   });
 
-  onCurrentChange(fill);
-  await fill();
+  dreamButton.addEventListener("click", playDream);
+  await showDiscriminative();
 }
 
-export function enter() {
-  fill();
+export function leave() {
+  busy?.abort();
 }
 
-/** Draw the current image into the diagram, and run the ending that is showing. */
-async function fill() {
-  const { image } = await getCurrent();
-  drawCat(net.input, image);
-  if (ending === "classifier" && net.labels) {
-    const labels = net.labels;
-    if (!labels.firstChild) {
-      if (await hasModel("cnn_cls")) labels.bars = probBars(labels, ["cat", "dog", "wild"]);
-    }
-    await withModel(labels, async () => {
-      const [result] = await classify([image]);
-      labels.bars?.update(result.probs);
-    }, { compact: true });
+function startTask() {
+  busy?.abort();
+  busy = new AbortController();
+  sticker.hidden = true;
+  return busy.signal;
+}
+
+function clearMissing() {
+  imageSlot.querySelector(".training-card")?.remove();
+  imageCanvas.hidden = false;
+}
+
+async function showDiscriminative() {
+  startTask();
+  generative = false;
+  flow.classList.remove("generative");
+  clearMissing();
+  const item = items[picker.value];
+  drawCat(imageCanvas, item.image);
+  await updateBars(item.image);
+}
+
+async function updateBars(image) {
+  if (!bars) return;
+  const [result] = await classify([image]);
+  bars.update(result.probs);
+}
+
+async function showGenerative() {
+  const signal = startTask();
+  generative = true;
+  flow.classList.add("generative");
+  clearMissing();
+  try {
+    const cat = await decode("vae_128", randn(128));
+    if (!signal.aborted) await revealFromNoise(imageCanvas, cat, { ms: 1400, signal });
+  } catch (err) {
+    if (!(err instanceof ModelMissing)) throw err;
+    imageCanvas.hidden = true;
+    const holder = document.createElement("div");
+    renderTraining(holder, "vae_128", { compact: true });
+    imageSlot.append(holder.firstElementChild);
   }
-  if (ending === "decoder" && net.output) {
-    const out = net.output;
-    await withModel(out.parentElement, async () => {
-      const { z } = await encode("ae_256", [image]);
-      drawCat(out, await decode("ae_256", z));
-    }, { compact: true });
+}
+
+/** Play the classifier's gradient-ascent "drawing" of a cat, re-classifying every frame live. */
+async function playDream() {
+  if (generative) flip.set(false, false);
+  generative = false;
+  flow.classList.remove("generative");
+  clearMissing();
+  const signal = startTask();
+  let dream;
+  try {
+    dream = await loadDream();
+  } catch {
+    dreamButton.disabled = true;
+    return;
   }
+  const cat = dream.classes.indexOf("cat");
+  dreamButton.disabled = true;
+  for (let f = 0; f < dream.cols; f++) {
+    if (signal.aborted) break;
+    const frame = dream.frame(cat, f);
+    drawCat(imageCanvas, frame);
+    await updateBars(frame);
+    await new Promise((r) => setTimeout(r, DREAM_FRAME_MS));
+  }
+  dreamButton.disabled = false;
+  if (!signal.aborted) sticker.hidden = false;
 }

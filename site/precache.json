@@ -1,6 +1,6 @@
 {
- "version": "e10b070ab713",
- "total_bytes": 72517115,
+ "version": "22727d0679d3",
+ "total_bytes": 72515971,
  "files": [
   {
    "path": "404.html",
@@ -8,7 +8,7 @@
   },
   {
    "path": "css/base.css",
-   "bytes": 8459
+   "bytes": 8360
   },
   {
    "path": "css/components.css",
@@ -20,7 +20,7 @@
   },
   {
    "path": "css/part1.css",
-   "bytes": 13672
+   "bytes": 14232
   },
   {
    "path": "css/part2.css",
@@ -132,7 +132,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 35250
+   "bytes": 36323
   },
   {
    "path": "js/latentmap.js",
@@ -163,87 +163,87 @@
    "bytes": 2135
   },
   {
-   "path": "js/slides/s01.js",
-   "bytes": 3538
-  },
-  {
    "path": "js/slides/s02.js",
-   "bytes": 4463
+   "bytes": 860
   },
   {
    "path": "js/slides/s03.js",
-   "bytes": 2234
+   "bytes": 4463
   },
   {
    "path": "js/slides/s04.js",
-   "bytes": 2907
+   "bytes": 2234
   },
   {
    "path": "js/slides/s05.js",
-   "bytes": 2231
+   "bytes": 2907
   },
   {
    "path": "js/slides/s06.js",
-   "bytes": 2725
+   "bytes": 2231
   },
   {
    "path": "js/slides/s07.js",
-   "bytes": 3300
+   "bytes": 2725
   },
   {
    "path": "js/slides/s08.js",
-   "bytes": 7519
+   "bytes": 3300
   },
   {
    "path": "js/slides/s09.js",
-   "bytes": 9792
+   "bytes": 7519
   },
   {
    "path": "js/slides/s10.js",
-   "bytes": 4360
+   "bytes": 9792
   },
   {
    "path": "js/slides/s11.js",
-   "bytes": 4365
+   "bytes": 4360
   },
   {
    "path": "js/slides/s12.js",
-   "bytes": 5240
+   "bytes": 4365
   },
   {
    "path": "js/slides/s13.js",
-   "bytes": 2476
+   "bytes": 5240
   },
   {
    "path": "js/slides/s14.js",
-   "bytes": 10973
+   "bytes": 2476
   },
   {
    "path": "js/slides/s15.js",
-   "bytes": 3296
+   "bytes": 10973
   },
   {
    "path": "js/slides/s16.js",
-   "bytes": 2891
+   "bytes": 3296
   },
   {
    "path": "js/slides/s17.js",
-   "bytes": 3699
+   "bytes": 2891
   },
   {
    "path": "js/slides/s18.js",
-   "bytes": 5239
+   "bytes": 3699
   },
   {
    "path": "js/slides/s19.js",
-   "bytes": 4451
+   "bytes": 5239
   },
   {
    "path": "js/slides/s20.js",
-   "bytes": 1523
+   "bytes": 4451
   },
   {
    "path": "js/slides/s21.js",
+   "bytes": 1523
+  },
+  {
+   "path": "js/slides/s22.js",
    "bytes": 1607
   },
   {
