@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Latent Café — title</title>
+  <style>
+    @font-face { font-family: "Display"; font-weight: 700; font-style: normal; src: url("../fonts/NotoSerifDisplay-Bold.ttf") format("truetype"); }
+    @font-face { font-family: "Display"; font-weight: 700; font-style: italic; src: url("../fonts/NotoSerifDisplay-BoldItalic.ttf") format("truetype"); }
+    @font-face { font-family: "Text"; font-weight: 400; src: url("../../site/vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Text"; font-weight: 600; src: url("../../site/vendor/fonts/inter-latin-600-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { background: #e7d7c3; color: #2a1c14; font-family: Text, sans-serif; }
+    .card {
+      height: 100%;
+      margin: 0;
+      padding: 36px 72px 28px;
+      background:
+        linear-gradient(#f7f1e6, #f7f1e6) padding-box;
+      border: 14px solid #2a1c14;
+      outline: 3px solid #c44536;
+      outline-offset: -22px;
+      display: flex;
+      flex-direction: column;
+    }
+    .place { margin: 8px 0 0; text-align: center; letter-spacing: 0.22em; text-transform: uppercase; font-size: 14px; font-weight: 600; }
+    h1 {
+      margin: 18px 0 0;
+      text-align: center;
+      font-family: Display, serif;
+      font-size: 84px;
+      line-height: 0.9;
+      font-weight: 700;
+    }
+    .today { margin: 10px 0 0; text-align: center; font-family: Display, serif; font-style: italic; font-size: 28px; }
+    .rules { border: 0; border-top: 3px solid #2a1c14; border-bottom: 1px solid #2a1c14; height: 8px; margin: 22px auto; width: min(640px, 80%); }
+    .menu { width: min(760px, 100%); margin: 0 auto; list-style: none; padding: 0; }
+    .menu li { display: flex; align-items: baseline; gap: 12px; font-size: 24px; margin: 8px 0; }
+    .menu .dots { flex: 1; border-bottom: 2px dotted #2a1c14; transform: translateY(-6px); }
+    .menu b { font-family: Display, serif; font-weight: 700; }
+    .menu i { font-style: normal; color: #c44536; font-weight: 600; font-size: 18px; letter-spacing: 0.04em; }
+    .foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="place">MAAI901 · Deep Learning for Visual Data</p>
+    <h1>The Latent Café</h1>
+    <p class="today">Today’s tasting: Autoencoders &amp; VAEs</p>
+    <hr class="rules" />
+    <ul class="menu">
+      <li><b>I. Tell them apart</b><span class="dots"></span><i>a label</i></li>
+      <li><b>II. The squeeze</b><span class="dots"></span><i>12,288 → 64</i></li>
+      <li><b>III. Territories</b><span class="dots"></span><i>a map of z</i></li>
+      <li><b>IV. Imagined cats</b><span class="dots"></span><i>sampled, not copied</i></li>
+    </ul>
+    <p class="today">teaching a network to imagine cats</p>
+    <p class="foot"><span>Danish</span><span>Tuesday 20 October 2026</span><span>Table for the room</span></p>
+  </main>
+</body>
+</html>

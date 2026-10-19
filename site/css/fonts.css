@@ -1,5 +1,13 @@
 /* Vendored from @fontsource (SIL Open Font License, see vendor/fonts/LICENSE-*.txt).
-   Latin for everything, plus Greek for the maths (mu, sigma, epsilon, beta). */
+   Latin for everything, plus Greek for the maths (mu, sigma, epsilon, beta).
+   Noto Sans Display Bold is the poster face (OFL, fonts.google.com). */
+
+@font-face {
+  font-family: "Noto Sans Display";
+  font-weight: 700;
+  font-display: swap;
+  src: url(../vendor/fonts/NotoSansDisplay-Bold.ttf) format("truetype");
+}
 
 @font-face {
   font-family: "Fredoka";

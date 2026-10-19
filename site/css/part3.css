@@ -56,7 +56,7 @@
 }
 .s09-figs figure.current .cat-canvas {
   border-color: var(--mint);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--mint) 35%, transparent), 0 0 28px color-mix(in srgb, var(--mint) 45%, transparent);
+  box-shadow: 4px 4px 0 var(--mint);
 }
 .s09-figs figure.current figcaption {
   color: var(--mint);

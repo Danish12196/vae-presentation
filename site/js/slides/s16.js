@@ -1,78 +1,89 @@
-// Interpolation: encode cat A and cat B, walk the straight line between their codes and decode
-// every step, for ae_128 (z) and vae_128 (mu). Two strips of 8 frames, and a scrubber with a big
-// live frame per model at the current t.
+// Generating new cats. Left: 24 samples from vae_128 with z ~ N(0, I), the distribution its KL term
+// organised the latent space around. Right: 24 samples from ae_128, either naive (z ~ N(0, I)) or
+// fair (z drawn with the AE's own per-dimension code mean and std). Fair is still mostly nonsense:
+// a plain AE has no reason for the space between its codes to decode to cats.
+// No classifier scores: cnn_cls calls every decoder output "cat" (see SPEC), so the images speak.
+// Below: a small vae_2d_b1 map where any click decodes a plausible cat.
 
-import { encode, decode, drawCat, drawTiles, inSlot, loadShowcase, getShowcaseCat } from "../models.js";
-import { catPicker, slider } from "../ui.js";
+import { decode, drawCat, drawTiles, inSlot, loadManifest, randn } from "../models.js";
+import { flipSwitch } from "../ui.js";
+import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
 
-const MODELS = ["ae_128", "vae_128"];
-const FRAMES = 8, TILE = 64, GAP = 4;
+const COLS = 6, ROWS = 4, N = COLS * ROWS, LATENT = 128, GAP = 4;
 
-let section, scrub;
-let picked = { a: 0, b: 5 };
-const codes = {}; // model -> { a: Float32Array, b: Float32Array }
+let vaeCanvas, aeCanvas, vaeFig, aeFig, fair = false, aeStats = null, dice, pickCanvas, map;
 let request = 0;
 
-export async function init(el) {
-  section = el;
-  await loadShowcase();
-  for (const ab of ["a", "b"]) {
-    await catPicker(el.querySelector(`.ab-picker[data-ab="${ab}"]`), {
-      selected: picked[ab],
-      onPick: (i) => {
-        picked[ab] = i;
-        refresh();
+export async function init(section) {
+  vaeFig = section.querySelector(".gen-vae");
+  aeFig = section.querySelector(".gen-ae");
+  vaeCanvas = vaeFig.querySelector("canvas");
+  aeCanvas = aeFig.querySelector("canvas");
+  dice = section.querySelector(".reroll");
+  pickCanvas = section.querySelector(".s15-pick");
+
+  const ae = (await loadManifest()).models.ae_128;
+  if (ae?.code_mean) aeStats = { mean: ae.code_mean, std: ae.code_std };
+
+  flipSwitch(section.querySelector(".ae-mode"), {
+    left: "naive N(0,1)",
+    right: "fair: its own stats",
+    label: "Sample the AE with its own code statistics",
+    onChange: (on) => {
+      fair = on;
+      rollAE();
+    },
+  });
+  dice.addEventListener("click", reroll);
+
+  await inSlot(section.querySelector(".s15-pick-fig"), async () => {
+    map = await loadLatentMap(section.querySelector(".s15-map"), "vae_2d_b1", {
+      view: VAE_VIEW,
+      dot: 1.6,
+      label: "The VAE's latent map: click anywhere to decode a cat",
+      onPick: async (z) => {
+        map.setCrosshair(z);
+        drawCat(pickCanvas, await decode("vae_2d_b1", z));
       },
     });
-  }
-  scrub = slider(el.querySelector(".s16-slider"), {
-    label: "t",
-    min: 0,
-    max: 1,
-    step: 0.01,
-    value: 0.5,
-    format: (v) => v.toFixed(2),
-    ticks: ["A", "B"],
-    onInput: () => showFrame(),
+    const z = [0.4, -0.3];
+    map.setCrosshair(z);
+    drawCat(pickCanvas, await decode("vae_2d_b1", z));
   });
-  await refresh();
+  await reroll();
 }
 
-const lerp = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+export function leave() {
+  dice?.classList.remove("rolling");
+}
 
-async function refresh() {
+async function reroll() {
+  // Restart the dice spin even if it is mid-turn.
+  dice.classList.remove("rolling");
+  void dice.offsetWidth;
+  dice.classList.add("rolling");
+  // One grid per frame: each batch of 24 decodes blocks the page for a moment (~30 ms, more on
+  // slow phones), so yielding in between keeps the page responsive while the dice spins.
+  await rollVAE();
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r)));
+  await rollAE();
+}
+
+async function rollVAE() {
   const mine = ++request;
-  const images = [getShowcaseCat(picked.a), getShowcaseCat(picked.b)];
-  for (const model of MODELS) {
-    const row = section.querySelector(`.interp-row[data-model="${model}"]`);
-    await inSlot(row.querySelector(".strip-wrap"), async () => {
-      const out = await encode(model, images);
-      const z = out.z ?? out.mu; // the VAE's mean, the AE's code
-      const n = z.dims[1];
-      codes[model] = { a: z.data.slice(0, n), b: z.data.slice(n, 2 * n) };
-      // All 8 frames in one batch.
-      const batch = new Float32Array(FRAMES * n);
-      for (let f = 0; f < FRAMES; f++) batch.set(lerp(codes[model].a, codes[model].b, f / (FRAMES - 1)), f * n);
-      const strip = await decode(model, batch);
-      if (mine !== request) return;
-      drawTiles(row.querySelector("canvas"), strip, { cols: FRAMES, gap: GAP });
-    });
-  }
-  if (mine === request) await showFrame();
+  await inSlot(vaeFig, async () => {
+    const images = await decode("vae_128", randn(N * LATENT));
+    if (mine === request) drawTiles(vaeCanvas, images, { cols: COLS, gap: GAP, inset: GAP / 2 });
+  });
 }
 
-async function showFrame() {
-  const t = scrub.value;
-  // The marker sits over the frame position for t along each strip.
-  const width = FRAMES * (TILE + GAP) - GAP;
-  const centre = (TILE / 2 + t * (FRAMES - 1) * (TILE + GAP)) / width;
-  for (const m of section.querySelectorAll(".strip-marker")) m.style.left = `${centre * 100}%`;
-  for (const model of MODELS) {
-    const fig = section.querySelector(`.s16-live figure[data-model="${model}"]`);
-    await inSlot(fig, async () => {
-      // Without codes the model is missing: decoding anyway lets inSlot show the training card.
-      const z = codes[model] ? lerp(codes[model].a, codes[model].b, t) : new Float32Array(128);
-      drawCat(fig.querySelector("canvas"), await decode(model, z));
-    });
+async function rollAE() {
+  const z = randn(N * LATENT);
+  if (fair && aeStats) {
+    for (let i = 0; i < z.length; i++) {
+      const d = i % LATENT;
+      z[i] = aeStats.mean[d] + aeStats.std[d] * z[i];
+    }
   }
+  await inSlot(aeFig, async () => drawTiles(aeCanvas, await decode("ae_128", z), { cols: COLS, gap: GAP, inset: GAP / 2 }));
 }

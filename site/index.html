@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#14112b" />
+    <meta name="theme-color" content="#efe6d2" />
     <meta name="description" content="An interactive presentation about autoencoders and variational autoencoders, with small models trained on cat faces running live in your browser." />
     <title>Autoencoders &amp; VAEs: teaching a network to imagine cats</title>
     <link rel="canonical" href="https://autoencoders.danishali.dev/" />
@@ -15,7 +15,7 @@
     <meta property="og:image" content="https://autoencoders.danishali.dev/img/og.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="The cartoon cat mascot beside the title: Autoencoders and VAEs, teaching a network to imagine cats" />
+    <meta property="og:image:alt" content="Title slide: Autoencoders and VAEs, teaching a network to imagine cats. MAAI901, Tuesday 20 October 2026." />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/fonts.css" />
@@ -48,20 +48,27 @@
 
     <main id="deck">
       <section class="slide title-slide" id="s01" data-accent="coral">
-        <!-- Drifting mosaic of held-out cats; js/slides/s01.js swaps in cats freshly made by vae_128 -->
-        <div class="mosaic" aria-hidden="true"><div class="mosaic-drift"><canvas class="mosaic-canvas"></canvas></div></div>
         <header class="slide-head">
-          <p class="part-label">Part 1 · From classification to generation</p>
+          <p class="part-label">MAAI901 · Deep Learning for Visual Data</p>
         </header>
         <div class="slide-body">
-          <div class="title-mascot" data-mascot="happy" data-animate></div>
           <h1>Autoencoders &amp; VAEs<span class="sub">teaching a network to imagine cats</span></h1>
-          <p class="byline">Danish · MAAI901 · 16 October 2026</p>
+          <p class="byline">Danish · MAAI901 · Tuesday 20 October 2026</p>
         </div>
         <p class="scroll-hint">scroll, swipe or use the arrow keys <span aria-hidden="true">↓</span></p>
       </section>
 
       <section class="slide" id="s02" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Warm-up</p>
+        </header>
+        <div class="slide-body ice-body">
+          <h2>Cat people <span class="ice-or">or</span> dog people?</h2>
+          <p class="ice-note">Hands up.</p>
+        </div>
+      </section>
+
+      <section class="slide" id="s03" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>Discriminative vs generative</h2>
@@ -89,7 +96,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s03" data-accent="coral">
+      <section class="slide" id="s04" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>Encoder and decoder</h2>
@@ -105,7 +112,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s04" data-accent="coral">
+      <section class="slide" id="s05" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>The identity trap</h2>
@@ -121,7 +128,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s05" data-accent="sunflower">
+      <section class="slide" id="s06" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>The bottleneck</h2>
@@ -151,7 +158,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s06" data-accent="sunflower">
+      <section class="slide" id="s07" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>Reconstruction loss</h2>
@@ -181,7 +188,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s07" data-accent="sunflower">
+      <section class="slide" id="s08" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>PCA vs autoencoder</h2>
@@ -192,12 +199,12 @@
             <div class="k-tabs"></div>
             <p class="pca-key">numbers: squared error, <span class="better-key">lower wins</span></p>
             <p class="pca-avg mono" aria-live="polite"></p>
-            <p class="callout"><strong>linear layers + MSE = PCA.</strong> Add nonlinearity = deep autoencoder = nonlinear PCA.</p>
+            <p class="callout"><strong>linear layers + MSE learn the same subspace as PCA.</strong> The axes can still rotate. Add nonlinearity and it is a deep autoencoder: nonlinear PCA.</p>
           </div>
         </div>
       </section>
 
-      <section class="slide" id="s08" data-accent="sunflower">
+      <section class="slide" id="s09" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>What autoencoders are good for</h2>
@@ -239,7 +246,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s09" data-accent="mint">
+      <section class="slide" id="s10" data-accent="mint">
         <header class="slide-head">
           <p class="part-label">Part 3 · Other types of autoencoders</p>
           <h2>Other kinds of autoencoders</h2>
@@ -302,7 +309,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s10" data-accent="sky">
+      <section class="slide" id="s11" data-accent="sky">
         <header class="slide-head">
           <p class="part-label">Part 4 · Why autoencoders can't generate</p>
           <h2>Holes in the latent space</h2>
@@ -324,7 +331,7 @@
         <p class="s10-caption">the decoder never saw anything from the gaps</p>
       </section>
 
-      <section class="slide" id="s11" data-accent="lilac">
+      <section class="slide" id="s12" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Encode a cloud, not a point</h2>
@@ -345,7 +352,7 @@
         <p class="slide-caption">one image → a small cloud, not a point</p>
       </section>
 
-      <section class="slide" id="s12" data-accent="lilac">
+      <section class="slide" id="s13" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Loss = reconstruction + KL</h2>
@@ -368,11 +375,11 @@
         </div>
         <div class="formula-bar">
           <p class="formula"><span class="recon">‖x − x̂‖²</span> reconstruction: how far the rebuilt cat is from the input</p>
-          <p class="formula"><span class="kl">KL</span> how far the cloud is from N(0, 1). Zero only when μ = 0 and σ = 1</p>
+          <p class="formula"><span class="kl">KL</span> = ½(μ² + σ² − 1 − ln σ²) per dimension, summed over the code. Zero only when μ = 0 and σ = 1</p>
         </div>
       </section>
 
-      <section class="slide" id="s13" data-accent="lilac">
+      <section class="slide" id="s14" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Turning the KL dial</h2>
@@ -386,12 +393,12 @@
               <span class="tug-team kl">KL</span>
             </div>
             <div class="s13-slider"></div>
-            <p class="callout"><strong>loss = −ELBO</strong> (Evidence Lower BOund). We maximise the ELBO because the true likelihood is intractable.</p>
+            <p class="callout"><strong>loss = −ELBO</strong> (Evidence Lower BOund): negative log-likelihood plus KL. Fixed-variance MSE matches that up to a constant and a scale. The true likelihood is intractable, so we maximise the ELBO.</p>
           </div>
         </div>
       </section>
 
-      <section class="slide" id="s14" data-accent="lilac">
+      <section class="slide" id="s15" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>The reparameterization trick</h2>
@@ -408,7 +415,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s15" data-accent="lilac">
+      <section class="slide" id="s16" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Generating cats</h2>
@@ -432,7 +439,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s16" data-accent="lilac">
+      <section class="slide" id="s17" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Interpolation</h2>
@@ -452,10 +459,10 @@
             <figure data-model="vae_128"><canvas class="cat-canvas" width="64" height="64" aria-label="VAE frame"></canvas><figcaption>VAE</figcaption></figure>
           </div>
         </div>
-        <p class="slide-caption">a continuous space means smooth in-betweens</p>
+        <p class="slide-caption">a straight walk between two real codes stays near the data for both. The plain AE fails on random samples, not here.</p>
       </section>
 
-      <section class="slide" id="s17" data-accent="coral">
+      <section class="slide" id="s18" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Why VAE cats are blurry</h2>
@@ -477,10 +484,10 @@
             <div class="s17-slider"></div>
           </div>
         </div>
-        <p class="slide-caption">MSE's best guess is the average, and an average of sharp cats is a blurry cat</p>
+        <p class="slide-caption">MSE's best guess is the average of the sharp cats that fit, and the KL term also caps how much detail the code can hold</p>
       </section>
 
-      <section class="slide" id="s18" data-accent="coral">
+      <section class="slide" id="s19" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Extensions</h2>
@@ -489,8 +496,8 @@
           <div class="s18-top">
             <article class="card ext beta">
               <h3>β-VAE</h3>
-              <p>a bigger KL weight: a tidier latent space, blurrier cats</p>
-              <button type="button" class="btn" data-goto="s13">remember this?</button>
+              <p>a bigger KL weight: a tidier, more disentangled latent space, and blurrier cats</p>
+              <button type="button" class="btn" data-goto="s14">remember this?</button>
             </article>
             <article class="card ext vq">
               <h3>VQ-VAE <span class="tag">illustration</span></h3>
@@ -526,7 +533,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s19" data-accent="coral">
+      <section class="slide" id="s20" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>VAE vs GAN vs diffusion</h2>
@@ -552,7 +559,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s20" data-accent="coral">
+      <section class="slide" id="s21" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Wrap-up</h2>
@@ -568,7 +575,7 @@
         </div>
       </section>
 
-      <section class="slide" id="s21" data-accent="coral">
+      <section class="slide" id="s22" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
           <h2>Questions?</h2>

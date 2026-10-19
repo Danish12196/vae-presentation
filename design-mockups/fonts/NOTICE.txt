@@ -1,0 +1,2 @@
+Noto Serif Display and Noto Sans Display, SIL Open Font License.
+Copied from the Debian fonts-noto package for these offline mockups only.

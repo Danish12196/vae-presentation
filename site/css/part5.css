@@ -256,7 +256,7 @@ svg.rep-graph {
 }
 .grad-particle {
   fill: var(--coral);
-  filter: drop-shadow(0 0 6px var(--coral));
+  filter: none;
   transition: opacity 300ms linear;
 }
 .grad-particle.stuck,
@@ -495,8 +495,8 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   bottom: -6px;
   width: 4px;
   border-radius: 2px;
-  background: var(--sunflower);
-  box-shadow: 0 0 10px var(--sunflower);
+  background: var(--stamp);
+  box-shadow: 3px 0 0 var(--line);
   transform: translateX(-50%);
   transition: left 120ms linear;
 }
@@ -589,6 +589,10 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   .s11-map,
   .s13-map {
     --map-size: min(92vw, 420px);
+  }
+  /* The ELBO callout sits under this map; keep the whole slide on a phone screen. */
+  .s13-map {
+    --map-size: min(68vw, 260px);
   }
   .s11-side,
   .s13-side {

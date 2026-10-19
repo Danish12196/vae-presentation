@@ -1,119 +1,274 @@
-// Holes in the latent space. The ae_2 codes of 2,000 training cats, coloured by fur.
-// Click anywhere to decode that point with ae_2. The verdict is about the map, not the picture:
-// is this z somewhere the decoder has seen training cats, or out in a gap? (We tried judging the
-// pictures with cnn_cls, but it calls every decoder output "cat", even flat green noise.)
-// "Random point" samples the view uniformly and keeps score: most of the space is gaps.
+// Other kinds of autoencoders, one tab each, all on the same picked cat.
+//   Sparse:        the 1024-neuron code as a 32x32 grid (precomputed: the sparse models are too big
+//                  to ship), with the L1 penalty on (sparse_l1) or off (sparse_none).
+//   Denoising:     noisy cat -> dae_128 (trained on noisy inputs) vs ae_128 (never saw noise), live.
+//   Contractive:   jiggle the input a little, ~4 times a second, and measure how far the code moves
+//                  for ae_64 and cae_64, each divided by that model's code spread so the bars compare fairly.
+//   Convolutional: the architecture we have used all along.
 
-import { decode, drawCat, hasModel, renderTraining, loadJSON, loadSprite, loadManifest } from "../models.js";
-import { latentMap } from "../latentmap.js";
-import { mascot } from "../mascot.js";
+import {
+  drawCat, encode, decode, reconstruct, inSlot, renderTraining, loadShowcase, getShowcaseCat,
+  loadManifest, loadJSON, loadSprite, toTensor, randn, SIZE,
+} from "../models.js";
+import { catPicker, tabs, toggle, slider, readout } from "../ui.js";
+import { netDiagram } from "../netdiagram.js";
 
-let map, out, zLabel, chip, dist, tally, tip, tipCanvas, thumbs;
-let seenRadius = 0; // a z this close to a training cat counts as "seen territory"
-let spread = 1;     // typical size of one code dimension, for readable distances
-const score = { seen: 0, gaps: 0 };
-let request = 0;
+const PIXELS = 3 * SIZE * SIZE;
+const JIGGLE_EVERY = 250; // ms
+const BAR_MAX = 0.5;      // code movement / code spread that fills a bar
 
-export async function init(section) {
-  const body = section.querySelector(".s10-body");
-  let data;
-  try {
-    data = await loadJSON("data/latent_maps.json");
-  } catch {
-    data = null;
-  }
-  if (!data?.maps?.ae_2 || !(await hasModel("ae_2"))) {
-    renderTraining(body, "ae_2");
-    return;
-  }
+/** base + scale * noise, each value clamped into [0, 1], as one CHW image. */
+function noisyImage(base, scale, noise) {
+  const noisy = new Float32Array(PIXELS);
+  for (let i = 0; i < PIXELS; i++) noisy[i] = Math.min(1, Math.max(0, base[i] + scale * noise[i]));
+  return noisy;
+}
 
-  out = section.querySelector(".s10-out canvas");
-  zLabel = section.querySelector(".s10-z");
-  chip = section.querySelector(".verdict-chip");
-  dist = section.querySelector(".s10-dist");
-  tally = section.querySelector(".s10-tally");
-  tip = section.querySelector(".map-tip");
-  tipCanvas = tip.querySelector("canvas");
+let section, cat = 0, tab = "sparse", active = false;
+let manifest;
 
-  const points = data.maps.ae_2;
-  const std = (await loadManifest()).models.ae_2?.code_std ?? [1, 1];
-  spread = (std[0] + std[1]) / 2;
-  seenRadius = typicalSpacing(points);
+export async function init(el) {
+  section = el;
+  manifest = (await loadManifest()).models;
+  await loadShowcase();
 
-  map = latentMap(section.querySelector(".s10-map"), {
-    points,
-    colours: data.colours,
-    onPick: (z) => pick(z),
-    onHover: showTip,
+  tabs(el.querySelector(".s09-tabs"), {
+    tabs: [
+      { id: "sparse", label: "Sparse" },
+      { id: "denoise", label: "Denoising" },
+      { id: "contract", label: "Contractive" },
+      { id: "conv", label: "Convolutional" },
+    ],
+    onChange: (id) => {
+      tab = id;
+      for (const p of el.querySelectorAll(".s09-panel")) p.hidden = p.dataset.tab !== id;
+      refresh();
+    },
   });
-  thumbs = await loadSprite(`data/${data.thumbs.file}`, data.thumbs);
+  await catPicker(el.querySelector(".s09-picker"), {
+    onPick: (i) => {
+      cat = i;
+      refresh();
+    },
+  });
 
-  // Old-map labels in the biggest empty regions.
-  for (const z of map.emptySpots(3)) {
-    const label = document.createElement("div");
-    label.className = "monster-label";
-    label.innerHTML = `${mascot({ expression: "monster" })}<span>here be monsters</span>`;
-    label.setAttribute("aria-hidden", "true");
-    map.addLabel(z, label);
-  }
+  await Promise.all([sparse.init(), denoise.init(), contract.init(), conv.init()]);
+  refresh();
+}
 
-  section.querySelector("[data-random]").addEventListener("click", () => pick(map.randomPoint(), { counted: true }));
+export function enter() {
+  active = true;
+  refresh();
 }
 
 export function leave() {
-  if (tip) tip.hidden = true;
+  active = false;
+  contract.stop();
 }
 
-/**
- * How close training cats usually are to their nearest neighbour: the 95th percentile of those
- * distances. A clicked z within this radius of some training cat is in "seen territory".
- */
-function typicalSpacing(points) {
-  const nearest = points.map((p, i) => {
-    let best = Infinity;
-    for (let j = 0; j < points.length; j++) {
-      if (j === i) continue;
-      const d = (p[0] - points[j][0]) ** 2 + (p[1] - points[j][1]) ** 2;
-      if (d < best) best = d;
+function refresh() {
+  contract.stop();
+  ({ sparse, denoise, contract, conv })[tab].show();
+}
+
+// ================================================================ sparse
+
+const sparse = {
+  data: null,
+  penalty: null,
+  scale: {},
+
+  async init() {
+    const panel = section.querySelector('[data-tab="sparse"]');
+    try {
+      this.data = await loadJSON("data/sparse_codes.json");
+      this.recon = {};
+      for (const name of ["sparse_l1", "sparse_none"]) {
+        this.recon[name] = await loadSprite(`data/${this.data.recon[name]}`);
+        // Brightness scale: the 99th percentile of this model's positive activations.
+        const values = this.data[name].codes.flat().filter((v) => v > 0).sort((a, b) => a - b);
+        this.scale[name] = values[Math.floor(values.length * 0.99)] || 1;
+      }
+    } catch {
+      renderTraining(panel.querySelector(".s09-row"), "sparse_l1");
+      return;
     }
-    return Math.sqrt(best);
+    this.penalty = toggle(panel.querySelector(".sp-toggle"), { label: "L1 penalty", checked: true, onChange: () => this.show() });
+    const box = panel.querySelector(".sp-readouts");
+    this.onReadout = readout(box, { label: "neurons on (this cat)", format: (v) => `${v.toFixed(1)}%` });
+    const avg = document.createElement("p");
+    avg.className = "sp-avg";
+    const pct = (name) => `${((manifest[name]?.active_fraction ?? 0) * 100).toFixed(1)}%`;
+    avg.textContent = `average over the data: ${pct("sparse_l1")} on with penalty, ${pct("sparse_none")} without`;
+    box.append(avg);
+    this.canvas = panel.querySelector(".sp-grid");
+    this.panel = panel;
+  },
+
+  show() {
+    if (!this.data) return;
+    const name = this.penalty.checked ? "sparse_l1" : "sparse_none";
+    const codes = this.data[name].codes[cat];
+    drawGrid(this.canvas, codes, this.scale[name]);
+    this.onReadout.set(this.data[name].active[cat] * 100);
+    drawCat(this.panel.querySelector(".sp-input"), getShowcaseCat(cat));
+    drawCat(this.panel.querySelector(".sp-on"), this.recon.sparse_l1.get(cat));
+    drawCat(this.panel.querySelector(".sp-off"), this.recon.sparse_none.get(cat));
+    this.panel.querySelector(".sp-on").closest("figure").classList.toggle("current", name === "sparse_l1");
+    this.panel.querySelector(".sp-off").closest("figure").classList.toggle("current", name === "sparse_none");
+  },
+};
+
+/** 1024 activations as a 32x32 grid of cells: paper = off, ink green = strongly on.
+    The values are the precomputed codes; only the paint colours changed. */
+function drawGrid(canvas, codes, scale) {
+  const ctx = canvas.getContext("2d");
+  const cell = canvas.width / 32;
+  ctx.fillStyle = "#efe6d2";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  codes.forEach((v, i) => {
+    const x = (i % 32) * cell;
+    const y = Math.floor(i / 32) * cell;
+    if (v > 0) {
+      const t = Math.min(1, v / scale);
+      ctx.fillStyle = `rgba(31, 92, 58, ${0.25 + 0.75 * t})`;
+    } else {
+      ctx.fillStyle = "#e4d7c0";
+    }
+    ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
   });
-  nearest.sort((a, b) => a - b);
-  return nearest[Math.floor(nearest.length * 0.95)];
 }
 
-function nearestTraining(z) {
-  let best = Infinity;
-  for (const p of map.points) best = Math.min(best, (p[0] - z[0]) ** 2 + (p[1] - z[1]) ** 2);
-  return Math.sqrt(best);
-}
+// ================================================================ denoising
 
-async function pick(z, { counted = false } = {}) {
-  const mine = ++request;
-  map.setCrosshair(z);
-  zLabel.textContent = `z = (${z[0].toFixed(1)}, ${z[1].toFixed(1)})`;
-  const d = nearestTraining(z);
-  const seen = d <= seenRadius;
-  chip.textContent = seen ? "seen territory" : "here be monsters";
-  chip.dataset.level = seen ? "ok" : "bad";
-  dist.textContent = `nearest training cat: ${(d / spread).toFixed(2)}σ away`;
-  if (counted) {
-    score[seen ? "seen" : "gaps"]++;
-    tally.textContent = `in the data: ${score.seen} / in the gaps: ${score.gaps}`;
-  }
-  const image = await decode("ae_2", z);
-  if (mine === request) drawCat(out, image);
-}
+const denoise = {
+  noise: null,
+  noiseCat: -1,
+  request: 0,
 
-/** On hover, the nearest training cat's thumbnail (only when the pointer is close to a dot). */
-function showTip(nearest, at) {
-  if (!nearest || nearest.distance > 28 || !thumbs) {
-    tip.hidden = true;
-    return;
-  }
-  tipCanvas.getContext("2d").putImageData(thumbs.get(nearest.index), 0, 0);
-  const [x, y] = map.toScreen(map.points[nearest.index]);
-  tip.style.left = `${x}px`;
-  tip.style.top = `${y}px`;
-  tip.hidden = false;
-}
+  async init() {
+    const panel = section.querySelector('[data-tab="denoise"]');
+    this.panel = panel;
+    this.sigma = slider(panel.querySelector(".dn-slider"), {
+      label: "noise σ",
+      min: 0,
+      max: 0.5,
+      step: 0.01,
+      value: 0.3, // from about 0.25 up, the denoising AE clearly wins
+      format: (v) => v.toFixed(2),
+      onInput: () => this.show(),
+    });
+  },
+
+  async show() {
+    const mine = ++this.request;
+    // One fixed noise pattern per cat, so the slider only changes its strength.
+    if (this.noiseCat !== cat) {
+      this.noise = randn(PIXELS);
+      this.noiseCat = cat;
+    }
+    const x = toTensor(getShowcaseCat(cat)).data;
+    const input = noisyImage(x, this.sigma.value, this.noise);
+    drawCat(this.panel.querySelector(".dn-noisy"), input);
+    for (const [cls, model] of [[".dn-dae", "dae_128"], [".dn-ae", "ae_128"]]) {
+      const fig = this.panel.querySelector(cls);
+      await inSlot(fig, async () => {
+        const out = await reconstruct(model, input);
+        if (mine === this.request) drawCat(fig.querySelector("canvas"), out);
+      });
+    }
+  },
+};
+
+// ================================================================ contractive
+
+const contract = {
+  timer: 0,
+  gen: 0, // only the newest update loop may schedule the next jiggle
+  base: {},
+  baseCat: -1,
+
+  async init() {
+    const panel = section.querySelector('[data-tab="contract"]');
+    this.panel = panel;
+    this.level = slider(panel.querySelector(".ct-slider"), {
+      label: "jiggle",
+      min: 0,
+      max: 0.1,
+      step: 0.005,
+      value: 0.05,
+      format: (v) => (v === 0 ? "still" : v.toFixed(3)),
+      onInput: () => this.show(),
+    });
+    const bars = panel.querySelector(".ct-bars");
+    bars.innerHTML = `<p class="ct-title">how far z moves</p>`;
+    this.rows = {};
+    for (const [model, label] of [["ae_64", "plain AE"], ["cae_64", "contractive AE"]]) {
+      const row = document.createElement("div");
+      row.className = "ct-row";
+      row.innerHTML = `<span class="ct-label">${label}</span><span class="ct-track"><span class="ct-fill"></span></span><span class="ct-value mono">–</span>`;
+      bars.append(row);
+      this.rows[model] = row;
+    }
+  },
+
+  /** Average size of one code dimension's natural variation, so moves are comparable across models. */
+  spread(model) {
+    const std = manifest[model]?.code_std;
+    return std ? std.reduce((a, b) => a + b, 0) / std.length : 1;
+  },
+
+  stop() {
+    clearTimeout(this.timer);
+    this.timer = 0;
+    this.gen++;
+  },
+
+  async show() {
+    this.stop();
+    const gen = ++this.gen;
+    const image = getShowcaseCat(cat);
+    const x = toTensor(image);
+    if (this.baseCat !== cat) {
+      this.base = {};
+      this.baseCat = cat;
+    }
+    const level = this.level.value;
+    const jiggled = noisyImage(x.data, level, randn(PIXELS));
+    drawCat(this.panel.querySelector(".ct-input"), jiggled);
+
+    for (const [model, cls] of [["ae_64", ".ct-ae"], ["cae_64", ".ct-cae"]]) {
+      const fig = this.panel.querySelector(cls);
+      const moved = await inSlot(fig, async () => {
+        this.base[model] ??= (await encode(model, x)).z;
+        const z = (await encode(model, jiggled)).z;
+        drawCat(fig.querySelector("canvas"), await decode(model, z));
+        let d = 0;
+        for (let i = 0; i < z.data.length; i++) d += (z.data[i] - this.base[model].data[i]) ** 2;
+        return Math.sqrt(d) / this.spread(model);
+      });
+      const row = this.rows[model];
+      row.querySelector(".ct-fill").style.width = moved == null ? "0%" : `${Math.min(100, (moved / BAR_MAX) * 100)}%`;
+      row.querySelector(".ct-value").textContent = moved == null ? "–" : moved.toFixed(2);
+    }
+    // Keep jiggling while the slide is showing this tab and the slider is above zero.
+    if (gen === this.gen && active && tab === "contract" && level > 0) {
+      this.timer = setTimeout(() => this.show(), JIGGLE_EVERY);
+    }
+  },
+};
+
+// ================================================================ convolutional
+
+const conv = {
+  async init() {
+    this.net = netDiagram(section.querySelector(".cv-stage"), { ending: "decoder", note: false });
+    this.net.showAll();
+  },
+
+  async show() {
+    const image = getShowcaseCat(cat);
+    drawCat(this.net.input, image);
+    await inSlot(this.net.output.parentElement, async () => drawCat(this.net.output, await reconstruct("dae_128", [image])));
+  },
+};

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Drawing office — title</title>
+  <style>
+    @font-face { font-family: "Sans"; font-weight: 700; src: url("../fonts/NotoSansDisplay-Bold.ttf") format("truetype"); }
+    @font-face { font-family: "Mono"; font-weight: 400; src: url("../../site/vendor/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Mono"; font-weight: 700; src: url("../../site/vendor/fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      color: #e8f2ff;
+      font-family: Mono, ui-monospace, monospace;
+      background:
+        linear-gradient(rgba(232, 242, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232, 242, 255, 0.08) 1px, transparent 1px),
+        #0c2744;
+      background-size: 32px 32px;
+    }
+    .sheet { height: 100%; padding: 36px 40px 28px; display: flex; flex-direction: column; }
+    .rev {
+      align-self: flex-start;
+      border: 2px solid #f0c14a;
+      color: #f0c14a;
+      padding: 8px 12px;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+    }
+    h1 {
+      margin: 70px 0 0;
+      font-family: Sans, "Noto Sans Display", sans-serif;
+      font-weight: 700;
+      font-size: 78px;
+      letter-spacing: 0.04em;
+      line-height: 0.92;
+      text-transform: uppercase;
+    }
+    .dim { margin-top: 28px; width: min(760px, 80%); }
+    .sub { margin: 18px 0 0; font-size: 20px; letter-spacing: 0.08em; }
+    .block {
+      margin-top: auto;
+      margin-left: auto;
+      width: 460px;
+      border: 2px solid #e8f2ff;
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      font-size: 15px;
+    }
+    .block div { padding: 8px 10px; border-bottom: 1px solid rgba(232, 242, 255, 0.45); }
+    .block div:nth-last-child(-n+2) { border-bottom: 0; }
+    .block .k { letter-spacing: 0.12em; color: #f0c14a; }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <p class="rev">REV B · DO NOT SCALE</p>
+    <h1>Autoencoders<br />&amp; VAEs</h1>
+    <svg class="dim" viewBox="0 0 760 36" aria-hidden="true">
+      <line x1="8" y1="18" x2="752" y2="18" stroke="#e8f2ff" stroke-width="1.5" />
+      <path d="M8 10 L8 26 M752 10 L752 26" stroke="#e8f2ff" stroke-width="1.5" />
+      <text x="380" y="14" text-anchor="middle" fill="#f0c14a" font-family="JetBrains Mono, monospace" font-size="13">TEACHING A NETWORK TO IMAGINE CATS</text>
+    </svg>
+    <p class="sub">SHEET 01 · LATENT SPACE, GENERAL ARRANGEMENT</p>
+    <section class="block" aria-label="Drawing title block">
+      <div class="k">COURSE</div><div>MAAI901 · DEEP LEARNING FOR VISUAL DATA</div>
+      <div class="k">DRAWN</div><div>DANISH</div>
+      <div class="k">DATE</div><div>TUE 20 OCT 2026</div>
+      <div class="k">SCALE</div><div>1 : 1 · 64×64 RGB</div>
+    </section>
+  </main>
+</body>
+</html>

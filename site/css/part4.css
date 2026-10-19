@@ -6,10 +6,10 @@
   position: relative;
   width: var(--map-size, 640px);
   aspect-ratio: 1;
-  border-radius: var(--radius);
-  background:
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 7%, var(--bg-sunken)), var(--bg-sunken) 70%);
-  border: 2px solid var(--line);
+  border-radius: 0;
+  background: var(--bg-sunken);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
   overflow: hidden;
 }
 .latent-canvas {

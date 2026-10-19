@@ -1,69 +1,85 @@
-// The bottleneck: squeeze the cat through k numbers and rebuild it (ae_2, ae_16, ae_64, ae_256, live).
-// The last stop removes the bottleneck: a perfect copy, and Photocopier Cat is back.
+// The identity trap. With a bottleneck the decoder has to rebuild the cat from a squeezed
+// summary (ae_64, live). Make every layer as wide as the input and the network can just copy:
+// perfect loss, nothing learned. The "on" state is an illustration, not a trained model.
 
-import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat } from "../models.js";
-import { catPicker, slider } from "../ui.js";
+import { encode, decode, drawCat, squaredError, withModel, SIZE } from "../models.js";
+import { toggle, readout } from "../ui.js";
+import { mountMascot } from "../mascot.js";
+import { netDiagram } from "../netdiagram.js";
+import { getCurrent, onCurrentChange } from "../state.js";
 
-const INPUT = 12288;
-const STOPS = [
-  { k: 2, open: 0.06 },
-  { k: 16, open: 0.16 },
-  { k: 64, open: 0.3 },
-  { k: 256, open: 0.5 },
-  { k: null, open: 1 }, // no bottleneck
-];
-const fmt = (n) => n.toLocaleString("en-US");
-
-let inCanvas, outCanvas, outSlot, diagram, kEl, ratioEl, copier, picker, stop;
-let cat = 0;
-let request = 0;
+let net, mascotEl, stamp, loss, features, newCats;
+let wide = false;
+let bottleneckLoss = NaN;
 
 export async function init(section) {
-  [inCanvas, outCanvas] = section.querySelectorAll(".bn-img canvas");
-  outSlot = section.querySelector(".bn-out");
-  diagram = section.querySelector(".bn-diagram");
-  kEl = section.querySelector(".bn-k");
-  ratioEl = section.querySelector(".bn-ratio");
-  copier = section.querySelector(".bn-copier");
+  net = netDiagram(section.querySelector(".net-stage"), { ending: "decoder", note: false });
+  net.showAll();
+  mascotEl = section.querySelector(".s04-mascot [data-mascot]");
+  stamp = section.querySelector(".stamp");
 
-  await loadShowcase();
-  stop = slider(section.querySelector(".bn-slider"), {
-    label: "bottleneck size",
-    min: 0,
-    max: STOPS.length - 1,
-    step: 1,
-    value: 0,
-    format: (i) => (STOPS[i].k ? `${STOPS[i].k} numbers` : "no bottleneck"),
-    ticks: ["2", "16", "64", "256", "none"],
-    onInput: update,
-  });
-  picker = await catPicker(section.querySelector(".bn-picker"), {
-    onPick: (i) => {
-      cat = i;
+  const readouts = section.querySelector(".s04-readouts");
+  loss = readout(readouts, { label: "loss", value: 0, format: (v) => (Number.isFinite(v) ? v.toFixed(3) : "–"), duration: 700 });
+  features = textReadout(readouts, "features learned");
+  newCats = textReadout(readouts, "can make new cats");
+
+  toggle(section.querySelector(".s04-toggle"), {
+    label: "make every layer as wide as the input",
+    onChange: (on) => {
+      wide = on;
       update();
     },
   });
+
+  onCurrentChange(update);
   await update();
 }
 
+export function enter() {
+  update();
+}
+
+function textReadout(parent, label) {
+  const wrap = document.createElement("div");
+  wrap.className = "readout";
+  wrap.innerHTML = `<span class="readout-label">${label}</span><span class="readout-value readout-text"></span>`;
+  parent.append(wrap);
+  const value = wrap.lastElementChild;
+  return {
+    set(text, bad) {
+      if (value.textContent === text) return;
+      value.classList.add("swap");
+      setTimeout(() => {
+        value.textContent = text;
+        value.classList.toggle("bad", bad);
+        value.classList.remove("swap");
+      }, 150);
+    },
+  };
+}
+
 async function update() {
-  const { k, open } = STOPS[stop.value];
-  const image = getShowcaseCat(cat);
-  const mine = ++request; // the slider can move faster than the model: only the latest result is drawn
+  const { image } = await getCurrent();
+  drawCat(net.input, image);
+  net.setWide(wide);
+  mountMascot(mascotEl, { expression: wide ? "photocopier" : "happy" });
+  stamp.hidden = !wide;
 
-  drawCat(inCanvas, image);
-  diagram.style.setProperty("--open", open);
-  kEl.textContent = fmt(k ?? INPUT);
-  ratioEl.textContent = k ? `${fmt(INPUT / k)}× smaller` : "no compression: 1×";
-  copier.hidden = k !== null;
-
-  if (k === null) {
-    // Nothing to squeeze through: the network can just copy.
-    await inSlot(outSlot, async () => drawCat(outCanvas, image));
+  if (wide) {
+    drawCat(net.output, image); // the pipe copies the input exactly
+    loss.set(0);
+    features.set("none", true);
+    newCats.set("no", true);
     return;
   }
-  await inSlot(outSlot, async () => {
-    const out = await reconstruct(`ae_${k}`, [image]);
-    if (mine === request) drawCat(outCanvas, out);
-  });
+  features.set("edges, fur, faces", false);
+  newCats.set("not yet", false);
+  await withModel(net.output.parentElement, async () => {
+    const { z } = await encode("ae_64", [image]);
+    const out = await decode("ae_64", z);
+    drawCat(net.output, out);
+    // Mean squared error per pixel value between the input and the reconstruction.
+    bottleneckLoss = squaredError(image, out) / (3 * SIZE * SIZE);
+  }, { compact: true });
+  loss.set(bottleneckLoss);
 }

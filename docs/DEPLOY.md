@@ -22,7 +22,7 @@ manual DNS record.
     onnxruntime-web runs multi-threaded. Everything the page loads is same-origin; the only
     external URLs are plain links in the credits, which these headers don't affect.
   - `.wasm` as `application/wasm`.
-- **`.vercelignore`** keeps `training/`, `tools/` and `docs/` out of CLI uploads.
+- **`.vercelignore`** keeps `training/`, `tools/`, `docs/` and `design-mockups/` out of CLI uploads. The mockups are design studies, not part of the site. The service worker only precaches files under `site/`.
 - **Cache-safe names.** `training/export.py` gives every model and data file a content hash in
   its name (`vae_128.decoder.0fa1da.onnx`). `models/manifest.json` names the model files and
   `data/files.json` maps every logical name (`data/showcase.png`) to its current file. Then it runs

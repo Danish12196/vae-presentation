@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Lecture slate — title</title>
+  <style>
+    @font-face { font-family: "Chalk"; font-weight: 400; font-style: italic; src: url("../fonts/NotoSerifDisplay-Italic.ttf") format("truetype"); }
+    @font-face { font-family: "Chalk"; font-weight: 700; font-style: italic; src: url("../fonts/NotoSerifDisplay-BoldItalic.ttf") format("truetype"); }
+    @font-face { font-family: "Text"; font-weight: 400; src: url("../../site/vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      color: #f3ecdf;
+      font-family: Text, sans-serif;
+      background: #221e18;
+    }
+    .dust {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      opacity: 0.18;
+      background-image:
+        radial-gradient(circle, rgba(243, 236, 223, 0.7) 0.6px, transparent 0.7px),
+        radial-gradient(circle, rgba(226, 182, 87, 0.8) 0.5px, transparent 0.6px);
+      background-size: 17px 19px, 29px 23px;
+      background-position: 0 0, 8px 11px;
+    }
+    .sheet { position: relative; height: 100%; padding: 48px 64px; display: flex; flex-direction: column; }
+    .course { margin: 0; letter-spacing: 0.18em; text-transform: uppercase; font-size: 14px; color: #e2b657; }
+    h1 {
+      margin: 54px 0 0;
+      max-width: 12ch;
+      font-family: Chalk, "Noto Serif Display", serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 92px;
+      line-height: 0.9;
+    }
+    .sub { margin: 16px 0 0; font-family: Chalk, serif; font-style: italic; font-size: 34px; color: #e7d7b0; }
+    .rule { width: 180px; height: 3px; margin-top: 28px; background: #e2b657; border-radius: 2px; transform: rotate(-1deg); }
+    footer { margin-top: auto; display: flex; justify-content: space-between; font-size: 20px; color: #e7d7b0; }
+    .sketch { position: absolute; right: 70px; bottom: 80px; width: 220px; height: 180px; }
+  </style>
+</head>
+<body>
+  <div class="dust" aria-hidden="true"></div>
+  <main class="sheet">
+    <p class="course">MAAI901 · Deep Learning for Visual Data</p>
+    <h1>Autoencoders &amp; VAEs</h1>
+    <p class="sub">teaching a network to imagine cats</p>
+    <div class="rule"></div>
+    <svg class="sketch" viewBox="0 0 220 180" aria-hidden="true">
+      <path d="M40 100 L70 40 L100 78 L130 36 L170 100 C190 150 150 168 110 160 C60 168 28 146 40 100Z" fill="none" stroke="#f3ecdf" stroke-width="3" stroke-linecap="round" />
+      <path d="M78 96 H92 M128 96 H142 M108 112 L100 124 L118 124" fill="none" stroke="#e2b657" stroke-width="3" stroke-linecap="round" />
+    </svg>
+    <footer>
+      <span>Danish</span>
+      <span>Tuesday 20 October 2026</span>
+    </footer>
+  </main>
+</body>
+</html>

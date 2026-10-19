@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Field notebook — title</title>
+  <style>
+    @font-face { font-family: "Display"; font-weight: 700; src: url("../fonts/NotoSansDisplay-Bold.ttf") format("truetype"); }
+    @font-face { font-family: "Serif"; font-weight: 700; font-style: italic; src: url("../fonts/NotoSerifDisplay-BoldItalic.ttf") format("truetype"); }
+    @font-face { font-family: "Text"; font-weight: 400; src: url("../../site/vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Mono"; src: url("../../site/vendor/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      color: #efe6d2;
+      font-family: Text, sans-serif;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 7px),
+        #3e4a34;
+    }
+    .cover { height: 100%; padding: 42px 64px; display: flex; flex-direction: column; position: relative; }
+    .tape { position: absolute; left: 0; top: 0; bottom: 0; width: 28px; background: #c4a46a; }
+    .spec { margin: 0 0 0 24px; font-family: Mono, monospace; letter-spacing: 0.14em; color: #e2b657; }
+    h1 { margin: 48px 0 0 24px; font-family: Display, sans-serif; font-size: 76px; line-height: 0.9; letter-spacing: 0.02em; text-transform: uppercase; max-width: 12ch; }
+    .sub { margin: 18px 0 0 24px; font-family: Serif, serif; font-style: italic; font-size: 32px; color: #f3e6c4; }
+    .stamp {
+      margin: 36px 0 0 24px;
+      width: 280px;
+      border: 3px solid #e2b657;
+      color: #e2b657;
+      padding: 10px 14px;
+      font-family: Mono, monospace;
+      letter-spacing: 0.08em;
+      transform: rotate(-2deg);
+    }
+    footer { margin: auto 0 0 24px; display: flex; gap: 36px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <main class="cover">
+    <div class="tape" aria-hidden="true"></div>
+    <p class="spec">SPECIMEN LOG · CAT-064</p>
+    <h1>Latent territories</h1>
+    <p class="sub">Autoencoders &amp; VAEs. A field notebook on teaching a network to imagine cats.</p>
+    <p class="stamp">SURVEYOR DANISH<br />MAAI901 · 20 OCT 2026</p>
+    <footer><span>Deep Learning for Visual Data</span><span>Hold-out cats are not for training</span></footer>
+  </main>
+</body>
+</html>

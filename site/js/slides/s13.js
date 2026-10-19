@@ -1,74 +1,133 @@
-// Turning the KL dial: the same 2,000 cats encoded by four 2D VAEs trained with
-// beta = 0, 0.1, 1 and 4. The slider glides the dots between the four precomputed mu scatters:
-// beta 0 is a plain autoencoder (spread out, gaps), beta 4 packs everything around N(0, 1).
-// The rope above leans towards whichever term is winning.
+// Loss = reconstruction + KL. The two terms stay written out at the bottom of the slide.
+// Below the equation: drag a Gaussian against N(0, 1) (its peak moves mu, its side handles
+// change sigma) and watch KL( N(mu, sigma^2) || N(0, 1) ) = 0.5 * (sigma^2 + mu^2 - 1 - ln sigma^2).
 
-import { loadJSON, renderTraining } from "../models.js";
-import { slider } from "../ui.js";
-import { latentMap } from "../latentmap.js";
+import { readout } from "../ui.js";
 
-const BETAS = [
-  { beta: "0", key: "vae_2d_b0", pull: -0.85 },
-  { beta: "0.1", key: "vae_2d_b0.1", pull: -0.45 },
-  { beta: "1", key: "vae_2d_b1", pull: 0.05 },
-  { beta: "4", key: "vae_2d_b4", pull: 0.6 },
-];
+// Plot geometry (SVG units): x from -4 to 4, density from 0 to 1.
+const W = 800, H = 300, X0 = 40, X1 = 760, Y0 = 262, Y1 = 22;
+const MU = [-3, 3], SIGMA = [0.4, 2.5];
+const sx = (x) => X0 + ((x + 4) / 8) * (X1 - X0);
+const ux = (px) => ((px - X0) / (X1 - X0)) * 8 - 4;
+const sy = (p) => Y0 - p * (Y0 - Y1);
+const pdf = (x, mu, s) => Math.exp(-(((x - mu) / s) ** 2) / 2) / (s * Math.sqrt(2 * Math.PI));
+const clamp = (v, [a, b]) => Math.min(b, Math.max(a, v));
 
-let map, tug;
+const kl = (mu, sigma) => 0.5 * (sigma ** 2 + mu ** 2 - 1 - Math.log(sigma ** 2));
 
-export async function init(section) {
-  const body = section.querySelector(".s13-body");
-  const data = await loadJSON("data/latent_maps.json").catch(() => null);
-  const missing = BETAS.find((b) => !data?.maps?.[b.key]);
-  if (missing) return renderTraining(body, missing.key);
+let svg, qPath, qFill, peak, sides, klOut, paramsEl;
+let mu = 1.4;
+let sigma = 0.6;
+let snapFrame = 0;
 
-  // One fixed view for all four, fitted to the widest (beta = 0), so the packing is visible.
-  map = latentMap(section.querySelector(".s13-map"), {
-    points: data.maps[BETAS[0].key],
-    colours: data.colours,
-    extent: 1.15,
-    dot: 2.6,
-    label: "Latent maps of four VAEs, from beta 0 to beta 4",
-  });
-  map.overlay = drawPrior;
-  tug = section.querySelector(".tug");
+export function init(section) {
+  // The plot.
+  svg = section.querySelector("svg.gauss");
+  svg.innerHTML = `
+    <line class="g-axis" x1="${X0}" x2="${X1}" y1="${Y0}" y2="${Y0}" />
+    ${[-3, -2, -1, 0, 1, 2, 3].map((t) => `<text class="g-tick" x="${sx(t)}" y="${Y0 + 26}" text-anchor="middle">${t}</text>`).join("")}
+    <path class="g-prior-fill" d="${area(0, 1)}" />
+    <path class="g-prior" d="${curve(0, 1)}" />
+    <text class="g-label prior" x="${sx(0)}" y="${sy(pdf(0, 0, 1)) - 10}" text-anchor="middle">N(0, 1)</text>
+    <path class="g-q-fill" />
+    <path class="g-q" />
+    <circle class="g-handle side" r="13" tabindex="0" role="slider" aria-label="spread σ" data-side="-1" />
+    <circle class="g-handle side" r="13" tabindex="0" role="slider" aria-label="spread σ" data-side="1" />
+    <circle class="g-handle peak" r="15" tabindex="0" role="slider" aria-label="mean μ" />`;
+  qPath = svg.querySelector(".g-q");
+  qFill = svg.querySelector(".g-q-fill");
+  peak = svg.querySelector(".peak");
+  sides = [...svg.querySelectorAll(".side")];
+  draggable(peak, (x) => (mu = clamp(x, MU)));
+  for (const s of sides) draggable(s, (x) => (sigma = clamp(Math.abs(x - mu), SIGMA)));
+  keyboard(peak, (d) => (mu = clamp(mu + d * 0.1, MU)));
+  for (const s of sides) keyboard(s, (d) => (sigma = clamp(sigma + d * Number(s.dataset.side) * 0.05, SIGMA)));
 
-  slider(section.querySelector(".s13-slider"), {
-    label: "KL weight β",
-    min: 0,
-    max: BETAS.length - 1,
-    step: 1,
-    value: 0,
-    format: (i) => `β = ${BETAS[i].beta}`,
-    ticks: BETAS.map((b) => b.beta),
-    onInput: (i) => {
-      map.setPoints(data.maps[BETAS[i].key]);
-      tug.style.setProperty("--pull", BETAS[i].pull);
-    },
-  });
-  tug.style.setProperty("--pull", BETAS[0].pull);
+  klOut = readout(section.querySelector(".kl-readout"), { label: "KL", value: kl(mu, sigma), format: (v) => v.toFixed(3), duration: 150 });
+  paramsEl = section.querySelector(".gauss-params");
+  section.querySelector("[data-snap]").addEventListener("click", snap);
+  update();
 }
 
 export function leave() {
-  map?.stop(); // jump to the end of any glide in progress
+  cancelAnimationFrame(snapFrame);
 }
 
-/** N(0, 1) as dashed 1 and 2 sigma rings: where the KL term pulls every cloud. */
-function drawPrior(ctx, m) {
-  const [ox, oy] = m.toScreen([0, 0]);
-  const [r1] = m.toScreen([1, 0]);
-  ctx.save();
-  ctx.setLineDash([6, 6]);
-  ctx.strokeStyle = "rgba(179, 136, 255, 0.85)";
-  ctx.lineWidth = 2;
-  for (const k of [1, 2]) {
-    ctx.beginPath();
-    ctx.arc(ox, oy, (r1 - ox) * k, 0, Math.PI * 2);
-    ctx.stroke();
+function curve(m, s) {
+  const pts = [];
+  for (let i = 0; i <= 160; i++) {
+    const x = -4 + (i / 160) * 8;
+    pts.push(`${sx(x).toFixed(1)},${sy(Math.min(1.05, pdf(x, m, s))).toFixed(1)}`);
   }
-  ctx.setLineDash([]);
-  ctx.fillStyle = "rgba(179, 136, 255, 0.95)";
-  ctx.font = "600 14px 'JetBrains Mono', monospace";
-  ctx.fillText("N(0, 1)", ox + (r1 - ox) * 2 + 6, oy - 6);
-  ctx.restore();
+  return `M${pts.join(" L")}`;
+}
+function area(m, s) {
+  return `${curve(m, s)} L${X1},${Y0} L${X0},${Y0} Z`;
+}
+
+function update() {
+  qPath.setAttribute("d", curve(mu, sigma));
+  qFill.setAttribute("d", area(mu, sigma));
+  const top = Math.min(1.05, pdf(mu, mu, sigma));
+  peak.setAttribute("cx", sx(mu));
+  peak.setAttribute("cy", sy(top));
+  peak.setAttribute("aria-valuenow", mu.toFixed(2));
+  sides.forEach((s) => {
+    const x = mu + Number(s.dataset.side) * sigma;
+    s.setAttribute("cx", sx(x));
+    s.setAttribute("cy", sy(Math.min(1.05, pdf(x, mu, sigma))));
+    s.setAttribute("aria-valuenow", sigma.toFixed(2));
+  });
+  klOut.set(kl(mu, sigma));
+  paramsEl.textContent = `μ = ${mu.toFixed(2)}   σ = ${sigma.toFixed(2)}`;
+}
+
+/** Drag a handle horizontally; onX gets the pointer's position in data units. */
+function draggable(el, onX) {
+  el.addEventListener("pointerdown", (e) => {
+    cancelAnimationFrame(snapFrame);
+    el.setPointerCapture(e.pointerId);
+    const move = (ev) => {
+      const r = svg.getBoundingClientRect();
+      onX(ux(((ev.clientX - r.left) / r.width) * W));
+      update();
+    };
+    const up = () => {
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    e.preventDefault();
+  });
+}
+
+/** Arrow keys nudge a focused handle (main.js leaves the arrows to role="slider" elements). */
+function keyboard(el, onStep) {
+  el.addEventListener("keydown", (e) => {
+    const d = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+    if (!d) return;
+    onStep(d);
+    update();
+    e.preventDefault();
+  });
+}
+
+/** Animate back to mu = 0, sigma = 1, where KL is exactly zero. */
+function snap() {
+  cancelAnimationFrame(snapFrame);
+  const [m0, s0] = [mu, sigma];
+  const start = performance.now();
+  const ms = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 600;
+  const step = (now) => {
+    const t = ms ? Math.min(1, (now - start) / ms) : 1;
+    const k = 1 - (1 - t) ** 3;
+    mu = m0 + (0 - m0) * k;
+    sigma = s0 + (1 - s0) * k;
+    update();
+    if (t < 1) snapFrame = requestAnimationFrame(step);
+  };
+  snapFrame = requestAnimationFrame(step);
 }

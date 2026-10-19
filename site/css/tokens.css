@@ -1,29 +1,29 @@
-/* Design tokens from SPEC.md. Everything else reads these variables. */
+/* Pixel training chrome. Cat pixels in the demos still come from the
+   trained models and the held-out dataset; these tokens only colour
+   the frames, type and panels around them. */
 
 :root {
-  /* Colours */
-  --bg: #14112b;            /* dark navy */
-  --bg-raised: #1f1a40;     /* cards and panels */
-  --bg-sunken: #0e0c20;     /* canvases, inputs */
-  --line: #3a3370;          /* borders */
-  --text: #f7f5ff;
-  --text-soft: #c9c3ec;     /* secondary text: still high contrast on navy */
+  --bg: #efe6d2;
+  --bg-raised: #fffaf3;
+  --bg-sunken: #e7dcc6;
+  --line: #24170f;
+  --text: #24170f;
+  --text-soft: #5c4636;
 
-  --coral: #ff6b6b;
-  --sunflower: #ffd166;
-  --mint: #06d6a0;
-  --sky: #4cc9f0;
-  --lilac: #b388ff;
+  /* Dark stamps so paper-coloured labels stay readable on a fill. */
+  --coral: #9d2f28;
+  --sunflower: #a85b12;
+  --mint: #1f5c3a;
+  --sky: #1e3f66;
+  --lilac: #6b3050;
+  --stamp: #e07a3d;
 
-  /* The current part's accent; each section sets it from data-accent. */
   --accent: var(--coral);
 
-  /* Fonts */
-  --font-head: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-head: "Noto Sans Display", "Trebuchet MS", system-ui, sans-serif;
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
 
-  /* Type scale: big enough for a projector at the back of the room. */
   --fs-body: 24px;
   --fs-small: 20px;
   --fs-h1: 80px;
@@ -31,18 +31,16 @@
   --fs-h3: 34px;
   --fs-label: 18px;
 
-  /* Spacing, shape, motion */
   --gap: 24px;
   --pad-x: 64px;
-  --radius: 18px;
-  --radius-small: 10px;
-  --bar-h: 44px;            /* top bar with progress and part label */
+  --radius: 0px;
+  --radius-small: 0px;
+  --bar-h: 48px;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --t-fast: 200ms;
   --t-med: 320ms;
 }
 
-/* 1366x768 laptops: same layout, a bit less air. */
 @media (max-height: 820px) {
   :root {
     --fs-h1: 68px;
@@ -52,7 +50,6 @@
   }
 }
 
-/* Phones and narrow windows. */
 @media (max-width: 760px) {
   :root {
     --fs-body: 18px;
@@ -63,7 +60,7 @@
     --fs-label: 14px;
     --gap: 14px;
     --pad-x: 18px;
-    --bar-h: 38px;
+    --bar-h: 42px;
   }
 }
 

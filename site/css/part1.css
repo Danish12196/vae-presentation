@@ -1,7 +1,7 @@
-/* Part 1 slides: title mosaic (s01), discriminative vs generative (s02),
-   and the network diagram shared by s03 and s04. */
+/* Opening slides: title (s01), warm-up question (s02), discriminative vs generative
+   (section s03, classes stay .s02-*), and the network diagram shared by s04 and s05. */
 
-/* Slide content sits above decorative backgrounds like the mosaic. */
+/* Slide content sits above any decorative background. */
 .slide > .slide-head,
 .slide > .slide-body {
   position: relative;
@@ -10,68 +10,25 @@
 
 /* ================================================================ s01 title */
 
-.mosaic {
-  --tile: 112px;
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-}
-/* Darken the middle so the title stays readable, keep the edges lively. */
-.mosaic::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 55% 60% at 50% 52%, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 70%, transparent) 60%, color-mix(in srgb, var(--bg) 45%, transparent) 100%);
-}
-.mosaic-drift {
-  animation: mosaic-bob 40s ease-in-out infinite alternate;
-  animation-play-state: paused;
-}
-.mosaic-canvas {
-  display: block;
-  image-rendering: pixelated;
-  opacity: 0.85;
-  animation: mosaic-drift 150s linear infinite;
-  animation-play-state: paused;
-}
-.mosaic.running .mosaic-drift,
-.mosaic.running .mosaic-canvas {
-  animation-play-state: running;
-}
-@keyframes mosaic-drift {
-  to { transform: translateX(calc(-1 * var(--drift, 0px))); }
-}
-@keyframes mosaic-bob {
-  from { transform: translateY(0); }
-  to { transform: translateY(calc(-1 * var(--drift-y, 0px))); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .mosaic-drift,
-  .mosaic-canvas {
-    animation: none;
-  }
-}
-
 .title-slide .slide-body {
-  gap: calc(var(--gap) * 0.9);
+  gap: calc(var(--gap) * 0.85);
 }
-.title-mascot .mascot {
-  width: min(30vh, 280px);
-  filter: drop-shadow(0 10px 30px color-mix(in srgb, black 50%, transparent));
-}
-.title-slide h1 {
-  text-shadow: 0 4px 24px var(--bg);
+.title-slide .slide-body::before {
+  content: "";
+  width: 96px;
+  height: 10px;
+  background: var(--accent);
+  box-shadow: 4px 4px 0 var(--stamp);
 }
 .byline {
-  font-family: var(--font-head);
-  font-weight: 500;
+  font-family: var(--font-mono);
+  font-weight: 700;
   font-size: var(--fs-small);
   color: var(--text);
-  padding: 6px 18px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  padding: 8px 16px;
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
 }
 .scroll-hint {
   position: absolute;
@@ -83,8 +40,8 @@
   font-size: var(--fs-label);
   color: var(--text-soft);
   padding: 4px 14px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
 }
 .scroll-hint span {
   display: inline-block;
@@ -99,7 +56,39 @@
   }
 }
 
-/* ================================================================ s02 discriminative vs generative */
+/* ================================================================ s02 warm-up question */
+
+.ice-body {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+}
+.ice-body h2 {
+  font-size: clamp(52px, 7.4vw, 108px);
+  line-height: 0.9;
+  max-width: 12ch;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  text-shadow: 6px 6px 0 var(--stamp);
+}
+.ice-or {
+  display: block;
+  margin: 0.18em 0;
+  font-size: 0.38em;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sunflower);
+}
+.ice-note {
+  font-family: var(--font-head);
+  font-size: var(--fs-h3);
+  color: var(--text-soft);
+}
+
+/* ================================================================ s03 discriminative vs generative (classes .s02-*) */
 
 .s02-body {
   gap: calc(var(--gap) * 2.5);
@@ -186,9 +175,10 @@
 }
 .flow-label {
   padding: 10px 34px;
-  border-radius: 999px;
   background: var(--accent);
   color: var(--bg);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
   font-family: var(--font-head);
   font-weight: 700;
   font-size: var(--fs-h3);
@@ -452,7 +442,9 @@
   white-space: nowrap;
   transform: rotate(-10deg);
   background: var(--coral);
-  color: var(--text);
+  color: var(--bg);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line);
 }
 .stamp:not([hidden]) {
   animation: stamp-in 320ms var(--ease);
@@ -501,25 +493,22 @@
   .s04-mascot {
     width: 110px;
   }
-  .mosaic {
-    --tile: 96px;
+  .ice-body h2 {
+    font-size: clamp(48px, 7vw, 84px);
   }
 }
 
 /* ================================================================ phones (portrait) */
 
 @media (max-width: 760px) {
-  .mosaic {
-    --tile: 72px;
-  }
-  .title-mascot .mascot {
-    width: 150px;
-  }
   .scroll-hint {
     white-space: normal;
     text-align: center;
     width: max-content;
     max-width: 90%;
+  }
+  .ice-body h2 {
+    font-size: clamp(40px, 12vw, 56px);
   }
 
   .s02-body {

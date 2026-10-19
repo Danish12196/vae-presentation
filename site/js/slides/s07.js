@@ -1,85 +1,85 @@
-// PCA vs autoencoder at the same k: the same four cats, rebuilt from k numbers by PCA
-// (precomputed, site/data/pca_k*.png) and by ae_k (live). Lower error is highlighted.
-// Four cats can go either way, so the side panel also shows the average over all 64 showcase cats.
+// Reconstruction loss: input, ae_64's output and the squared error of every pixel.
+// MSE and BCE computed live. The only "label" is the input itself.
 
-import { drawCat, reconstruct, squaredError, inSlot, loadShowcase, getShowcaseCat, loadPCA } from "../models.js";
-import { tabs } from "../ui.js";
+import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat, toTensor } from "../models.js";
+import { catPicker, tabs, readout } from "../ui.js";
+import { drawErrorHeatmap, heatLegend } from "../viz.js";
 
-const CATS = [0, 3, 9, 13];
-const KS = [2, 16, 64, 256];
+const EPS = 1e-6;
 
-let rows = [];
+let canvases, outSlot, formulas, counter, readouts, lossTabs;
+let cat = 0;
 let request = 0;
-let avgEl;
 
 export async function init(section) {
+  canvases = section.querySelectorAll(".loss-row canvas");
+  outSlot = section.querySelector(".loss-out");
+  formulas = [...section.querySelectorAll(".formula")];
+  counter = section.querySelector(".labels-count");
+  heatLegend(section.querySelector(".legend"));
+
+  const box = section.querySelector(".loss-readouts");
+  readouts = {
+    mse: readout(box, { label: "MSE (mean)", format: (v) => v.toFixed(4) }),
+    sum: readout(box, { label: "MSE (summed)", format: (v) => v.toFixed(1) }),
+    bce: readout(box, { label: "BCE (mean)", format: (v) => v.toFixed(4) }),
+  };
+  readouts.mse.el.dataset.loss = readouts.sum.el.dataset.loss = "mse";
+  readouts.bce.el.dataset.loss = "bce";
+
+  lossTabs = tabs(section.querySelector(".loss-tabs"), {
+    tabs: [
+      { id: "mse", label: "MSE" },
+      { id: "bce", label: "BCE" },
+    ],
+    onChange: showSelected,
+  });
+
   await loadShowcase();
-  avgEl = section.querySelector(".pca-avg");
-  const grid = section.querySelector(".pca-grid");
-  grid.innerHTML = `
-    <span role="columnheader" class="pca-head">original</span>
-    <span role="columnheader" class="pca-head">PCA</span>
-    <span role="columnheader" class="pca-head">autoencoder</span>`;
-  rows = CATS.map((i) => {
-    const cell = (cls) => {
-      const fig = document.createElement("figure");
-      fig.className = `pca-cell ${cls}`;
-      fig.innerHTML = `<canvas class="cat-canvas small" width="64" height="64"></canvas><figcaption class="mono"></figcaption>`;
-      return fig;
-    };
-    const original = cell("orig");
-    const pca = cell("pca");
-    const ae = cell("ae");
-    drawCat(original.querySelector("canvas"), getShowcaseCat(i));
-    original.querySelector("figcaption").textContent = " "; // keeps the rows aligned
-    grid.append(original, pca, ae);
-    return { i, pca, ae };
+  await catPicker(section.querySelector(".s06-picker"), {
+    onPick: (i) => {
+      cat = i;
+      update();
+    },
   });
-
-  tabs(section.querySelector(".k-tabs"), {
-    tabs: KS.map((k) => ({ id: String(k), label: `k = ${k}` })),
-    selected: "16",
-    onChange: (k) => update(Number(k)),
-  });
-  await update(16);
+  showSelected();
+  await update();
 }
 
-async function update(k) {
+function showSelected() {
+  const loss = lossTabs.value;
+  for (const r of Object.values(readouts)) r.el.classList.toggle("dim", r.el.dataset.loss !== loss);
+  for (const f of formulas) f.classList.toggle("is-active", f.dataset.loss === loss);
+}
+
+async function update() {
+  const image = getShowcaseCat(cat);
   const mine = ++request;
-  let pca = null;
-  try {
-    pca = await loadPCA(k);
-  } catch {
-    /* PCA data not exported: leave those cells empty */
-  }
-  for (const row of rows) {
-    const image = getShowcaseCat(row.i);
-    const pcaErr = pca ? pca.errors[row.i] : NaN;
-    if (pca && mine === request) {
-      drawCat(row.pca.querySelector("canvas"), pca.sprite.get(row.i));
-      row.pca.querySelector("figcaption").textContent = pcaErr.toFixed(0);
-    }
-    const aeErr = await inSlot(row.ae, async () => {
-      const out = await reconstruct(`ae_${k}`, [image]);
-      if (mine === request) drawCat(row.ae.querySelector("canvas"), out);
-      return squaredError(image, out);
-    });
-    if (mine !== request) return;
-    row.ae.querySelector("figcaption").textContent = aeErr == null ? "" : aeErr.toFixed(0);
-    row.pca.classList.toggle("better", aeErr != null && pcaErr < aeErr);
-    row.ae.classList.toggle("better", aeErr != null && aeErr < pcaErr);
-  }
-  await showAverage(k, pca, mine);
-}
+  const [input, output, heat] = canvases;
+  drawCat(input, image);
 
-async function showAverage(k, pca, mine) {
-  if (!pca) return;
-  const cats = Array.from({ length: 64 }, (_, i) => getShowcaseCat(i));
-  const pcaMean = pca.errors.reduce((a, b) => a + b, 0) / pca.errors.length;
-  const aeMean = await inSlot(avgEl, async () => {
-    const out = await reconstruct(`ae_${k}`, cats);
-    return cats.reduce((sum, cat, i) => sum + squaredError(cat, out, i), 0) / cats.length;
+  // Same counter, every time: nobody had to label this cat.
+  counter.classList.remove("pulse");
+  void counter.offsetWidth;
+  counter.classList.add("pulse");
+
+  await inSlot(outSlot, async () => {
+    const out = await reconstruct("ae_64", [image]);
+    if (mine !== request) return;
+    drawCat(output, out);
+    drawErrorHeatmap(heat, image, out);
+
+    const x = toTensor(image).data;
+    const y = out.data;
+    let sq = 0;
+    let bce = 0;
+    for (let i = 0; i < x.length; i++) {
+      const p = Math.min(1 - EPS, Math.max(EPS, y[i]));
+      sq += (y[i] - x[i]) ** 2;
+      bce -= x[i] * Math.log(p) + (1 - x[i]) * Math.log(1 - p);
+    }
+    readouts.mse.set(sq / x.length);
+    readouts.sum.set(sq);
+    readouts.bce.set(bce / x.length);
   });
-  if (mine !== request || aeMean == null) return;
-  avgEl.textContent = `average of 64 cats: PCA ${Math.round(pcaMean)} · AE ${Math.round(aeMean)}`;
 }

@@ -1,6 +1,6 @@
 # Autoencoders & VAEs: Presentation Script
 
-Oct 16, 2026 · @Danish
+Tuesday 20 October 2026 · @Danish
 
 Expect about 24 minutes of speaking, or 29 minutes with slide changes and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip.
 
@@ -18,7 +18,11 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 ## Part 1: From classification to generation
 
-*Slide: title slide, then a slide showing a CNN classifier taking an image and outputting "cat".*
+*Slide: title. Tuesday 20 October 2026. No cats on this one.*
+
+*Slide: warm-up. "Cat people or dog people?" Ask the room to raise hands. Count them yourself; the slide does not keep a tally.*
+
+*Slide: a CNN classifier taking an image and outputting "cat".*
 
 - So far in this course, almost everything we've looked at has been about understanding images.
 - We've looked at CNNs, ResNet, MobileNet, Vision Transformers, CvT and a bunch of other transformers. (CvT stands for Convolutional vision Transformer, which mixes convolutions into the transformer.)
@@ -160,6 +164,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - Again, this is usually MSE (Mean Squared Error) or BCE (Binary Cross-Entropy).
 - The second part is the KL divergence. (KL stands for Kullback–Leibler. KL divergence measures how different one probability distribution is from another. If they're identical, it's zero.)
 - The KL term pushes each encoded distribution to be close to a standard normal distribution, which has a mean of 0 and a standard deviation of 1.
+- For one dimension the closed form is one half of sigma squared plus mu squared, minus 1, minus the log of sigma squared. The training loss sums that over every latent dimension.
 - This pulls all the distributions toward the center of the latent space and makes them overlap, which removes the gaps.
 - It also stops the model from cheating by making sigma tiny, which would turn it back into a normal autoencoder.
 
@@ -173,6 +178,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - Formally, this combined loss is the negative of something called the ELBO. (ELBO stands for Evidence Lower Bound. It's a lower bound on the likelihood of the data, meaning how probable the model thinks real images are.)
 - We'd ideally like to maximize that likelihood directly, but calculating it is intractable. (Intractable means it's impossible to compute in practice.)
 - So instead we maximize the ELBO, which is a practical stand-in that pushes the likelihood up.
+- One caveat: our reconstruction term is mean squared error. For a decoder with a fixed variance, that matches the negative log-likelihood up to a constant and a fixed scale.
 
 ### The reparameterization trick
 
@@ -198,8 +204,8 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - Because the KL term organized the latent space around that distribution, the output is a plausible new image.
 - We can also interpolate.
 - That means taking two images, encoding them, and walking along the straight line between their two latent points.
-- The decoder produces a smooth transition from one image to the other.
-- This shows that the latent space really is continuous, which is exactly what we were missing with the plain autoencoder.
+- The decoder produces the frames along that line.
+- A straight walk between two real codes stays near the data even for a plain autoencoder, so those two rows look similar. The plain autoencoder's failure was the random samples we just saw, not this walk.
 
 ## Part 6: Limitations, extensions, and wrap-up
 

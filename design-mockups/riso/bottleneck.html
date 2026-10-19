@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Two-ink poster — bottleneck</title>
+  <style>
+    @font-face { font-family: "Poster"; font-weight: 700; src: url("../fonts/NotoSansDisplay-Bold.ttf") format("truetype"); }
+    @font-face { font-family: "Text"; font-weight: 600; src: url("../../site/vendor/fonts/inter-latin-600-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Text"; font-weight: 400; src: url("../../site/vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { background: #f3ecdf; color: #10261c; font-family: Text, sans-serif; }
+    .sheet {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      padding: 32px 40px;
+    }
+    .kicker { margin: 0; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; font-size: 14px; color: #1f6f8a; }
+    h1 { margin: 8px 0 0; font-family: Poster, sans-serif; font-size: 64px; line-height: 0.9; text-transform: uppercase; }
+    .ratio { display: flex; align-items: baseline; gap: 16px; margin-top: 18px; }
+    .ratio b { font-family: Poster, sans-serif; font-size: 92px; line-height: 0.8; }
+    .ratio b.small { color: #d84a1b; }
+    .arrow { font-size: 48px; color: #1f6f8a; }
+    p { font-size: 24px; line-height: 1.35; max-width: 28ch; }
+    .bar { margin-top: 18px; height: 22px; background: repeating-linear-gradient(90deg, #10261c 0 18px, transparent 18px 24px); width: 70%; }
+    .prints { position: relative; }
+    .ink {
+      position: absolute;
+      inset: 40px 20px 20px 40px;
+      background-image: radial-gradient(circle, currentColor 1.2px, transparent 1.35px);
+      background-size: 7px 7px;
+      -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path fill='black' d='M40 90 L60 40 L90 70 L110 40 L150 90 C170 140 140 175 100 170 C50 175 25 140 40 90Z'/></svg>") center / 86% no-repeat;
+      mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path fill='black' d='M40 90 L60 40 L90 70 L110 40 L150 90 C170 140 140 175 100 170 C50 175 25 140 40 90Z'/></svg>") center / 86% no-repeat;
+    }
+    .ink.a { color: #1f6f8a; transform: translate(-8px, 4px); }
+    .ink.b { color: #d84a1b; }
+    .cap { position: absolute; left: 40px; bottom: 8px; margin: 0; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <section>
+      <p class="kicker">Part 2 · The bottleneck</p>
+      <h1>Throw most of it away</h1>
+      <div class="ratio" aria-label="12,288 numbers become 64">
+        <b>12,288</b><span class="arrow">→</span><b class="small">64</b>
+      </div>
+      <p>Same cat on the way out. The code in the middle is 192 times smaller. That squeeze is the whole idea.</p>
+      <div class="bar" aria-hidden="true"></div>
+    </section>
+    <section class="prints" aria-label="Two misregistered prints of a cat">
+      <div class="ink a"></div>
+      <div class="ink b"></div>
+      <p class="cap">one cat, two inks</p>
+    </section>
+  </main>
+</body>
+</html>

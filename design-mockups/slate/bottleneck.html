@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Lecture slate — bottleneck</title>
+  <style>
+    @font-face { font-family: "Chalk"; font-weight: 700; font-style: italic; src: url("../fonts/NotoSerifDisplay-BoldItalic.ttf") format("truetype"); }
+    @font-face { font-family: "Mono"; font-weight: 400; src: url("../../site/vendor/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Text"; font-weight: 400; src: url("../../site/vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { background: #221e18; color: #f3ecdf; font-family: Text, sans-serif; }
+    .dust {
+      pointer-events: none; position: absolute; inset: 0; opacity: 0.16;
+      background-image: radial-gradient(circle, rgba(243,236,223,0.8) 0.6px, transparent 0.7px);
+      background-size: 14px 16px;
+    }
+    .sheet { position: relative; height: 100%; padding: 32px 48px; display: flex; flex-direction: column; }
+    .part { margin: 0; color: #e2b657; letter-spacing: 0.16em; text-transform: uppercase; font-size: 14px; }
+    h1 { margin: 8px 0 0; font-family: Chalk, serif; font-style: italic; font-size: 58px; }
+    .row { flex: 1; display: grid; grid-template-columns: 1fr 90px 1fr; gap: 18px; align-items: center; }
+    .box { border: 3px solid rgba(243, 236, 223, 0.85); border-radius: 6px; min-height: 280px; display: grid; place-items: center; text-align: center; padding: 16px; }
+    .box svg { width: 150px; height: 120px; }
+    .box.out svg { opacity: 0.72; }
+    .box b { display: block; font-family: Mono, monospace; font-size: 28px; font-weight: 400; margin-top: 8px; }
+    .box span { font-family: Chalk, serif; font-style: italic; font-size: 28px; }
+    .neck { font-family: Mono, monospace; color: #e2b657; font-size: 22px; text-align: center; }
+    .eq { margin: 0; font-family: Mono, monospace; font-size: 26px; }
+    .eq i { color: #e2b657; font-style: normal; }
+  </style>
+</head>
+<body>
+  <div class="dust" aria-hidden="true"></div>
+  <main class="sheet">
+    <p class="part">Part 2 · Autoencoders</p>
+    <h1>The bottleneck</h1>
+    <div class="row">
+      <div class="box">
+        <div>
+          <svg viewBox="0 0 160 120" aria-hidden="true"><path d="M28 70 L48 28 L70 58 L92 24 L128 70 C146 108 118 112 80 108 C40 112 16 100 28 70Z" fill="none" stroke="#f3ecdf" stroke-width="3" stroke-linecap="round"/><path d="M58 72h12M96 72h12" stroke="#e2b657" stroke-width="3" stroke-linecap="round"/></svg>
+          <span>the cat</span><b>12,288</b>
+        </div>
+      </div>
+      <div class="neck">→<br />k = 64<br />→</div>
+      <div class="box out">
+        <div>
+          <svg viewBox="0 0 160 120" aria-hidden="true"><path d="M34 74 L52 36 L74 60 L94 34 L124 74 C140 104 116 110 80 106 C44 110 22 98 34 74Z" fill="none" stroke="#f3ecdf" stroke-width="3" stroke-linecap="round"/></svg>
+          <span>built back</span><b>12,288</b>
+        </div>
+      </div>
+    </div>
+    <p class="eq">ratio = 12288 / 64 = <i>192</i> · MSE = mean of (x̂ − x)²</p>
+  </main>
+</body>
+</html>

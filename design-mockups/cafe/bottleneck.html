@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Latent Café — bottleneck</title>
+  <style>
+    @font-face { font-family: "Display"; font-weight: 700; src: url("../fonts/NotoSerifDisplay-Bold.ttf") format("truetype"); }
+    @font-face { font-family: "Display"; font-weight: 700; font-style: italic; src: url("../fonts/NotoSerifDisplay-BoldItalic.ttf") format("truetype"); }
+    @font-face { font-family: "Text"; font-weight: 400; src: url("../../site/vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Text"; font-weight: 600; src: url("../../site/vendor/fonts/inter-latin-600-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Mono"; src: url("../../site/vendor/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { background: #e7d7c3; color: #2a1c14; font-family: Text, sans-serif; }
+    .card {
+      height: 100%;
+      padding: 28px 56px 24px;
+      border: 14px solid #2a1c14;
+      outline: 3px solid #c44536;
+      outline-offset: -22px;
+      background: #f7f1e6;
+      display: flex;
+      flex-direction: column;
+    }
+    .course { margin: 0; letter-spacing: 0.18em; text-transform: uppercase; font-size: 14px; font-weight: 600; color: #c44536; }
+    h1 { margin: 4px 0 0; font-family: Display, serif; font-size: 54px; line-height: 1; }
+    .dish { flex: 1; display: grid; grid-template-columns: 220px 1fr; gap: 28px; align-items: center; }
+    .plate { width: 200px; height: 200px; border: 10px solid #efe2cf; border-radius: 50%; box-shadow: 0 0 0 3px #2a1c14; background: #fffaf3; }
+    .desc { font-size: 26px; line-height: 1.35; margin: 0; max-width: 34ch; }
+    .stats { display: flex; gap: 28px; margin-top: 16px; font-family: Mono, monospace; font-size: 22px; }
+    .stats b { display: block; font-family: Display, serif; font-size: 18px; font-weight: 700; }
+    .aside { margin: 0; font-family: Display, serif; font-style: italic; font-size: 22px; color: #c44536; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="course">Course II · The squeeze</p>
+    <h1>House cat, reduced</h1>
+    <div class="dish">
+      <svg class="plate" viewBox="0 0 120 120" aria-label="A cat, plated">
+        <path d="M34 58 L42 34 L54 50 M86 58 L78 34 L66 50" fill="none" stroke="#2a1c14" stroke-width="3" />
+        <ellipse cx="60" cy="68" rx="28" ry="22" fill="#f0c48a" stroke="#2a1c14" stroke-width="3" />
+        <circle cx="50" cy="64" r="2.5" /><circle cx="70" cy="64" r="2.5" />
+        <path d="M60 70 L57 77 L63 77 Z" fill="#c44536" />
+      </svg>
+      <div>
+        <p class="desc">One cat comes in as 12,288 numbers. The kitchen keeps a 64-number essence and sends the dish back out. Same animal, 192 times less on the order slip.</p>
+        <div class="stats">
+          <span><b>in</b>12,288</span>
+          <span><b>essence k</b>64</span>
+          <span><b>ratio</b>192×</span>
+        </div>
+      </div>
+    </div>
+    <p class="aside">A linear kitchen trained with MSE only learns the PCA pantry. The axes can still be rearranged.</p>
+  </main>
+</body>
+</html>

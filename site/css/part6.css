@@ -91,7 +91,7 @@
 .tag {
   margin-left: 8px;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: 0;
   border: 2px solid var(--line);
   color: var(--text-soft);
   font-family: var(--font-body);
@@ -139,7 +139,7 @@
 }
 .sd-node.lit {
   border-color: var(--accent);
-  box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 4px 4px 0 var(--accent);
 }
 .sd-node .soft {
   color: var(--text-soft);
@@ -320,7 +320,7 @@ svg.tri {
   font-size: 20px;
 }
 .tri-corner.on text {
-  fill: var(--text);
+  fill: var(--bg);
 }
 
 .gary {
@@ -433,9 +433,9 @@ svg.tri {
   background: var(--accent);
 }
 
-/* ================================================================ s21 questions */
+/* ================================================================ s22 questions */
 
-#s21 .slide-head h2 {
+#s22 .slide-head h2 {
   /* The big "Questions?" below is the title; keep the heading for structure only. */
   position: absolute;
   width: 1px;

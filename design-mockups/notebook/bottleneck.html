@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Field notebook — bottleneck</title>
+  <style>
+    @font-face { font-family: "Serif"; font-weight: 700; src: url("../fonts/NotoSerifDisplay-Bold.ttf") format("truetype"); }
+    @font-face { font-family: "Serif"; font-weight: 700; font-style: italic; src: url("../fonts/NotoSerifDisplay-BoldItalic.ttf") format("truetype"); }
+    @font-face { font-family: "Text"; font-weight: 400; src: url("../../site/vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Mono"; src: url("../../site/vendor/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      color: #241c12;
+      font-family: Text, sans-serif;
+      background:
+        linear-gradient(90deg, transparent 46px, rgba(180, 50, 40, 0.35) 46px, rgba(180, 50, 40, 0.35) 48px, transparent 48px),
+        repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(70, 110, 150, 0.28) 28px),
+        #f3eccf;
+    }
+    .page { height: 100%; padding: 28px 40px 22px 72px; display: grid; grid-template-rows: auto 1fr auto; gap: 8px; }
+    h1 { margin: 0; font-family: Serif, serif; font-size: 40px; }
+    .lead { margin: 0; font-size: 18px; }
+    .spread { display: grid; grid-template-columns: 280px 1fr; gap: 22px; min-height: 0; }
+    .card { border: 2px solid #241c12; background: #f7f3e2; padding: 12px 14px; align-self: center; }
+    .card h2 { margin: 0; font-family: Mono, monospace; font-size: 14px; letter-spacing: 0.12em; }
+    .card p { margin: 8px 0 0; font-family: Mono, monospace; font-size: 16px; line-height: 1.45; }
+    .map { width: 100%; height: 100%; }
+    .caption { margin: 0; font-family: Serif, serif; font-style: italic; font-size: 22px; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>The pass between territories</h1>
+      <p class="lead">Latent space, sketched as cat country. The bottleneck is the only trail wide enough to carry a specimen.</p>
+    </header>
+    <div class="spread">
+      <article class="card">
+        <svg viewBox="0 0 160 120" width="160" height="120" aria-hidden="true">
+          <path d="M30 70 L48 28 L68 52 L92 26 L128 70 C142 108 112 112 80 106 C42 112 18 100 30 70Z" fill="#e7b56a" stroke="#241c12" stroke-width="3" />
+          <circle cx="62" cy="68" r="3" /><circle cx="98" cy="68" r="3" />
+          <path d="M80 76 L76 84 L84 84 Z" fill="#8c2f22" />
+        </svg>
+        <h2>PINNED · HELD-OUT</h2>
+        <p>64×64×3<br />12,288 observations<br />code kept: k = 64<br />ratio: 192×</p>
+      </article>
+      <svg class="map" viewBox="0 0 760 420" role="img" aria-label="Two cat territories joined by a narrow pass labeled k equals 64">
+        <path d="M40 80 C120 20 250 40 280 140 C300 200 180 250 80 220 C10 190 -10 120 40 80Z" fill="#d9e4c4" stroke="#241c12" stroke-width="3" />
+        <path d="M470 70 C620 10 740 80 720 190 C700 300 540 280 500 190 C480 140 420 120 470 70Z" fill="#f0d0b0" stroke="#241c12" stroke-width="3" />
+        <path d="M280 160 C340 150 390 150 470 170" fill="none" stroke="#8c2f22" stroke-width="10" />
+        <path d="M280 190 C350 210 400 200 470 200" fill="none" stroke="#8c2f22" stroke-width="10" />
+        <circle cx="150" cy="150" r="7" fill="#8c2f22" />
+        <text x="150" y="250" text-anchor="middle" font-family="serif" font-size="22">tabby ridge</text>
+        <text x="600" y="250" text-anchor="middle" font-family="serif" font-size="22">orange clan</text>
+        <text x="375" y="140" text-anchor="middle" font-family="ui-monospace, monospace" font-size="20" fill="#8c2f22">k = 64</text>
+        <text x="120" y="330" font-family="serif" font-size="20">here be gaps</text>
+        <text x="520" y="340" font-family="serif" font-size="20">no cats surveyed</text>
+      </svg>
+    </div>
+    <p class="caption">12,288 numbers will not fit on the far side unless they file through a pass of 64. The surveyor redraws the cat from what survived the crossing.</p>
+  </main>
+</body>
+</html>

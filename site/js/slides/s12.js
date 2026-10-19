@@ -1,133 +1,112 @@
-// Loss = reconstruction + KL. The two terms stay written out at the bottom of the slide.
-// Below the equation: drag a Gaussian against N(0, 1) (its peak moves mu, its side handles
-// change sigma) and watch KL( N(mu, sigma^2) || N(0, 1) ) = 0.5 * (sigma^2 + mu^2 - 1 - ln sigma^2).
+// The core idea: a VAE encodes a cat to a cloud (mu, sigma), not a point.
+// The picked cat's 1 and 2 sigma ellipses glow on the vae_2d_b1 map; "sample again" draws
+// z = mu + sigma * eps from that cloud, marks it on the map and decodes it. The last six samples
+// stay in a row: the same cat, slightly different each time.
+// The clouds are tiny next to the whole space (sigma ~0.05 on a map spanning about ±4), so after
+// picking a cat the map zooms in to about 12 sigma around mu; the readout says by how much.
 
-import { readout } from "../ui.js";
+import { encode, decode, drawCat, hasModel, renderTraining, loadShowcase, getShowcaseCat, randn } from "../models.js";
+import { catPicker } from "../ui.js";
+import { loadLatentMap, VAE_VIEW } from "../latentmap.js";
 
-// Plot geometry (SVG units): x from -4 to 4, density from 0 to 1.
-const W = 800, H = 300, X0 = 40, X1 = 760, Y0 = 262, Y1 = 22;
-const MU = [-3, 3], SIGMA = [0.4, 2.5];
-const sx = (x) => X0 + ((x + 4) / 8) * (X1 - X0);
-const ux = (px) => ((px - X0) / (X1 - X0)) * 8 - 4;
-const sy = (p) => Y0 - p * (Y0 - Y1);
-const pdf = (x, mu, s) => Math.exp(-(((x - mu) / s) ** 2) / 2) / (s * Math.sqrt(2 * Math.PI));
-const clamp = (v, [a, b]) => Math.min(b, Math.max(a, v));
+const MODEL = "vae_2d_b1";
+const KEEP = 6;
+const ZOOM_SIGMAS = 12;
 
-const kl = (mu, sigma) => 0.5 * (sigma ** 2 + mu ** 2 - 1 - Math.log(sigma ** 2));
+let map, inCanvas, outCanvas, row, params;
+let cloud = null;     // { mu: [x, y], sigma: [sx, sy] }
+let samples = [];     // recent z, newest last
 
-let svg, qPath, qFill, peak, sides, klOut, paramsEl;
-let mu = 1.4;
-let sigma = 0.6;
-let snapFrame = 0;
+export async function init(section) {
+  const body = section.querySelector(".s11-body");
+  if (!(await hasModel(MODEL))) return renderTraining(body, MODEL);
+  inCanvas = section.querySelector(".s11-input");
+  outCanvas = section.querySelector(".s11-out");
+  row = section.querySelector(".s11-row");
+  params = section.querySelector(".s11-params");
 
-export function init(section) {
-  // The plot.
-  svg = section.querySelector("svg.gauss");
-  svg.innerHTML = `
-    <line class="g-axis" x1="${X0}" x2="${X1}" y1="${Y0}" y2="${Y0}" />
-    ${[-3, -2, -1, 0, 1, 2, 3].map((t) => `<text class="g-tick" x="${sx(t)}" y="${Y0 + 26}" text-anchor="middle">${t}</text>`).join("")}
-    <path class="g-prior-fill" d="${area(0, 1)}" />
-    <path class="g-prior" d="${curve(0, 1)}" />
-    <text class="g-label prior" x="${sx(0)}" y="${sy(pdf(0, 0, 1)) - 10}" text-anchor="middle">N(0, 1)</text>
-    <path class="g-q-fill" />
-    <path class="g-q" />
-    <circle class="g-handle side" r="13" tabindex="0" role="slider" aria-label="spread σ" data-side="-1" />
-    <circle class="g-handle side" r="13" tabindex="0" role="slider" aria-label="spread σ" data-side="1" />
-    <circle class="g-handle peak" r="15" tabindex="0" role="slider" aria-label="mean μ" />`;
-  qPath = svg.querySelector(".g-q");
-  qFill = svg.querySelector(".g-q-fill");
-  peak = svg.querySelector(".peak");
-  sides = [...svg.querySelectorAll(".side")];
-  draggable(peak, (x) => (mu = clamp(x, MU)));
-  for (const s of sides) draggable(s, (x) => (sigma = clamp(Math.abs(x - mu), SIGMA)));
-  keyboard(peak, (d) => (mu = clamp(mu + d * 0.1, MU)));
-  for (const s of sides) keyboard(s, (d) => (sigma = clamp(sigma + d * Number(s.dataset.side) * 0.05, SIGMA)));
+  map = await loadLatentMap(section.querySelector(".s11-map"), MODEL, {
+    view: VAE_VIEW,
+    label: "The VAE's latent map with the picked cat's cloud",
+  });
+  map.overlay = drawCloud;
 
-  klOut = readout(section.querySelector(".kl-readout"), { label: "KL", value: kl(mu, sigma), format: (v) => v.toFixed(3), duration: 150 });
-  paramsEl = section.querySelector(".gauss-params");
-  section.querySelector("[data-snap]").addEventListener("click", snap);
-  update();
+  await loadShowcase();
+  await catPicker(section.querySelector(".s11-picker"), { onPick: pickCat });
+  section.querySelector("[data-sample]").addEventListener("click", sampleAgain);
+  await pickCat(0);
+}
+
+async function pickCat(i) {
+  const image = getShowcaseCat(i);
+  drawCat(inCanvas, image);
+  const { mu, logvar } = await encode(MODEL, [image]);
+  cloud = {
+    mu: [mu.data[0], mu.data[1]],
+    sigma: [Math.exp(0.5 * logvar.data[0]), Math.exp(0.5 * logvar.data[1])],
+  };
+  params.textContent = `μ = (${cloud.mu.map((v) => v.toFixed(2)).join(", ")})   σ = (${cloud.sigma.map((v) => v.toFixed(2)).join(", ")})`;
+  samples = [];
+  row.replaceChildren();
+  // Show where the cloud sits in the whole space, then glide in close enough to see it.
+  map.stop();
+  map.view = { ...map.home };
+  map.draw();
+  const half = Math.max(0.35, ZOOM_SIGMAS * Math.max(...cloud.sigma));
+  setTimeout(() => map.zoomTo({ cx: cloud.mu[0], cy: cloud.mu[1], half }), 350);
+  params.textContent += `   zoom ×${Math.round(map.home.half / half)}`;
+  await sampleAgain();
 }
 
 export function leave() {
-  cancelAnimationFrame(snapFrame);
+  map?.stop();
 }
 
-function curve(m, s) {
-  const pts = [];
-  for (let i = 0; i <= 160; i++) {
-    const x = -4 + (i / 160) * 8;
-    pts.push(`${sx(x).toFixed(1)},${sy(Math.min(1.05, pdf(x, m, s))).toFixed(1)}`);
+/** z = mu + sigma * eps, eps ~ N(0, 1): one more draw from the same cloud. */
+async function sampleAgain() {
+  if (!cloud) return;
+  const eps = randn(2);
+  const z = [cloud.mu[0] + cloud.sigma[0] * eps[0], cloud.mu[1] + cloud.sigma[1] * eps[1]];
+  samples = [...samples, z].slice(-KEEP);
+  map.draw();
+  const image = await decode(MODEL, z);
+  drawCat(outCanvas, image);
+
+  const thumb = document.createElement("canvas");
+  thumb.className = "cat-canvas small";
+  thumb.setAttribute("role", "listitem");
+  thumb.setAttribute("aria-label", "A sample");
+  drawCat(thumb, image);
+  row.append(thumb);
+  while (row.children.length > KEEP) row.firstElementChild.remove();
+}
+
+/** Map overlay: a glowing 2-sigma and 1-sigma ellipse at mu, and the recent samples as dots. */
+function drawCloud(ctx, m) {
+  if (!cloud) return;
+  const [cx, cy] = m.toScreen(cloud.mu);
+  const [ex] = m.toScreen([cloud.mu[0] + cloud.sigma[0], cloud.mu[1]]);
+  const [, ey] = m.toScreen([cloud.mu[0], cloud.mu[1] + cloud.sigma[1]]);
+  const rx = Math.max(4, Math.abs(ex - cx));
+  const ry = Math.max(4, Math.abs(cy - ey));
+  ctx.save();
+  for (const [k, alpha] of [[2, 0.22], [1, 0.4]]) {
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx * k, ry * k, 0, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(196, 98, 45, ${alpha})`;
+    ctx.shadowBlur = 0;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(36, 23, 15, 0.85)";
+    ctx.stroke();
   }
-  return `M${pts.join(" L")}`;
-}
-function area(m, s) {
-  return `${curve(m, s)} L${X1},${Y0} L${X0},${Y0} Z`;
-}
-
-function update() {
-  qPath.setAttribute("d", curve(mu, sigma));
-  qFill.setAttribute("d", area(mu, sigma));
-  const top = Math.min(1.05, pdf(mu, mu, sigma));
-  peak.setAttribute("cx", sx(mu));
-  peak.setAttribute("cy", sy(top));
-  peak.setAttribute("aria-valuenow", mu.toFixed(2));
-  sides.forEach((s) => {
-    const x = mu + Number(s.dataset.side) * sigma;
-    s.setAttribute("cx", sx(x));
-    s.setAttribute("cy", sy(Math.min(1.05, pdf(x, mu, sigma))));
-    s.setAttribute("aria-valuenow", sigma.toFixed(2));
+  ctx.shadowBlur = 0;
+  samples.forEach((z, i) => {
+    const [x, y] = m.toScreen(z);
+    ctx.beginPath();
+    ctx.arc(x, y, i === samples.length - 1 ? 6 : 4, 0, Math.PI * 2);
+    ctx.fillStyle = i === samples.length - 1 ? "#c4622d" : "rgba(36, 23, 15, 0.55)";
+    ctx.fill();
   });
-  klOut.set(kl(mu, sigma));
-  paramsEl.textContent = `μ = ${mu.toFixed(2)}   σ = ${sigma.toFixed(2)}`;
-}
-
-/** Drag a handle horizontally; onX gets the pointer's position in data units. */
-function draggable(el, onX) {
-  el.addEventListener("pointerdown", (e) => {
-    cancelAnimationFrame(snapFrame);
-    el.setPointerCapture(e.pointerId);
-    const move = (ev) => {
-      const r = svg.getBoundingClientRect();
-      onX(ux(((ev.clientX - r.left) / r.width) * W));
-      update();
-    };
-    const up = () => {
-      el.removeEventListener("pointermove", move);
-      el.removeEventListener("pointerup", up);
-      el.removeEventListener("pointercancel", up);
-    };
-    el.addEventListener("pointermove", move);
-    el.addEventListener("pointerup", up);
-    el.addEventListener("pointercancel", up);
-    e.preventDefault();
-  });
-}
-
-/** Arrow keys nudge a focused handle (main.js leaves the arrows to role="slider" elements). */
-function keyboard(el, onStep) {
-  el.addEventListener("keydown", (e) => {
-    const d = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
-    if (!d) return;
-    onStep(d);
-    update();
-    e.preventDefault();
-  });
-}
-
-/** Animate back to mu = 0, sigma = 1, where KL is exactly zero. */
-function snap() {
-  cancelAnimationFrame(snapFrame);
-  const [m0, s0] = [mu, sigma];
-  const start = performance.now();
-  const ms = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 600;
-  const step = (now) => {
-    const t = ms ? Math.min(1, (now - start) / ms) : 1;
-    const k = 1 - (1 - t) ** 3;
-    mu = m0 + (0 - m0) * k;
-    sigma = s0 + (1 - s0) * k;
-    update();
-    if (t < 1) snapFrame = requestAnimationFrame(step);
-  };
-  snapFrame = requestAnimationFrame(step);
+  ctx.restore();
 }

@@ -1,48 +1,39 @@
-// Questions: the thinking mascot, credits, and new vae_128 cats gently floating up behind it all.
-// Each cat floats with a CSS animation; when one leaves the top it comes back as a fresh cat.
-// Without vae_128 the background just stays empty (it's decoration).
+// Wrap-up: three rows revealed one at a time, then the classifier footnote.
+// When the presenter arrives with the keys or the buttons going forward, the rows start hidden
+// and each next press reveals one (main.js asks step() first). Arriving any other way
+// (scrolling, swiping, coming back from slide 21) shows everything, so no one gets stuck.
+// A click or tap anywhere on the slide also reveals the next row.
 
-import { decode, drawCat, hasModel, randn } from "../models.js";
+const LAST = 4;
 
-const COUNT = 10;
-const LATENT = 128;
+let section, items = [], dots = [], shown = LAST;
 
-let layer, cats = [];
-
-export async function init(section) {
-  layer = section.querySelector(".float-cats");
-  if (!(await hasModel("vae_128"))) return;
-  const images = await decode("vae_128", randn(COUNT * LATENT));
-  for (let i = 0; i < COUNT; i++) {
-    const c = document.createElement("canvas");
-    c.className = "float-cat";
-    drawCat(c, images, i);
-    place(c, true);
-    c.addEventListener("animationiteration", () => refresh(c));
-    layer.append(c);
-    cats.push(c);
-  }
+export function init(el) {
+  section = el;
+  items = [...el.querySelectorAll("[data-step]")];
+  const dotBox = el.querySelector(".wrap-dots");
+  dots = Array.from({ length: LAST }, () => dotBox.appendChild(document.createElement("span")));
+  el.querySelector(".s20-body").addEventListener("click", (e) => {
+    if (e.target.closest("a, button")) return;
+    if (shown < LAST) show(shown + 1);
+  });
+  show(LAST);
 }
 
-export function enter() {
-  layer?.classList.add("running");
+export function enter({ direction = 1, byKey = false } = {}) {
+  show(byKey && direction === 1 ? 0 : LAST);
 }
 
-export function leave() {
-  layer?.classList.remove("running");
+/** Next/previous inside the slide: reveal or hide one row; at either end, let the deck move. */
+export function step(dir) {
+  if (dir > 0 && shown < LAST) return show(shown + 1), true;
+  if (dir < 0 && shown > 0 && shown < LAST) return show(shown - 1), true;
+  return false;
 }
 
-/** Random column, size and speed; `first` spreads the starting heights so they don't rise in a line. */
-function place(c, first = false) {
-  const duration = 16 + Math.random() * 12;
-  c.style.left = `${3 + Math.random() * 90}%`;
-  c.style.setProperty("--size", `${56 + Math.random() * 56}px`);
-  c.style.setProperty("--drift", `${(Math.random() - 0.5) * 80}px`);
-  c.style.animationDuration = `${duration}s`;
-  if (first) c.style.animationDelay = `${-Math.random() * duration}s`;
-}
-
-async function refresh(c) {
-  drawCat(c, await decode("vae_128", randn(LATENT)));
-  c.style.left = `${3 + Math.random() * 90}%`;
+function show(n) {
+  shown = n;
+  for (const el of items) el.classList.toggle("shown", Number(el.dataset.step) <= n);
+  dots.forEach((d, i) => d.classList.toggle("on", i < n));
+  section.classList.toggle("revealing", n < LAST);
 }

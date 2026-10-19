@@ -1,39 +1,106 @@
-// Wrap-up: three rows revealed one at a time, then the classifier footnote.
-// When the presenter arrives with the keys or the buttons going forward, the rows start hidden
-// and each next press reveals one (main.js asks step() first). Arriving any other way
-// (scrolling, swiping, coming back from slide 21) shows everything, so no one gets stuck.
-// A click or tap anywhere on the slide also reveals the next row.
+// VAE vs GAN vs diffusion.
+//   The comparison table: every cell starts hidden and appears when clicked (a row header shows its row).
+//   The trilemma: pick a model and its two corners of quality / variety / speed light up.
+//   Meet Gary, a mode-collapsed GAN (an illustration: his cats are drawn by our VAE from one fixed
+//   code, with tiny jitter), next to nine genuinely different vae_128 samples.
 
-const LAST = 4;
+import { decode, drawTiles, inSlot, randn } from "../models.js";
+import { tabs } from "../ui.js";
 
-let section, items = [], dots = [], shown = LAST;
+const ROWS = [
+  ["Image quality", ["Blurry", false], ["Sharp", true], ["Sharp", true]],
+  ["Variety of outputs", ["High", true], ["Can suffer mode collapse", false], ["High", true]],
+  ["Generation speed", ["Fast, one pass", true], ["Fast, one pass", true], ["Slow, many steps", false]],
+  ["Training", ["Stable", true], ["Unstable", false], ["Stable", true]],
+  ["Encoder for real images", ["Yes", true], ["No", false], ["No (noising instead)", false]],
+];
+const CORNERS = { quality: [160, 34], variety: [36, 248], speed: [284, 248] };
+const GETS = { vae: ["variety", "speed"], gan: ["quality", "speed"], diffusion: ["quality", "variety"] };
+const LATENT = 128, GAP = 4;
 
-export function init(el) {
-  section = el;
-  items = [...el.querySelectorAll("[data-step]")];
-  const dotBox = el.querySelector(".wrap-dots");
-  dots = Array.from({ length: LAST }, () => dotBox.appendChild(document.createElement("span")));
-  el.querySelector(".s20-body").addEventListener("click", (e) => {
-    if (e.target.closest("a, button")) return;
-    if (shown < LAST) show(shown + 1);
+let tri, grids;
+
+export async function init(section) {
+  buildTable(section.querySelector(".cmp-table tbody"));
+
+  tri = section.querySelector("svg.tri");
+  buildTriangle();
+  tabs(section.querySelector(".tri-models"), {
+    tabs: [
+      { id: "vae", label: "VAE" },
+      { id: "gan", label: "GAN" },
+      { id: "diffusion", label: "Diffusion" },
+    ],
+    onChange: highlight,
   });
-  show(LAST);
+  highlight("vae");
+
+  grids = [...section.querySelectorAll(".gary-grid")];
+  section.querySelector("[data-gary]").addEventListener("click", generate);
+  await generate();
 }
 
-export function enter({ direction = 1, byKey = false } = {}) {
-  show(byKey && direction === 1 ? 0 : LAST);
+function buildTable(tbody) {
+  for (const [label, ...cells] of ROWS) {
+    const tr = document.createElement("tr");
+    const th = document.createElement("th");
+    const rowButton = document.createElement("button");
+    rowButton.type = "button";
+    rowButton.className = "cmp-row";
+    rowButton.textContent = label;
+    th.append(rowButton);
+    tr.append(th);
+    const buttons = cells.map(([text, good]) => {
+      const td = document.createElement("td");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = `cmp-cell ${good ? "good" : "bad"}`;
+      b.setAttribute("aria-label", `${label}: reveal`);
+      b.innerHTML = `<span class="cmp-q" aria-hidden="true">?</span><span class="cmp-a">${text}</span>`;
+      b.addEventListener("click", () => reveal(b));
+      td.append(b);
+      tr.append(td);
+      return b;
+    });
+    rowButton.addEventListener("click", () => buttons.forEach(reveal));
+    tbody.append(tr);
+  }
 }
 
-/** Next/previous inside the slide: reveal or hide one row; at either end, let the deck move. */
-export function step(dir) {
-  if (dir > 0 && shown < LAST) return show(shown + 1), true;
-  if (dir < 0 && shown > 0 && shown < LAST) return show(shown - 1), true;
-  return false;
+function reveal(b) {
+  b.classList.add("revealed");
+  b.removeAttribute("aria-label");
 }
 
-function show(n) {
-  shown = n;
-  for (const el of items) el.classList.toggle("shown", Number(el.dataset.step) <= n);
-  dots.forEach((d, i) => d.classList.toggle("on", i < n));
-  section.classList.toggle("revealing", n < LAST);
+function buildTriangle() {
+  const [q, v, s] = [CORNERS.quality, CORNERS.variety, CORNERS.speed];
+  const edge = (a, b, k) => `<line class="tri-edge" data-edge="${k}" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" />`;
+  const corner = (name, [x, y], label, dy) =>
+    `<g class="tri-corner" data-corner="${name}"><circle cx="${x}" cy="${y}" r="16" /><text x="${x}" y="${y + dy}" text-anchor="middle">${label}</text></g>`;
+  tri.innerHTML = `
+    <polygon class="tri-fill" points="${q} ${v} ${s}" />
+    ${edge(q, v, "quality-variety")}${edge(v, s, "speed-variety")}${edge(q, s, "quality-speed")}
+    ${corner("quality", q, "Quality", -26)}${corner("variety", v, "Variety", 38)}${corner("speed", s, "Speed", 38)}`;
+}
+
+function highlight(model) {
+  const on = GETS[model];
+  for (const c of tri.querySelectorAll(".tri-corner")) c.classList.toggle("on", on.includes(c.dataset.corner));
+  const key = [...on].sort().join("-");
+  for (const e of tri.querySelectorAll(".tri-edge")) e.classList.toggle("on", e.dataset.edge === key);
+}
+
+/** Gary's nine cats (one code, tiny jitter) and nine independent VAE samples. */
+async function generate() {
+  const gary = randn(LATENT);
+  const garyBatch = new Float32Array(9 * LATENT);
+  const jitter = randn(9 * LATENT);
+  for (let i = 0; i < garyBatch.length; i++) garyBatch[i] = gary[i % LATENT] + 0.04 * jitter[i];
+  const batches = [garyBatch, randn(9 * LATENT)];
+  for (let g = 0; g < 2; g++) {
+    await inSlot(grids[g].closest("figure"), async () => {
+      const images = await decode("vae_128", batches[g]);
+      drawTiles(grids[g], images, { cols: 3, gap: GAP, inset: GAP / 2 });
+    });
+  }
 }

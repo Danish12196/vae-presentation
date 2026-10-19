@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Hourglass — bottleneck</title>
+  <style>
+    @font-face { font-family: "Display"; font-weight: 700; src: url("../fonts/NotoSerifDisplay-Bold.ttf") format("truetype"); }
+    @font-face { font-family: "Text"; font-weight: 400; src: url("../../site/vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Mono"; src: url("../../site/vendor/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { background: #f6f3ee; color: #1a1a1a; font-family: Text, sans-serif; }
+    .sheet { height: 100%; padding: 26px 36px 18px; display: grid; grid-template-rows: auto 1fr auto; }
+    h1 { margin: 0; font-family: Display, serif; font-size: 46px; }
+    .lead { margin: 4px 0 0; font-size: 20px; }
+    svg { width: 100%; height: 100%; }
+    .eq { margin: 0; font-family: Mono, monospace; font-size: 24px; }
+    .eq b { color: #c4622d; font-weight: 400; }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <header>
+      <h1>Squeeze, then open</h1>
+      <p class="lead">The encoder packs the cat into a narrow code. The decoder paints it back. Copper dots are the latent sample.</p>
+    </header>
+    <svg id="field" viewBox="0 0 1280 460" role="img" aria-label="A wide field of dots, a narrow copper waist, then a wide field again"></svg>
+    <p class="eq">12,288 → <b>k = 64</b> → 12,288 · ratio <b>192</b> · sample z = μ + σ ε, ε ~ N(0, 1)</p>
+  </main>
+  <script>
+    const rand = (function (a) {
+      return function () {
+        a |= 0; a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    })(4);
+    const gauss = () => {
+      const u = Math.max(1e-9, rand()), v = rand();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    };
+    const svg = document.getElementById("field");
+    const ns = "http://www.w3.org/2000/svg";
+    const dot = (x, y, r, fill) => {
+      const c = document.createElementNS(ns, "circle");
+      c.setAttribute("cx", x.toFixed(1));
+      c.setAttribute("cy", y.toFixed(1));
+      c.setAttribute("r", r.toFixed(2));
+      c.setAttribute("fill", fill);
+      svg.appendChild(c);
+    };
+    const outline = document.createElementNS(ns, "path");
+    outline.setAttribute("d", "M80 70 H430 L620 210 L430 390 H80 Z M850 70 H1200 L1010 210 L1200 390 H850 Z");
+    outline.setAttribute("fill", "none");
+    outline.setAttribute("stroke", "#1a1a1a");
+    outline.setAttribute("stroke-width", "2");
+    svg.appendChild(outline);
+    for (let i = 0; i < 160; i++) dot(250 + gauss() * 90, 230 + gauss() * 80, 3, "#1a1a1a");
+    for (let i = 0; i < 22; i++) dot(640 + gauss() * 10, 230 + gauss() * 36, 3.2, "#c4622d");
+    for (let i = 0; i < 120; i++) dot(1020 + gauss() * 78, 230 + gauss() * 72, 3, "#1a1a1a");
+    const label = (x, y, text) => {
+      const t = document.createElementNS(ns, "text");
+      t.setAttribute("x", x); t.setAttribute("y", y); t.setAttribute("text-anchor", "middle");
+      t.setAttribute("font-family", "JetBrains Mono, monospace"); t.setAttribute("font-size", "18");
+      t.textContent = text;
+      svg.appendChild(t);
+    };
+    label(250, 40, "x · 12,288");
+    label(640, 40, "z");
+    label(1020, 40, "x̂");
+  </script>
+</body>
+</html>
