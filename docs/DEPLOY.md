@@ -53,12 +53,12 @@ for the repo if it isn't listed). Team: **Danish's projects**.
 
 | setting | value |
 | --- | --- |
-| Project name | `cat-vae` |
+| Project name | `vae-presentation` |
 | Framework preset | Other |
 | Root directory | `./` |
 | Build and output settings | leave as is (`vercel.json` sets output `site`, no build) |
 
-**Deploy**. After about a minute it is live at `https://cat-vae.vercel.app`. Every push to `main`
+**Deploy**. After about a minute it is live at `https://vae-presentation.vercel.app`. Every push to `main`
 redeploys production; other branches get preview URLs.
 
 ### 3. Add the custom domain
@@ -80,7 +80,7 @@ npx vercel login
 npx vercel --prod
 ```
 
-The first run asks for the scope (Danish's projects) and project name (`cat-vae`) and links the
+The first run asks for the scope (Danish's projects) and project name (`vae-presentation`) and links the
 folder (it writes `.vercel/`, which is git-ignored). Then add the domain:
 
 ```bash
