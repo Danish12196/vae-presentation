@@ -168,14 +168,16 @@
           <div class="panel s06-right">
             <div class="loss-tabs"></div>
             <div class="loss-readouts"></div>
-            <div class="formula-toggle"></div>
-            <p class="formula" hidden></p>
             <div class="labels-used">
               <span class="readout-label">labels used</span>
               <span class="labels-count mono">0</span>
               <span class="sticker">human annotators harmed: 0</span>
             </div>
           </div>
+        </div>
+        <div class="formula-bar" aria-label="Loss formulas">
+          <p class="formula is-active" data-loss="mse">MSE = <sup>1</sup>&frasl;<sub>n</sub> Σ<sub>i</sub> (x̂<sub>i</sub> − x<sub>i</sub>)²</p>
+          <p class="formula" data-loss="bce">BCE = −<sup>1</sup>&frasl;<sub>n</sub> Σ<sub>i</sub> [ x<sub>i</sub> log x̂<sub>i</sub> + (1 − x<sub>i</sub>) log(1 − x̂<sub>i</sub>) ]</p>
         </div>
       </section>
 
@@ -351,11 +353,10 @@
         <div class="slide-body s12-body" data-demo>
           <div class="loss-eq" role="group" aria-label="The VAE loss">
             <span class="eq-word">Loss</span><span class="eq-op">=</span>
-            <button type="button" class="eq-term recon" data-term="recon">‖x − x̂‖²</button>
+            <span class="eq-term recon">‖x − x̂‖²</span>
             <span class="eq-op">+</span>
-            <button type="button" class="eq-term kl" data-term="kl">KL( N(μ, σ²) ‖ N(0, 1) )</button>
+            <span class="eq-term kl">KL( N(μ, σ²) ‖ N(0, 1) )</span>
           </div>
-          <p class="eq-explain" aria-live="polite">hover or tap a term</p>
           <div class="gauss-wrap">
             <svg class="gauss interactive" viewBox="0 0 800 300" role="group" aria-label="A Gaussian you can drag, drawn against N(0,1)"></svg>
           </div>
@@ -364,6 +365,10 @@
             <p class="gauss-params mono"></p>
             <button type="button" class="btn" data-snap>snap to N(0,1)</button>
           </div>
+        </div>
+        <div class="formula-bar">
+          <p class="formula"><span class="recon">‖x − x̂‖²</span> reconstruction: how far the rebuilt cat is from the input</p>
+          <p class="formula"><span class="kl">KL</span> how far the cloud is from N(0, 1). Zero only when μ = 0 and σ = 1</p>
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 {
- "version": "4aca79b23514",
- "total_bytes": 72519189,
+ "version": "ce35c0b364a4",
+ "total_bytes": 72519524,
  "files": [
   {
    "path": "404.html",
@@ -12,7 +12,7 @@
   },
   {
    "path": "css/components.css",
-   "bytes": 10738
+   "bytes": 11253
   },
   {
    "path": "css/fonts.css",
@@ -24,7 +24,7 @@
   },
   {
    "path": "css/part2.css",
-   "bytes": 11955
+   "bytes": 12424
   },
   {
    "path": "css/part3.css",
@@ -36,7 +36,7 @@
   },
   {
    "path": "css/part5.css",
-   "bytes": 12489
+   "bytes": 12561
   },
   {
    "path": "css/part6.css",
@@ -132,7 +132,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 36097
+   "bytes": 36596
   },
   {
    "path": "js/latentmap.js",
@@ -184,7 +184,7 @@
   },
   {
    "path": "js/slides/s06.js",
-   "bytes": 3124
+   "bytes": 2725
   },
   {
    "path": "js/slides/s07.js",
@@ -208,7 +208,7 @@
   },
   {
    "path": "js/slides/s12.js",
-   "bytes": 6061
+   "bytes": 5240
   },
   {
    "path": "js/slides/s13.js",

@@ -2,23 +2,19 @@
 // MSE and BCE computed live. The only "label" is the input itself.
 
 import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat, toTensor } from "../models.js";
-import { catPicker, tabs, toggle, readout } from "../ui.js";
+import { catPicker, tabs, readout } from "../ui.js";
 import { drawErrorHeatmap, heatLegend } from "../viz.js";
 
-const FORMULAS = {
-  mse: "MSE = <sup>1</sup>&frasl;<sub>n</sub> Σ<sub>i</sub> (x̂<sub>i</sub> − x<sub>i</sub>)²",
-  bce: "BCE = −<sup>1</sup>&frasl;<sub>n</sub> Σ<sub>i</sub> [ x<sub>i</sub> log x̂<sub>i</sub> + (1 − x<sub>i</sub>) log(1 − x̂<sub>i</sub>) ]",
-};
 const EPS = 1e-6;
 
-let canvases, outSlot, formula, counter, readouts, lossTabs, showFormula;
+let canvases, outSlot, formulas, counter, readouts, lossTabs;
 let cat = 0;
 let request = 0;
 
 export async function init(section) {
   canvases = section.querySelectorAll(".loss-row canvas");
   outSlot = section.querySelector(".loss-out");
-  formula = section.querySelector(".formula");
+  formulas = [...section.querySelectorAll(".formula")];
   counter = section.querySelector(".labels-count");
   heatLegend(section.querySelector(".legend"));
 
@@ -38,7 +34,6 @@ export async function init(section) {
     ],
     onChange: showSelected,
   });
-  showFormula = toggle(section.querySelector(".formula-toggle"), { label: "show formula", onChange: showSelected });
 
   await loadShowcase();
   await catPicker(section.querySelector(".s06-picker"), {
@@ -54,8 +49,7 @@ export async function init(section) {
 function showSelected() {
   const loss = lossTabs.value;
   for (const r of Object.values(readouts)) r.el.classList.toggle("dim", r.el.dataset.loss !== loss);
-  formula.innerHTML = FORMULAS[loss];
-  formula.hidden = !showFormula.checked;
+  for (const f of formulas) f.classList.toggle("is-active", f.dataset.loss === loss);
 }
 
 async function update() {

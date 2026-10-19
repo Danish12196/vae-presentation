@@ -217,12 +217,13 @@ figure > figcaption {
   opacity: 0.35;
 }
 .formula {
-  padding: 12px 18px;
+  padding: 10px 16px;
   border-radius: var(--radius-small);
   background: var(--bg-sunken);
   border: 2px solid var(--line);
   font-family: var(--font-mono);
   font-size: var(--fs-small);
+  line-height: 1.35;
 }
 .labels-used {
   display: flex;
@@ -508,6 +509,30 @@ figure > figcaption {
   .anomaly-picker .cat-pick canvas {
     width: 42px;
     height: 42px;
+  }
+}
+
+/* Between a phone and a full laptop, the three loss pictures plus the readouts
+   otherwise run off the left edge of the slide. */
+@media (max-width: 1200px) {
+  .loss-row .cat-canvas {
+    --cat-size: 150px;
+  }
+  .s06-right {
+    flex-basis: 320px;
+    min-width: 0;
+  }
+}
+@media (max-width: 1000px) {
+  .s06-body {
+    flex-wrap: wrap;
+  }
+  .s06-left,
+  .s06-right {
+    flex-basis: 100%;
+  }
+  .loss-row {
+    justify-content: center;
   }
 }
 

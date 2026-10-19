@@ -1,14 +1,8 @@
-// Loss = reconstruction + KL. Hover or tap a term for a one-line meaning.
-// Below: drag a Gaussian against N(0, 1) (its peak moves mu, its side handles change sigma)
-// and watch KL( N(mu, sigma^2) || N(0, 1) ) = 0.5 * (sigma^2 + mu^2 - 1 - ln sigma^2).
+// Loss = reconstruction + KL. The two terms stay written out at the bottom of the slide.
+// Below the equation: drag a Gaussian against N(0, 1) (its peak moves mu, its side handles
+// change sigma) and watch KL( N(mu, sigma^2) || N(0, 1) ) = 0.5 * (sigma^2 + mu^2 - 1 - ln sigma^2).
 
 import { readout } from "../ui.js";
-
-const EXPLAIN = {
-  recon: "reconstruction: how far the rebuilt cat x̂ is from the input x",
-  kl: "KL: how far the cloud is from N(0, 1). Zero only when μ = 0 and σ = 1",
-};
-const HINT = "hover or tap a term";
 
 // Plot geometry (SVG units): x from -4 to 4, density from 0 to 1.
 const W = 800, H = 300, X0 = 40, X1 = 760, Y0 = 262, Y1 = 22;
@@ -27,21 +21,6 @@ let sigma = 0.6;
 let snapFrame = 0;
 
 export function init(section) {
-  // The equation's terms.
-  const explain = section.querySelector(".eq-explain");
-  const terms = [...section.querySelectorAll(".eq-term")];
-  const show = (term) => {
-    terms.forEach((t) => t.classList.toggle("active", t === term));
-    explain.textContent = term ? EXPLAIN[term.dataset.term] : HINT;
-    explain.dataset.term = term?.dataset.term ?? "";
-  };
-  for (const t of terms) {
-    t.addEventListener("pointerenter", () => show(t));
-    t.addEventListener("focus", () => show(t));
-    t.addEventListener("click", () => show(t));
-  }
-  section.querySelector(".loss-eq").addEventListener("pointerleave", () => show(null));
-
   // The plot.
   svg = section.querySelector("svg.gauss");
   svg.innerHTML = `

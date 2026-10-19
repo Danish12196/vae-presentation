@@ -69,31 +69,11 @@
   padding: 2px 18px;
   border: 3px dashed currentColor;
   border-radius: 16px;
-  background: transparent;
-  font: inherit;
-  cursor: help;
-  transition: background-color var(--t-fast) linear;
 }
 .eq-term.recon {
   color: var(--coral);
 }
 .eq-term.kl {
-  color: var(--sky);
-}
-.eq-term.active {
-  border-style: solid;
-  background: color-mix(in srgb, currentColor 15%, transparent);
-}
-.eq-explain {
-  min-height: 1.5em;
-  font-size: var(--fs-body);
-  color: var(--text-soft);
-  text-align: center;
-}
-.eq-explain[data-term="recon"] {
-  color: var(--coral);
-}
-.eq-explain[data-term="kl"] {
   color: var(--sky);
 }
 .gauss-wrap {
@@ -328,11 +308,21 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
 /* ================================================================ s15 generating */
 
 .s15-body {
+  flex-wrap: wrap;
+  min-width: 0;
   gap: calc(var(--gap) * 2);
 }
 .gen-grids {
   display: flex;
+  flex: 1 1 480px;
+  min-width: 0;
+  justify-content: center;
   gap: calc(var(--gap) * 1.5);
+}
+.gen {
+  flex: 1 1 200px;
+  min-width: 0;
+  max-width: 460px;
 }
 .gen figcaption {
   display: flex;
@@ -369,7 +359,9 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
 }
 .gen-canvas {
   display: block;
-  width: 460px;
+  width: 100%;
+  max-width: 460px;
+  height: auto;
   image-rendering: pixelated;
   border-radius: 12px;
   background: var(--bg-sunken);
@@ -379,7 +371,8 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   border-color: var(--accent);
 }
 .s15-side {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  max-width: 100%;
   gap: var(--gap);
 }
 .reroll {
@@ -421,6 +414,8 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
 
 .s16-body {
   flex-direction: column;
+  width: min(980px, 100%);
+  min-width: 0;
   gap: var(--gap);
 }
 .s16-pickers {
@@ -458,13 +453,16 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
 .interp-rows {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-width: 0;
   gap: 12px;
 }
 .interp-row {
   display: grid;
-  grid-template-columns: 110px auto;
+  grid-template-columns: minmax(72px, 110px) minmax(0, 1fr);
   align-items: center;
   gap: 16px;
+  min-width: 0;
 }
 .row-label {
   font-family: var(--font-head);
@@ -480,10 +478,14 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
 }
 .strip-wrap {
   position: relative;
+  min-width: 0;
+  justify-self: start;
+  width: min(760px, 100%);
 }
 .interp-strip {
   display: block;
-  width: 760px;
+  width: 100%;
+  height: auto;
   image-rendering: pixelated;
   border-radius: 8px;
 }
@@ -500,8 +502,11 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
 }
 .s16-live {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: 100%;
   gap: calc(var(--gap) * 2);
 }
 .s16-live .cat-canvas {
@@ -511,7 +516,7 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   border-color: var(--coral);
 }
 .s16-slider {
-  width: 380px;
+  width: min(380px, 100%);
 }
 
 /* ================================================================ 1366x768 and smaller laptops */
@@ -534,7 +539,7 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     font-size: 46px;
   }
   .gauss-wrap {
-    width: min(760px, 100%);
+    width: min(640px, 100%);
   }
   .s13-map {
     --map-size: min(62vh, 520px);
@@ -548,8 +553,11 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   .s14-map {
     --map-size: 160px;
   }
+  .gen {
+    max-width: 360px;
+  }
   .gen-canvas {
-    width: 360px;
+    max-width: 360px;
   }
   .s15-map {
     --map-size: 210px;
@@ -557,8 +565,8 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
   .s15-pick-fig .cat-canvas.small {
     --cat-size: 84px;
   }
-  .interp-strip {
-    width: 600px;
+  .strip-wrap {
+    width: min(600px, 100%);
   }
   .s16-live .cat-canvas {
     --cat-size: 150px;
@@ -601,9 +609,6 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     padding: 2px 10px;
     border-width: 2px;
   }
-  .eq-explain {
-    font-size: var(--fs-small);
-  }
   .tug {
     grid-template-columns: 1fr 1fr;
   }
@@ -629,6 +634,10 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
     flex-direction: column;
     gap: var(--gap);
     width: 100%;
+  }
+  .gen,
+  .gen-canvas {
+    max-width: none;
   }
   .gen-canvas {
     width: 100%;
