@@ -1,5 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
+# The site is served byte-for-byte: keep LF on every OS, so tools/stamp_site.py gives the
+# same cache version on Windows and Linux.
+site/** text=auto eol=lf
+
 # Vendored third-party files: keep them byte-for-byte
 site/vendor/** -text

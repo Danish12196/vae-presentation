@@ -34,7 +34,9 @@ COUNT_LIMIT = 15_000
 
 
 def site_files():
-    for path in sorted(SITE.rglob("*")):
+    # Sort by the posix path string: Path ordering is case-insensitive on Windows only, and the
+    # version must not depend on the OS that runs this.
+    for path in sorted(SITE.rglob("*"), key=lambda p: p.relative_to(SITE).as_posix()):
         rel = path.relative_to(SITE).as_posix()
         if (path.is_file() and path.name not in SKIP_NAMES and path.suffix not in SKIP_SUFFIXES
                 and not path.name.startswith("LICENSE")):
@@ -70,11 +72,12 @@ def main():
     total = sum(f["bytes"] for f in files)
 
     (SITE / "precache.json").write_text(
-        json.dumps({"version": version, "total_bytes": total, "files": files}, indent=1) + "\n")
+        json.dumps({"version": version, "total_bytes": total, "files": files}, indent=1) + "\n",
+        newline="\n")  # LF on every OS, like the rest of site/
     sw = SITE / "sw.js"
     text = sw.read_text(encoding="utf-8")
     text = re.sub(r'^const VERSION = ".*";$', f'const VERSION = "{version}";', text, count=1, flags=re.M)
-    sw.write_text(text, encoding="utf-8")
+    sw.write_text(text, encoding="utf-8", newline="\n")
     print(f"{len(files)} files to cache, {total / 1e6:.1f} MB, version {version}")
     if not check_limits():
         sys.exit("host limits exceeded")
