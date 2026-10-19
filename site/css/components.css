@@ -63,6 +63,33 @@
   color: var(--accent);
 }
 
+/* Formulas sit at the bottom of a slide, always visible. */
+.formula-bar {
+  width: min(1080px, 100%);
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.formula-bar .formula {
+  margin: 0;
+  padding: 6px 14px;
+}
+.formula-bar:has(.is-active) .formula:not(.is-active) {
+  opacity: 0.72;
+}
+.formula-bar .formula.is-active {
+  border-color: var(--accent);
+}
+.formula-bar .recon {
+  color: var(--coral);
+  font-weight: 700;
+}
+.formula-bar .kl {
+  color: var(--sky);
+  font-weight: 700;
+}
+
 /* A slightly tilted label for the one joke per slide. */
 .sticker {
   display: inline-block;
