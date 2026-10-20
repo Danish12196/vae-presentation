@@ -1,5 +1,5 @@
 /* Analogy chips in slide headers, and the explainer slides added for the script:
-   s06b (every face is a point), s23 (backprop, 3Blue1Brown style), s30b (measure and use well).
+   s06b (every face is a point), s28b (GAN as an alternative), s30b (measure and use well).
    Kept in one file so it never collides with the partN.css files. */
 
 /* ================================================================ analogy chip */
@@ -39,7 +39,7 @@
   text-transform: uppercase;
   color: var(--accent);
 }
-@media (max-height: 820px) {
+@media (max-height: 900px) {
   .analogy { max-width: 40ch; font-size: calc(var(--fs-small) * 0.85); padding: 4px 12px 5px; }
 }
 @media (max-width: 760px) {
@@ -141,104 +141,6 @@ svg.faces-big {
   .faces-note { font-size: 16px; }
 }
 
-/* ================================================================ s23 backprop, briefly */
-
-.bp2-body {
-  gap: calc(var(--gap) * 2.5);
-  align-items: center;
-}
-.bp2-left {
-  flex: 1 1 auto;
-  max-width: 980px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap);
-}
-svg.bp2-graph {
-  width: 100%;
-  height: auto;
-  max-height: 38vh;
-  overflow: visible;
-}
-.bp2-node rect { fill: var(--bg-raised); stroke: var(--line); stroke-width: 3; }
-.bp2-lossbox rect { fill: color-mix(in srgb, var(--accent) 14%, var(--bg-raised)); }
-.bp2-op circle { fill: var(--bg-sunken); stroke: var(--line); stroke-width: 3; }
-.bp2-name { font-family: var(--font-head); font-weight: 700; font-size: 26px; fill: var(--text); }
-.bp2-val { font-family: var(--font-mono); font-weight: 700; font-size: 24px; fill: var(--accent); }
-.bp2-weight { font-family: var(--font-mono); font-weight: 700; font-size: 22px; fill: var(--text); }
-.bp2-target { font-family: var(--font-mono); font-size: 19px; fill: var(--text-soft); }
-.bp2-fwd { stroke: var(--line); stroke-width: 3; }
-.bp2-fwd-tip { fill: var(--line); }
-.bp2-back { stroke: var(--stamp); stroke-width: 5; }
-.bp2-back-tip { fill: var(--stamp); }
-.bp2-blame, .bp2-grad { font-family: var(--font-mono); font-weight: 700; font-size: 20px; fill: var(--coral); }
-.bp2-why { font-family: var(--font-mono); font-size: 18px; fill: var(--text-soft); }
-.bp2-backrow, .bp2-back-only, .bp2-val, .bp2-lossbox { transition: opacity var(--t-med) var(--ease); }
-
-.bp2-steps {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 18px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--fs-small);
-}
-.bp2-steps li {
-  padding: 8px 14px;
-  border: 2px solid var(--line);
-  background: var(--bg-raised);
-  transition: opacity var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
-}
-.bp2-steps strong { color: var(--accent); }
-
-.bp2-right {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-.bp2-land {
-  position: relative;
-  width: min(36vh, 340px);
-  height: min(36vh, 340px);
-  border: 3px solid var(--line);
-  box-shadow: 6px 6px 0 var(--accent);
-}
-.bp2-land canvas, .bp2-land svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.bp2-land canvas { image-rendering: auto; }
-.bp2-trail { fill: none; stroke: var(--stamp); stroke-width: 1.4; }
-.bp2-dot { fill: var(--bg-raised); }
-.bp2-ball { fill: var(--stamp); stroke: var(--line); stroke-width: 1.2; }
-.bp2-axes { margin: 0; font-size: 16px; color: var(--text-soft); }
-.bp2-buttons { display: flex; gap: 12px; }
-
-/* The build */
-#s23:is([data-step="0"]) .bp2-val { opacity: 0.35; }
-#s23:is([data-step="0"], [data-step="1"]) .bp2-lossbox { opacity: 0.35; }
-#s23:is([data-step="0"], [data-step="1"], [data-step="2"]) :is(.bp2-backrow, .bp2-back-only) { opacity: 0; }
-#s23 .bp2-steps li { opacity: 0.35; }
-#s23[data-step="1"] .bp2-steps li[data-step="1"],
-#s23[data-step="2"] .bp2-steps li:is([data-step="1"], [data-step="2"]),
-#s23[data-step="3"] .bp2-steps li:not([data-step="4"]),
-#s23[data-step="4"] .bp2-steps li { opacity: 1; }
-#s23[data-step="0"] .bp2-steps li { opacity: 1; }
-
-@media (max-width: 1000px) {
-  .bp2-body { flex-direction: column; gap: var(--gap); }
-  .bp2-steps { grid-template-columns: 1fr; font-size: 14px; gap: 4px; }
-  .bp2-steps li { padding: 4px 10px; }
-  .bp2-land { width: 30vh; height: 30vh; }
-  .bp2-right { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-  .bp2-buttons .btn { min-height: 40px; padding: 6px 14px; }
-}
-
 /* ================================================================ s30b measure it, then use it well */
 
 .eval-body {
@@ -270,7 +172,7 @@ svg.bp2-graph {
 .eval-row[data-model^="vae"] .eval-fill { background: var(--lilac); }
 .eval-db { text-align: right; font-weight: 700; }
 
-@media (max-height: 820px) {
+@media (max-height: 900px) {
   .eval-card { padding: 12px 16px; gap: 8px; font-size: calc(var(--fs-small) * 0.9); }
 }
 @media (max-width: 1000px) {
@@ -289,11 +191,71 @@ svg.bp2-graph {
   .eval-db { font-size: 13px; }
 }
 
-/* ================================================================ s24 gradient chains */
+/* ================================================================ s28b GAN as an alternative? */
 
-svg.grad-chain { display: block; width: 100%; height: auto; max-height: 22vh; margin: 4px 0 8px; }
-.gc-node { fill: var(--bg-raised); stroke: var(--line); stroke-width: 2.5; }
-.gc-dice { fill: color-mix(in srgb, var(--coral) 16%, var(--bg-raised)); }
-.gc-label { font-family: var(--font-mono); font-weight: 700; font-size: 20px; fill: var(--text); }
-.gc-stop { font-family: var(--font-head); font-weight: 700; font-size: 34px; fill: var(--coral); }
-.gc-note { font-family: var(--font-mono); font-size: 16px; fill: var(--coral); }
+.gan-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--gap) * 3);
+}
+.gan-left {
+  flex: 1 1 640px;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--gap) * 1.2);
+}
+svg.gan-diagram { display: block; width: 100%; height: auto; overflow: visible; }
+.gan-shadow { fill: var(--line); }
+.gan-face { fill: var(--bg-raised); stroke: var(--line); stroke-width: 3; }
+.gan-box.gen .gan-face { fill: color-mix(in srgb, var(--coral) 18%, var(--bg-raised)); }
+.gan-box.disc .gan-face { fill: color-mix(in srgb, var(--sky) 18%, var(--bg-raised)); }
+.gan-box.noise .gan-face { fill: var(--bg-sunken); stroke-dasharray: 6 5; }
+.gan-fake, .gan-real { image-rendering: pixelated; }
+.gan-name, .gan-label, .gan-verdict, .gan-back-label { text-anchor: middle; dominant-baseline: middle; }
+.gan-name { font-family: var(--font-head); font-weight: 700; font-size: 21px; fill: var(--text); }
+.gan-label { font-family: var(--font-mono); font-size: 18px; fill: var(--text); }
+.gan-label.small { font-size: 16px; fill: var(--text-soft); }
+.gan-verdict { font-family: var(--font-head); font-weight: 700; font-size: 22px; fill: var(--accent); }
+.gan-back-label { font-family: var(--font-head); font-weight: 700; font-size: 19px; fill: var(--coral); paint-order: stroke; stroke: var(--bg); stroke-width: 8px; stroke-linejoin: round; }
+.gan-arrow { fill: none; stroke: var(--line); stroke-width: 3; }
+.gan-arrow.back { stroke: var(--coral); stroke-width: 3.5; stroke-dasharray: 9 6; }
+.gan-tip { fill: var(--line); }
+.gan-tip.back { fill: var(--coral); }
+.gan-lines { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-body); line-height: 1.35; }
+.gan-lines li::marker { color: var(--accent); }
+
+.gan-right {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--gap) * 1.2);
+}
+.gan-fig { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.gan-grid {
+  width: min(500px, 46vh);
+  height: auto;
+  image-rendering: pixelated;
+  border: 3px solid var(--line);
+  box-shadow: 6px 6px 0 var(--line);
+  background: var(--bg-raised);
+}
+.gan-fig figcaption { max-width: 34ch; text-align: center; font-size: var(--fs-small); color: var(--text-soft); line-height: 1.35; }
+
+@media (max-height: 900px), (max-width: 1500px) {
+  .gan-body { gap: calc(var(--gap) * 2); }
+  .gan-left { flex-basis: 540px; max-width: 600px; }
+  .gan-grid { width: min(420px, 52vh); }
+  .gan-lines { font-size: var(--fs-small); }
+  .gan-fig figcaption { font-size: var(--fs-label); }
+}
+@media (max-width: 1000px) {
+  .gan-body { flex-direction: column; gap: var(--gap); }
+  .gan-left { flex-basis: auto; width: 100%; }
+  .gan-grid { width: min(78vw, 300px); }
+}
+@media (max-width: 760px) {
+  .gan-lines { font-size: 14px; }
+}

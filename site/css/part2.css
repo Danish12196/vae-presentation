@@ -484,7 +484,7 @@ figure > figcaption {
 
 /* ================================================================ 1366x768 and smaller laptops */
 
-@media (max-height: 820px), (max-width: 1500px) {
+@media (max-height: 900px), (max-width: 1500px) {
   .bn-img .cat-canvas {
     --cat-size: 220px;
   }
@@ -879,7 +879,7 @@ svg.num-stage {
 .size-cat {
   --cat-size: 110px;
 }
-@media (max-height: 820px), (max-width: 1500px) {
+@media (max-height: 900px), (max-width: 1500px) {
   .size-map { max-width: 220px; }
   .size-cat { --cat-size: 84px; }
 }
@@ -956,7 +956,7 @@ svg.num-stage {
   margin: 0;
   font-size: var(--fs-label);
 }
-@media (max-height: 820px), (max-width: 1500px) {
+@media (max-height: 900px), (max-width: 1500px) {
   .learn-row .cat-canvas { --cat-size: 70px; }
   .learn-canvas { max-width: 300px; }
 }
@@ -1016,7 +1016,7 @@ svg.num-stage {
 .bn-stamp-2 { transform: rotate(5deg); }
 .bn-stamps:not([hidden]) .bn-stamp { animation: stamp-in 320ms var(--ease) both; }
 .bn-stamps:not([hidden]) .bn-stamp-2 { animation-delay: 180ms; }
-@media (max-height: 820px), (max-width: 1500px) {
+@media (max-height: 900px), (max-width: 1500px) {
   .bn-copier { bottom: 16px; }
   .bn-stamp { font-size: var(--fs-label); padding: 4px 10px; }
 }

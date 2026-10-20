@@ -469,7 +469,7 @@
 
 /* ================================================================ 1366x768 and smaller laptops */
 
-@media (max-height: 820px), (max-width: 1500px) {
+@media (max-height: 900px), (max-width: 1500px) {
   .net-stage {
     --u: 0.8;
   }

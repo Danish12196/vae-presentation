@@ -123,7 +123,7 @@ async function realSamples(section, meta) {
       <figcaption><strong>${labels[k]}</strong> <span>${notes[k]}</span></figcaption>
       <canvas class="trio-grid" width="${3 * 64 + 4 * GAP}" height="${3 * 64 + 4 * GAP}" data-part="${k}" aria-label="Nine ${labels[k]} samples"></canvas>
     </figure>`).join("") + `<div class="trio-side"><button type="button" class="btn primary" data-trio>new samples</button>
-    <p class="gary-caption">Same 29,331 cats, one GPU, three ways to generate. The GAN is Gary, now a real one.</p></div>`;
+    <p class="gary-caption">Same 29,331 cats, one GPU, three ways to generate. The GAN is Gary, from the last slide.</p></div>`;
   const draw = () => {
     for (const c of row.querySelectorAll(".trio-grid")) {
       const [start, n] = meta.parts[c.dataset.part];

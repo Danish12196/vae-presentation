@@ -129,7 +129,7 @@
   color: var(--accent);
 }
 
-@media (max-height: 820px), (max-width: 1500px) {
+@media (max-height: 900px), (max-width: 1500px) {
   .s10-body {
     gap: calc(var(--gap) * 2);
   }

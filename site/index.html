@@ -455,6 +455,32 @@
         <p class="slide-caption">generate = sample the round world, decode into the strange one. The encoder only helps us train.</p>
       </section>
 
+      <section class="slide" id="s20" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 4 · Variational autoencoders</p>
+          <h2>The VAE&rsquo;s loss: the ELBO</h2>
+          <p class="analogy"><span class="analogy-tag">analogy</span>KL is a leash tying every cloud to the middle of the park</p>
+        </header>
+        <div class="slide-body s12-body">
+          <div class="callout elbo">
+            <div class="elbo-tex" data-display data-tex="\mathcal{L}(x) = \underbrace{\htmlClass{recon}{\mathbb{E}_{q(z \mid x)}\big[\log p(x \mid z)\big]}}_{\displaystyle\text{data consistency (our L2)}} - \overbrace{\htmlClass{kl}{\mathrm{KL}\big(q(z \mid x) \,\Vert\, p(z)\big)}}^{\displaystyle\text{latent-space regularisation}}"></div>
+            <p><strong>loss = −ELBO</strong> (Evidence Lower BOund): rebuild the cat, and keep each cloud near <span data-tex="\mathcal{N}(0, 1)"></span>. The true likelihood is intractable, so we maximise this lower bound instead. With a fixed-variance Gaussian decoder, the first term is our L2 up to a constant and a scale.</p>
+          </div>
+          <div class="gauss-wrap">
+            <svg class="gauss interactive" viewBox="0 0 800 300" role="group" aria-label="A Gaussian you can drag, drawn against N(0,1)"></svg>
+          </div>
+          <div class="gauss-controls">
+            <div class="kl-readout"></div>
+            <p class="gauss-params mono"></p>
+            <button type="button" class="btn" data-snap>snap to N(0,1)</button>
+          </div>
+        </div>
+        <div class="formula-bar">
+          <p class="formula"><span data-tex="\htmlClass{recon}{\lVert x - \hat{x} \rVert^2}"></span> reconstruction: how far the rebuilt cat is from the input</p>
+          <p class="formula"><span data-tex="\htmlClass{kl}{\mathrm{KL}} = \tfrac{1}{2}\left(\mu^2 + \sigma^2 - 1 - \ln \sigma^2\right)"></span> per dimension, summed over the code. Zero only when <span data-tex="\mu = 0,\ \sigma = 1"></span></p>
+        </div>
+      </section>
+
       <section class="slide" id="s19" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 4 · Variational autoencoders</p>
@@ -484,29 +510,32 @@
         </div>
       </section>
 
-      <section class="slide" id="s20" data-accent="lilac">
+      <section class="slide" id="s25" data-accent="lilac">
         <header class="slide-head">
           <p class="part-label">Part 4 · Variational autoencoders</p>
-          <h2>Loss = reconstruction + KL</h2>
-          <p class="analogy"><span class="analogy-tag">analogy</span>KL is a leash tying every cloud to the middle of the park</p>
+          <h2>The reparameterization trick</h2>
+          <p class="analogy"><span class="analogy-tag">analogy</span>roll the dice first, then stretch it by σ and move it by μ</p>
+          <p class="kind-lead rep-lead">Can we backprop through a random sample? No: the gradient stops at the dice.</p>
         </header>
-        <div class="slide-body s12-body">
-          <div class="loss-eq" role="group" aria-label="The VAE loss">
-            <div class="loss-tex" data-display data-tex="\text{Loss} = \underbrace{\htmlClass{recon}{\lVert x - \hat{x} \rVert^2}}_{\displaystyle\text{rebuild the cat}} + \underbrace{\htmlClass{kl}{\mathrm{KL}\big(\mathcal{N}(\mu, \sigma^2) \,\Vert\, \mathcal{N}(0, 1)\big)}}_{\displaystyle\text{keep the clouds near } \mathcal{N}(0,1)}"></div>
+        <div class="slide-body s14-body">
+          <div class="s14-switch"></div>
+          <div class="graph-wrap"><svg class="rep-graph" viewBox="0 0 1200 290" role="img" aria-label="Computation graph from x through the encoder, mu and sigma, z and the decoder to the loss, with the gradient flowing back"></svg></div>
+          <div class="s14-demo">
+            <div class="s14-sliders"><button type="button" class="btn" data-eps>resample ε</button></div>
+            <figure class="s14-out-fig"><canvas class="cat-canvas s14-out" width="64" height="64" aria-label="Decoded z"></canvas><figcaption class="mono s14-z"></figcaption></figure>
+            <div class="s14-map map-host"></div>
           </div>
-          <div class="gauss-wrap">
-            <svg class="gauss interactive" viewBox="0 0 800 300" role="group" aria-label="A Gaussian you can drag, drawn against N(0,1)"></svg>
-          </div>
-          <div class="gauss-controls">
-            <div class="kl-readout"></div>
-            <p class="gauss-params mono"></p>
-            <button type="button" class="btn" data-snap>snap to N(0,1)</button>
-          </div>
+          <p class="s14-note">the encoder really outputs log σ², for numerical stability</p>
         </div>
-        <div class="formula-bar">
-          <p class="formula"><span data-tex="\htmlClass{recon}{\lVert x - \hat{x} \rVert^2}"></span> reconstruction: how far the rebuilt cat is from the input</p>
-          <p class="formula"><span data-tex="\htmlClass{kl}{\mathrm{KL}} = \tfrac{1}{2}\left(\mu^2 + \sigma^2 - 1 - \ln \sigma^2\right)"></span> per dimension, summed over the code. Zero only when <span data-tex="\mu = 0,\ \sigma = 1"></span></p>
-        </div>
+      </section>
+
+      <section class="slide" id="s22" data-accent="lilac">
+        <header class="slide-head">
+          <p class="part-label">Part 4 · Variational autoencoders</p>
+          <h2>Watch a VAE learn</h2>
+        </header>
+        <div class="slide-body learn-body"></div>
+        <p class="slide-caption">KL warm-up lets the cats spread out first; then KL pulls every cloud into one round N(0, 1)</p>
       </section>
 
       <section class="slide" id="s21" data-accent="lilac">
@@ -525,88 +554,7 @@
             </div>
             <div class="s13-slider"></div>
             <button type="button" class="btn grid-toggle" aria-pressed="false" data-grid>what lives here?</button>
-            <div class="callout elbo">
-              <div class="elbo-tex" data-display data-tex="\mathcal{L}(x) = \underbrace{\mathbb{E}_{q(z \mid x)}\big[\log p(x \mid z)\big]}_{\displaystyle\text{data consistency (our L2)}} - \overbrace{\mathrm{KL}\big(q(z \mid x) \,\Vert\, p(z)\big)}^{\displaystyle\text{latent-space regularisation}}"></div>
-              <p><strong>loss = −ELBO</strong> (Evidence Lower BOund). The true likelihood is intractable, so we maximise this lower bound instead. With a fixed-variance Gaussian decoder, the first term is our L2 up to a constant and a scale.</p>
-            </div>
           </div>
-        </div>
-      </section>
-
-      <section class="slide" id="s22" data-accent="lilac">
-        <header class="slide-head">
-          <p class="part-label">Part 4 · Variational autoencoders</p>
-          <h2>Watch a VAE learn</h2>
-        </header>
-        <div class="slide-body learn-body"></div>
-        <p class="slide-caption">KL warm-up lets the cats spread out first; then KL pulls every cloud into one round N(0, 1)</p>
-      </section>
-
-      <section class="slide" id="s23" data-accent="lilac">
-        <header class="slide-head">
-          <p class="part-label">Part 4 · Variational autoencoders</p>
-          <h2>Backpropagation, briefly</h2>
-          <p class="analogy"><span class="analogy-tag">analogy</span>the chain rule is a relay of blame, passed back one layer at a time</p>
-        </header>
-        <div class="slide-body bp2-body">
-          <div class="bp2-left">
-            <svg class="bp2-graph" viewBox="0 20 900 280" role="img" aria-label="A tiny network: x times w1 gives h, h times w2 gives the prediction, compared with the target in the loss; the gradient flows back from the loss to each weight"></svg>
-            <ol class="bp2-steps">
-              <li data-step="1"><strong>Forward.</strong> x goes through w₁ and w₂ and comes out as a guess ŷ.</li>
-              <li data-step="2"><strong>Loss.</strong> One number: how wrong the guess was.</li>
-              <li data-step="3"><strong>Backward.</strong> Each box passes the blame back, times its own local slope.</li>
-              <li data-step="4"><strong>Step.</strong> Every weight moves a little downhill: w ← w − η · ∂L/∂w.</li>
-            </ol>
-          </div>
-          <div class="bp2-right">
-            <div class="bp2-land"><canvas class="bp2-heat" width="120" height="120" aria-hidden="true"></canvas><svg class="bp2-path" viewBox="0 0 100 100" role="img" aria-label="The loss landscape over w1 and w2, with the path of gradient descent rolling into the valley"></svg></div>
-            <p class="bp2-axes mono">loss over (w₁, w₂): dark is low</p>
-            <div class="bp2-buttons"><button type="button" class="btn primary" data-bp-step>take a step</button><button type="button" class="btn" data-bp-reset>reset</button></div>
-          </div>
-        </div>
-        <p class="slide-caption">a plain autoencoder is smooth the whole way, so the blame reaches every weight</p>
-      </section>
-
-      <section class="slide" id="s24" data-accent="lilac">
-        <header class="slide-head">
-          <p class="part-label">Part 4 · Variational autoencoders</p>
-          <h2>A dice roll has no gradient</h2>
-          <p class="analogy"><span class="analogy-tag">analogy</span>you can&rsquo;t ask a dice how to roll a bit higher</p>
-        </header>
-        <div class="slide-body sample-body">
-          <div class="sample-pair">
-            <article>
-              <h3>Plain autoencoder</h3>
-              <svg class="grad-chain" viewBox="0 0 510 120" aria-hidden="true"><defs><marker id="gc-tip-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="bp2-back-tip"/></marker></defs><rect class="gc-node" x="6" y="14" width="68" height="44"/><text class="gc-label" x="40" y="43" text-anchor="middle">x</text><line class="bp2-fwd" x1="74" y1="36" x2="116" y2="36"/><rect class="gc-node" x="116" y="14" width="68" height="44"/><text class="gc-label" x="150" y="43" text-anchor="middle">enc</text><line class="bp2-fwd" x1="184" y1="36" x2="226" y2="36"/><rect class="gc-node" x="226" y="14" width="68" height="44"/><text class="gc-label" x="260" y="43" text-anchor="middle">z</text><line class="bp2-fwd" x1="294" y1="36" x2="336" y2="36"/><rect class="gc-node" x="336" y="14" width="68" height="44"/><text class="gc-label" x="370" y="43" text-anchor="middle">dec</text><line class="bp2-fwd" x1="404" y1="36" x2="436" y2="36"/><rect class="gc-node" x="436" y="14" width="68" height="44"/><text class="gc-label" x="470" y="43" text-anchor="middle">L</text><line class="bp2-back" x1="470" y1="88" x2="40" y2="88" marker-end="url(#gc-tip-p)"/><text class="gc-note" x="255" y="112" text-anchor="middle">∂L flows all the way back</text></svg>
-              <p class="mono">z = encoder(x)</p>
-              <p>z is a plain function of the weights. The chain rule goes straight through it. Backprop is fine.</p>
-            </article>
-            <article>
-              <h3>VAE, if you sample directly</h3>
-              <svg class="grad-chain" viewBox="0 0 510 120" aria-hidden="true"><defs><marker id="gc-tip-d" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="bp2-back-tip"/></marker></defs><rect class="gc-node" x="6" y="14" width="68" height="44"/><text class="gc-label" x="40" y="43" text-anchor="middle">x</text><line class="bp2-fwd" x1="74" y1="36" x2="116" y2="36"/><rect class="gc-node" x="116" y="14" width="68" height="44"/><text class="gc-label" x="150" y="43" text-anchor="middle">enc</text><line class="bp2-fwd" x1="184" y1="36" x2="226" y2="36"/><rect class="gc-node gc-dice" x="226" y="14" width="68" height="44"/><text class="gc-label" x="260" y="43" text-anchor="middle">sample</text><line class="bp2-fwd" x1="294" y1="36" x2="336" y2="36"/><rect class="gc-node" x="336" y="14" width="68" height="44"/><text class="gc-label" x="370" y="43" text-anchor="middle">dec</text><line class="bp2-fwd" x1="404" y1="36" x2="436" y2="36"/><rect class="gc-node" x="436" y="14" width="68" height="44"/><text class="gc-label" x="470" y="43" text-anchor="middle">L</text><line class="bp2-back" x1="470" y1="88" x2="300" y2="88" marker-end="url(#gc-tip-d)"/><text class="gc-stop" x="262" y="98" text-anchor="middle">✗</text><text class="gc-note" x="150" y="96" text-anchor="middle">no gradient</text></svg>
-              <p class="mono">z ~ N(μ, σ)</p>
-              <p>μ and σ themselves are fine to differentiate. The random draw is not a smooth function of them, so the gradient stops at the dice. That is the only break.</p>
-            </article>
-          </div>
-        </div>
-        <p class="slide-caption">next: move the dice outside the graph. That is the reparameterization trick.</p>
-      </section>
-
-      <section class="slide" id="s25" data-accent="lilac">
-        <header class="slide-head">
-          <p class="part-label">Part 4 · Variational autoencoders</p>
-          <h2>The reparameterization trick</h2>
-          <p class="analogy"><span class="analogy-tag">analogy</span>roll the dice first, then stretch it by σ and move it by μ</p>
-        </header>
-        <div class="slide-body s14-body">
-          <div class="s14-switch"></div>
-          <div class="graph-wrap"><svg class="rep-graph" viewBox="0 0 1200 290" role="img" aria-label="Computation graph from x through the encoder, mu and sigma, z and the decoder to the loss, with the gradient flowing back"></svg></div>
-          <div class="s14-demo">
-            <div class="s14-sliders"><button type="button" class="btn" data-eps>resample ε</button></div>
-            <figure class="s14-out-fig"><canvas class="cat-canvas s14-out" width="64" height="64" aria-label="Decoded z"></canvas><figcaption class="mono s14-z"></figcaption></figure>
-            <div class="s14-map map-host"></div>
-          </div>
-          <p class="s14-note">the encoder really outputs log σ², for numerical stability</p>
         </div>
       </section>
 
@@ -662,7 +610,7 @@
 
       <section class="slide" id="s28" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, alternatives and wrap-up</p>
           <h2>Why VAE cats are blurry</h2>
         </header>
         <div class="slide-body s17-body">
@@ -685,10 +633,60 @@
         <p class="slide-caption">MSE's best guess is the average of the sharp cats that fit, and the KL term also caps how much detail the code can hold</p>
       </section>
 
+      <section class="slide" id="s28b" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Limitations, alternatives and wrap-up</p>
+          <h2>GAN as an alternative?</h2>
+          <p class="analogy"><span class="analogy-tag">analogy</span>a forger and a detective</p>
+        </header>
+        <div class="slide-body gan-body">
+          <div class="gan-left">
+            <svg class="gan-diagram" viewBox="0 0 640 330" role="img" aria-label="A GAN: noise goes into the generator, which makes a fake image. The discriminator sees fakes and real training cats and answers real or fake. Its verdict flows back to the generator: fool me better."></svg>
+            <ul class="gan-lines">
+              <li>No reconstruction loss, no averaging: the discriminator punishes blur.</li>
+              <li>The catch: unstable training, and mode collapse (the forger repeats one trick).</li>
+            </ul>
+          </div>
+          <div class="gan-right">
+            <figure class="gan-fig">
+              <canvas class="gan-grid" width="208" height="208" aria-label="Nine samples from Gary, a GAN trained on our cats"></canvas>
+              <figcaption>Gary: a real GAN trained on the same cats. Sharp in one pass. The next presentation covers how.</figcaption>
+            </figure>
+            <button type="button" class="btn primary" data-gan>new samples</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" id="s30" data-accent="coral">
+        <header class="slide-head">
+          <p class="part-label">Part 5 · Limitations, alternatives and wrap-up</p>
+          <h2>VAE vs GAN vs diffusion</h2>
+        </header>
+        <div class="slide-body s19-body">
+          <div class="s19-top">
+            <table class="cmp-table">
+              <thead><tr><th></th><th>VAE</th><th>GAN</th><th>Diffusion</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div class="trilemma">
+              <svg class="tri" viewBox="0 0 320 280" role="img" aria-label="Quality, variety, speed: each model gets two"></svg>
+              <div class="tri-models"></div>
+            </div>
+          </div>
+          <div class="gary">
+            <div class="gary-mascot"><div data-mascot="happy"></div><span class="sticker">Gary · illustration</span></div>
+            <button type="button" class="btn primary" data-gary>generate 9 cats</button>
+            <figure class="gary-grid-fig"><canvas class="gary-grid" width="204" height="204" aria-label="Nine decodes of one code"></canvas><figcaption>one code, nine times</figcaption></figure>
+            <figure class="gary-grid-fig vae"><canvas class="gary-grid" width="204" height="204" aria-label="Nine VAE cats"></canvas><figcaption>nine different codes</figcaption></figure>
+            <p class="gary-caption">Not a GAN photograph. This repo has no GAN checkpoint, so Gary is our VAE decoding one code nine times with a little jitter. A real GAN sample would be sharper. This only shows mode collapse: one picture, over and over.</p>
+          </div>
+        </div>
+      </section>
+
       <section class="slide" id="s29" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
-          <h2>Extensions</h2>
+          <p class="part-label">Part 5 · Limitations, alternatives and wrap-up</p>
+          <h2>Variants: conditional VAE, β-VAE, VQ-VAE</h2>
         </header>
         <div class="slide-body s18-body">
           <div class="s18-top">
@@ -732,35 +730,9 @@
         </div>
       </section>
 
-      <section class="slide" id="s30" data-accent="coral">
-        <header class="slide-head">
-          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
-          <h2>VAE vs GAN vs diffusion</h2>
-        </header>
-        <div class="slide-body s19-body">
-          <div class="s19-top">
-            <table class="cmp-table">
-              <thead><tr><th></th><th>VAE</th><th>GAN</th><th>Diffusion</th></tr></thead>
-              <tbody></tbody>
-            </table>
-            <div class="trilemma">
-              <svg class="tri" viewBox="0 0 320 280" role="img" aria-label="Quality, variety, speed: each model gets two"></svg>
-              <div class="tri-models"></div>
-            </div>
-          </div>
-          <div class="gary">
-            <div class="gary-mascot"><div data-mascot="happy"></div><span class="sticker">Gary · illustration</span></div>
-            <button type="button" class="btn primary" data-gary>generate 9 cats</button>
-            <figure class="gary-grid-fig"><canvas class="gary-grid" width="204" height="204" aria-label="Nine decodes of one code"></canvas><figcaption>one code, nine times</figcaption></figure>
-            <figure class="gary-grid-fig vae"><canvas class="gary-grid" width="204" height="204" aria-label="Nine VAE cats"></canvas><figcaption>nine different codes</figcaption></figure>
-            <p class="gary-caption">Not a GAN photograph. This repo has no GAN checkpoint, so Gary is our VAE decoding one code nine times with a little jitter. A real GAN sample would be sharper. This only shows mode collapse: one picture, over and over.</p>
-          </div>
-        </div>
-      </section>
-
       <section class="slide" id="s30b" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, alternatives and wrap-up</p>
           <h2>Measure it, then use it well</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>FID compares two crowds, not two faces</p>
         </header>
@@ -793,7 +765,7 @@
 
       <section class="slide" id="s31" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, alternatives and wrap-up</p>
           <h2>Wrap-up</h2>
         </header>
         <div class="slide-body s20-body">
@@ -810,7 +782,7 @@
 
       <section class="slide" id="s32" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, alternatives and wrap-up</p>
           <h2>Questions?</h2>
         </header>
         <div class="float-cats" aria-hidden="true"></div>

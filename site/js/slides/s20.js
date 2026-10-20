@@ -1,4 +1,5 @@
-// Loss = reconstruction + KL. The two terms stay written out at the bottom of the slide.
+// The VAE's loss, the ELBO: data consistency (our L2) minus KL. A Gaussian you can drag shows the KL term;
+// the two terms stay written out at the bottom of the slide.
 // Below the equation: drag a Gaussian against N(0, 1) (its peak moves mu, its side handles
 // change sigma) and watch KL( N(mu, sigma^2) || N(0, 1) ) = 0.5 * (sigma^2 + mu^2 - 1 - ln sigma^2).
 

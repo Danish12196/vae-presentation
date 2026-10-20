@@ -1,6 +1,6 @@
 {
- "version": "72bdd2647a2c",
- "total_bytes": 75135281,
+ "version": "c90eb019733f",
+ "total_bytes": 75128481,
  "files": [
   {
    "path": "404.html",
@@ -16,7 +16,7 @@
   },
   {
    "path": "css/explainers.css",
-   "bytes": 10493
+   "bytes": 9292
   },
   {
    "path": "css/fonts.css",
@@ -40,7 +40,7 @@
   },
   {
    "path": "css/part5.css",
-   "bytes": 20654
+   "bytes": 22120
   },
   {
    "path": "css/part6.css",
@@ -180,7 +180,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 59271
+   "bytes": 54743
   },
   {
    "path": "js/anim.js",
@@ -300,7 +300,7 @@
   },
   {
    "path": "js/slides/s20.js",
-   "bytes": 5240
+   "bytes": 5320
   },
   {
    "path": "js/slides/s21.js",
@@ -309,14 +309,6 @@
   {
    "path": "js/slides/s22.js",
    "bytes": 606
-  },
-  {
-   "path": "js/slides/s23.js",
-   "bytes": 7093
-  },
-  {
-   "path": "js/slides/s24.js",
-   "bytes": 25
   },
   {
    "path": "js/slides/s25.js",
@@ -335,12 +327,16 @@
    "bytes": 4637
   },
   {
+   "path": "js/slides/s28b.js",
+   "bytes": 4496
+  },
+  {
    "path": "js/slides/s29.js",
    "bytes": 5376
   },
   {
    "path": "js/slides/s30.js",
-   "bytes": 6666
+   "bytes": 6671
   },
   {
    "path": "js/slides/s30b.js",

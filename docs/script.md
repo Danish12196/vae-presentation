@@ -2,18 +2,18 @@
 
 Tuesday 20 October 2026, 18:30 · @Danish · MAAI901 Deep Learning for Visual Data · deck: autoencoders.danishali.dev
 
-Expect about 35 minutes of speaking, or about 41 minutes with slide changes, demos and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip. **Analogy** marks an analogy; each slide has at most one main one, and most slides show a short version of it in the top-right corner. The slide ids (#s07, #s06b) match the URL hash, so you can jump with them.
+Expect about 28 minutes of speaking, or about 34 minutes with slide changes, demos and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip. **Analogy** marks an analogy; each slide has at most one main one, and most slides show a short version of it in the top-right corner. The slide ids (#s07, #s06b) match the URL hash, so you can jump with them.
 
 | Part | Approx. words | Approx. time |
 | --- | --- | --- |
-| 1. From classification to generation | 300 | 2.5 min |
-| 2. Autoencoders (incl. undercomplete, overcomplete and the other types) | 1,320 | 10 min |
+| 1. From classification to generation | 298 | 2.5 min |
+| 2. Autoencoders (incl. undercomplete, overcomplete and the other types) | 1,319 | 10 min |
 | 3. Why autoencoders can't generate | 180 | 1.5 min |
-| 4. Variational autoencoders | 1,690 | 13 min |
-| 5. Limitations, extensions, comparison, evaluation, wrap-up | 1,100 | 8.5 min |
-| Total | \~4,580 | \~35 min |
+| 4. Variational autoencoders | 1,168 | 9 min |
+| 5. Limitations, alternatives (GAN), comparison, variants, evaluation, wrap-up | 670 | 5 min |
+| Total | \~3,635 | \~28 min |
 
-Times assume a steady presenting pace of about 130 words per minute. If you need to cut, these are safest, in order: the Extensions slide (keep only Stable Diffusion), "Making overcomplete work" (one tab, name the rest), PCA vs autoencoder (say "nonlinear PCA" and move on), the two "Watch it learn" replays (start them and move on), and the "for the maths fans" ELBO lines. Keep "Every face is a point", the comparison and the evaluation slide: the first is the clearest picture of a latent space, and the last two are what a master's audience will ask about.
+Times assume a steady presenting pace of about 130 words per minute. If you need to cut, these are safest, in order: the Variants slide (keep only Stable Diffusion), "Making overcomplete work" (one tab, name the rest), PCA vs autoencoder (say "nonlinear PCA" and move on), the two "Watch it learn" replays (start them and move on), and the "if asked" ELBO line. Keep "Every face is a point", the GAN slide, the comparison and the evaluation slide: the first is the clearest picture of a latent space, and the rest are what a master's audience will ask about.
 
 ### The story in one breath (say this to yourself before you start)
 
@@ -150,171 +150,139 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 
 ## Part 4: Variational autoencoders (VAEs)
 
-*Slide #s16: where VAEs come from. Kingma & Welling 2013, and Rezende, Mohamed & Wierstra 2014. Skim it.*
+*Slide #s16: where VAEs come from. Kingma & Welling 2013, and Rezende, Mohamed & Wierstra 2014.*
 
-- Two groups, almost at once: Kingma and Welling, December 2013, Auto-Encoding Variational Bayes; and Rezende, Mohamed and Wierstra, ICML 2014, independently.
+- Created by Diederik P. Kingma in his 2013 paper "Auto-Encoding Variational Bayes", with Max Welling.
+- He also co-created the Adam optimizer, which we've all used sometime this semester, probably without knowing it.
+- He was a co-founder of OpenAI, later worked on diffusion models at Google, and joined Anthropic in October 2024.
+- There was also a 2014 paper that independently published the same idea, by Rezende, Mohamed & Wierstra at DeepMind.
+- → "Before the idea itself, we need four words from probability."
 
 *Slide #s17: "Probability in one minute". A heatmap of a joint p(x, z), its marginals on the edges, and a crosshair you can drag: the horizontal slice is p(x | z), the vertical slice is p(z | x). The notes build up press by press.*
 
-- To say what a VAE does, we need four words from probability, and this one picture shows all of them. This framing is from Deepia's VAE video.
-- The heatmap is the joint distribution, p of x and z: how likely an image and a code are together. Here x is squashed to one number so we can draw it.
-- Add up each column and you get p of x, the distribution of images. Add up each row and you get p of z, the distribution of codes. Those are the marginals.
-- **Analogy:** think of a spreadsheet of a school, with grades down the side and ages across the top. The total at the bottom of each column is a marginal. One row, rescaled to add up to one, is a conditional: "given this grade, how old are the students?"
-- Take one horizontal slice and rescale it: that is p of x given z, the images one code can make. That is the decoder's job.
-- Take a vertical slice instead: p of z given x, which codes explain this image. That is called the posterior, and it's the encoder's job.
-- Here's the catch. To get the posterior exactly you need p of x, which means adding up over every possible code. For real cats in 12,288 dimensions, no one can compute that.
-- So the VAE doesn't compute it. It approximates the posterior with a simple Gaussian, called q of z given x. Approximating a distribution you can't compute is called variational inference, and that's the "variational" in variational autoencoder.
+- To explain VAEs we need a tiny bit of probability. One picture covers it.
+- *(Press.)* This heatmap is the joint distribution, p of x and z: how likely an image and a code are together. Here x is squashed to one number so we can draw it.
+- *(Press.)* Add up the columns and you get p of x, all the images. Add up the rows and you get p of z, all the codes. Those are the marginals.
+- *(Press, drag the crosshair.)* Take one slice and rescale it, and you get a conditional. p of x given z: the images one code makes. That's the decoder. p of z given x: which codes explain this image. That's called the posterior, and it's the encoder's job.
+- *(Press.)* The catch: computing the posterior exactly means adding up over every possible code. For 12,288-number cats, nobody can do that.
+- → "So what does a VAE do instead?"
 
 *Slide #s18: "Two worlds". Left: p(x), a lumpy shape made of real training-cat photos. Right: p(z) = N(0, I), a round glow. Press for the decoder arrow, then the encoder arrow. Tap anywhere in p(z) to decode that exact code; pick a cat to see its cloud q(z | x).*
 
-- So picture two worlds. On the left, p of x: real cat photos. In 12,288 dimensions that's a strange, lumpy shape that nobody can write down.
-- On the right, p of z: the latent world. And here's the key assumption: we choose this one. We say the codes should follow a standard normal distribution, N of zero and I, a nice round blob. That is the prior.
-- **Analogy:** it's a translator between a language nobody can write down, cat photos, and a simple one we invented, points in a round blob. Write in the simple language, read it out in cat.
-- The decoder, p of x given z, is the bridge from the round world to the lumpy one. *(Tap in p(z).)* Every point I pick here comes out as a cat over there.
-- The encoder, q of z given x, goes the other way: it takes a cat and gives a small cloud of codes, our approximation of the posterior.
-- And that is how a VAE generates: sample the round world, which is easy, and decode it into the strange one. The encoder is only needed for training.
+- Picture two worlds. On the left, p of x: real cat photos. It's a strange, lumpy shape that nobody can write down. We only have samples, our 29,800 cats.
+- On the right, p of z: the latent world. Here's the key move: we choose this one, a simple round normal distribution. That's called the prior.
+- *(Press, tap in p(z).)* The decoder bridges right to left: any point here comes out as a cat over there.
+- *(Press, pick a cat.)* The encoder goes the other way. We can't compute the true posterior, so we approximate it with a simple Gaussian, q of z given x. That approximation is the "variational" in variational autoencoder.
+- So generating is easy: sample the round world, decode it into the strange one.
+- → "But how do we train both bridges at once?"
 
-### The core idea
+*Slide #s20: "The VAE's loss: the ELBO". The ELBO with labelled braces (data consistency, latent-space regularisation) and loss = −ELBO; below it a Gaussian you can drag against N(0, 1), the live KL and "snap to N(0,1)"; the two terms written out at the bottom.*
+
+- From Bayes' rule you can derive one training objective, the ELBO, the Evidence Lower Bound. It looks scary, but it's just two parts.
+- Part one, data consistency: encode a real cat, decode it, and check how close it came back. That's our same MSE as before. Rebuild the cat.
+- Part two, regularization: the KL divergence, a kind of distance between two distributions. It measures how far each cat's cloud is from our round prior.
+- *(Drag the Gaussian, then "snap to N(0,1)".)* It's zero only at mean 0, standard deviation 1. **Analogy:** think of KL as a leash tying every cloud to the middle of the park.
+- So a VAE's loss is a regularized reconstruction loss: rebuild the cat, and keep the latent space shaped like a normal distribution.
+- *(If asked.)* It's a lower bound on the log-likelihood of the data, which we can't compute directly. Push the bound up and the likelihood rises with it.
+- → "So how does the network actually produce these clouds?"
 
 *Slide #s19: the vae_2d_b1 map with the picked cat's cloud drawn as a glowing Gaussian, and a pipeline strip below: encoder → μ, σ → N(μ, σ²) ~ z → decoder, with the live numbers.*
 
-- Instead of a single point, the VAE's encoder outputs a distribution: a mean, mu, and a standard deviation, sigma. A Gaussian, the bell curve. We sample z from it and pass it to the decoder.
-- **Analogy:** a plain autoencoder gives each cat an exact street address. A VAE gives each cat a neighbourhood. *(Click "sample again".)* Every time we pass the same cat through, we land somewhere else in its neighbourhood, but the decoder still has to rebuild the same cat.
-- So the decoder learns the whole area around each point, and the gaps start to fill. But nothing yet stops the encoder from making the neighbourhoods tiny and far apart. That's the job of the loss.
+- A plain autoencoder maps each cat to one exact point. A VAE's encoder outputs two numbers per dimension instead: a mean, μ, and a spread, σ. That's a Gaussian, a little cloud.
+- *(Pick a cat; point at the strip at the bottom.)* Encoder, μ and σ, sample a z from the cloud, decoder.
+- *(Click "sample again".)* Same cat, a different spot in its cloud, almost the same cat back.
+- **Analogy:** it's the difference between an exact street address and a neighbourhood. The decoder has to handle the whole neighbourhood, so the gaps start to fill.
+- → "But there's a problem with that sampling step."
 
-### The loss function
+*Slide #s25: the computation graph, opening on naive sampling with the lead "Can we backprop through a random sample? No: the gradient stops at the dice." Flip to Reparameterization: z = μ + σ × ε. "Resample ε" animates the trick on the mini map: a white unit blob with ε in it is scaled by σ, then shifted by μ.*
 
-*Slide #s20: Loss = reconstruction + KL, typeset with labelled braces. Drag the Gaussian; "snap to N(0,1)".*
+- To train, gradients have to flow back through every step. But can we backprop through a random sample? No. **Analogy:** you can't ask a dice how it should change to roll a bit higher.
+- *(Naive sampling showing.)* The gradient stops right here, at the dice. So the encoder never learns.
+- *(Flip to Reparameterization.)* The trick: roll the dice first. Sample ε from a standard normal, then compute z = μ + σ·ε. Stretch it by σ, shift it by μ.
+- *(Click "resample ε"; drag μ and σ.)* Same result as sampling from the cloud, but now it's just multiply and add. The gradient flows straight through μ and σ, and we can train with Adam. There's Kingma again.
+- Small detail: the encoder actually outputs log σ², which keeps the numbers stable and σ always positive.
+- → "Let's watch it train."
 
-- The VAE loss has two parts. The first is the reconstruction loss, the same as before. The second is the KL divergence. (KL stands for Kullback–Leibler. KL divergence measures how different one probability distribution is from another. If they're identical, it's zero.)
-- It pushes each encoded distribution towards a standard normal, mean 0 and standard deviation 1. *(Drag the Gaussian away, then "snap to N(0,1)".)* It's zero only at mu 0, sigma 1.
-- **Analogy:** KL is a leash. Every cat's cloud is a dog on a leash tied to the centre of the park. The dogs can wander to their favourite spots, which is reconstruction, but none can run off to a far corner, and none can shrink to a single point.
-- For one dimension the closed form is one half of mu squared plus sigma squared, minus 1, minus the log of sigma squared. The training loss sums that over every latent dimension.
-- The two parts have names: data consistency, rebuild the cat, and latent-space regularisation, keep every cloud close to the prior.
+*Slide #s22: "Watch a VAE learn". A replay of vae_2d_b1's training at the same log-spaced steps as before: reconstruction and KL per step, four cats and the latent map per snapshot. Arriving with the keys going forward starts the replay.*
 
-*Slide #s21: the KL dial. β = 0, 0.1, 1, 4; the ELBO callout; "what lives here?".*
+- *(Arrive with the clicker; the replay starts.)* Same replay as before, but for our 2-number VAE.
+- At the start, every cat sits in the same spot. Then the KL pulls everything into one round blob around zero: the shape of our prior.
+- The KL weight ramps up slowly at first, which is called KL warm-up. It lets the decoder learn to draw cats before the space gets squeezed. Watch the KL curve fall from the thousands.
+- Meanwhile the reconstruction keeps improving: both parts of the loss, working at the same time.
+- → "So what happens if we change how hard the KL pulls?"
 
-- The two terms work against each other: reconstruction wants every cat in its own distinct spot, KL wants everyone bunched around zero.
-- **Analogy:** it's a tug of war. *(Drag β from 0 to 4.)* At beta 0, reconstruction wins: scattered islands. At beta 4, KL wins: everything squashed into the middle and the cats get blurrier. Beta 1 is the balance.
-- *(Press "what lives here?" at β = 0, then at β = 1.)* With no KL the gaps still decode to junk; with KL, every point in the round region is a cat.
-- Formally, this combined loss is the negative of something called the ELBO. (ELBO stands for Evidence Lower Bound. It's a lower bound on the log-likelihood of the data, meaning how probable the model thinks real images are.)
-- The likelihood itself is intractable, so we maximize the ELBO instead.
-- For the maths fans, in one line: log p of x equals the ELBO plus the KL between q and the true posterior. That last KL can't be negative, so the ELBO sits underneath log p of x. Push the floor up and the ceiling has to go up too, and q gets closer to the true posterior on the way.
-- One caveat: our reconstruction term is squared error. For a Gaussian decoder with a fixed variance, that matches the negative log-likelihood up to a constant and a scale.
+*Slide #s21: the KL dial. β = 0, 0.1, 1, 4 on a big map, the tug of war, and "what lives here?".*
 
-*Slide #s22: "Watch a VAE learn". A replay of vae_2d_b1's training at the same log-spaced steps: reconstruction and KL per step, four cats and the latent map per snapshot.*
-
-- Same replay, for the VAE. In the first epochs the KL weight is ramped up slowly. That's called KL warm-up: it lets the decoder learn to draw cats before the latent space gets squeezed. (Without it, the KL can win too early and the model ignores z. That failure is called posterior collapse.)
-- Watch the KL curve fall from the thousands, and the map get pulled into one round blob around zero, the shape of our prior.
-- The reconstruction keeps improving at the same time: the tug of war, live.
-
-### Backprop, then the reparameterization trick
-
-*Slide #s23: "Backpropagation, briefly". A tiny network, x → w₁ → h → w₂ → ŷ → loss, with real numbers. Each press builds one step: the forward pass; the loss; the blame flowing back, one local derivative at a time; one gradient-descent step. "Take a step" repeats it; the little valley on the right shows the ball rolling down.*
-
-- Before the trick, a quick refresher on backpropagation, in the style of 3Blue1Brown.
-- *(Press.)* Forward: the input goes through two weights and comes out as a guess. *(Press.)* Loss: one number, how wrong it was. *(Press.)* Backward: how much is each weight to blame?
-- **Analogy:** the chain rule is a relay of blame. The loss tells the last layer "you were this much off". That layer keeps its share and passes the rest back, multiplied by its own local slope. Each layer only needs the message from the layer after it.
-- In 3Blue1Brown's words, the gradient tells you which nudges give you the most bang for your buck: weights attached to big activations get the big nudges.
-- *(Press, then "take a step" a few times.)* Then every weight takes a small step downhill, and the ball rolls down the valley. Repeat that millions of times and you've trained a network.
-- A plain autoencoder is smooth from start to finish, so the blame can flow all the way back. Hold that thought.
-
-*Slide #s24: plain AE on the left, z = encoder(x). VAE on the right, z sampled from N(μ, σ).*
-
-- *(Point at the two chains.)* In a VAE, the only break is the sampling step. mu and sigma are ordinary numbers; you can differentiate those.
-- **Analogy:** but you can't ask a dice "how should I change you to roll a little higher?" A random draw isn't a smooth function of mu and sigma, so the relay of blame stops at the dice.
-
-*Slide #s25: the computation graph, with z = μ + σ × ε. "Resample ε" animates the trick on the mini map: a white unit blob with ε in it is scaled by σ, then shifted by μ.*
-
-- So how do we fix this? We move the randomness outside the network.
-- Sample epsilon from a standard normal, then compute z as mu plus sigma times epsilon.
-- **Analogy:** roll the dice first, before the recipe starts. Then the recipe is just: take the dice result, stretch it by sigma, move it by mu. Stretching and moving are smooth, so the blame flows back through them. The dice becomes an ingredient, not a step.
-- *(Toggle to Reparameterization, then "resample ε".)* On the mini map: a standard blob, scaled by sigma, then shifted by mu.
-- Epsilon is just an input now, and gradients flow through mu and sigma. That's the reparameterization trick, and it's what makes VAEs trainable.
-- Practical note: the encoder outputs the log of the variance, so any number is allowed and the exponential always comes back positive.
-
-### Generating new images
+- The two parts of the loss fight each other. Reconstruction wants every cat in its own spot. KL wants everyone bunched in the middle. **Analogy:** it's a tug of war.
+- *(Drag β from 0 to 4.)* At β = 0 there's no KL: scattered islands, just like the plain autoencoder. At β = 4 KL wins: everything's squashed and the cats get blurrier. β = 1 is the standard VAE.
+- *(Press "what lives here?" at β = 0, then β = 1.)* Remember the monsters? At β = 0 the gaps still decode to junk. At β = 1, every point in the round region is a cat.
+- → "So now we can finally generate."
 
 *Slide #s26: 24 samples from a bigger VAE (10M weights, trained overnight) beside 24 from a bigger plain AE, naive or "fair" (its own code statistics); re-roll draws new ones from precomputed pools. A small live VAE map on the side.*
 
-- Once trained, we throw away the encoder. To generate, we sample a random z from the standard normal distribution and pass it through the decoder. *(Re-roll.)*
-- Because KL organized the space around that distribution, we get a plausible new cat. Soft, but a cat.
-- The plain autoencoder, sampled the same way, gives tiger-stripe texture: its codes never lived near N of zero and one, so we're sampling the countryside. Even with its own mean and spread you get collages, because the space between its codes was never trained to be cats.
-- These two models are bigger than the ones running live, so their samples are precomputed. *(Click the small map.)* The tiny live map is the small VAE: every point on it is a cat. No monsters.
+- Once it's trained, throw away the encoder. To make a new cat, sample a random point from the normal distribution and decode it. *(Re-roll.)*
+- Every one of these is a new cat that doesn't exist. Soft, but cats.
+- *(Point at the plain-autoencoder grid; try "fair".)* The plain autoencoder sampled the same way gives tiger-stripe texture or collages. Its codes never lived near that round blob.
+- These grids come from bigger models I trained on my desktop, too big for the browser, so their samples are precomputed. *(Click the small map.)* This little map is the live VAE: anywhere you click, a cat.
+- → "And because there are no gaps, we can walk between cats."
 
 *Slide #s27: interpolation. Pick A and B; three rows of 8 frames: a pixel crossfade, the bigger plain AE's walk, the bigger VAE's walk; a scrubber with a big frame per model.*
 
-- We can also interpolate: encode two cats and walk the straight line between their two codes, decoding as we go.
-- **Analogy:** it's the difference between a crossfade and a morph in a video editor. Top row: fading the pixels just stacks two ghost cats. That's why we walk the code, not the pixels.
-- The plain AE keeps one cat, but look at the middle frames: smears and glitches, because the points between its codes were never trained.
-- The VAE morphs smoothly from one cat to the other. Softer, but every frame is a cat, because KL made the whole region around the codes decodable.
+- *(Pick A and B; drag t.)* Encode two cats, walk the straight line between their codes, and decode each step.
+- Top row: just fading the pixels stacks two ghost cats. **Analogy:** it's a crossfade, not a morph.
+- The plain autoencoder glitches in the middle, because the points between its codes were never trained.
+- The VAE morphs smoothly, a bit softer, but every frame is a cat. That's the continuous latent space paying off.
+- → "But you've noticed every VAE cat is a bit… soft."
 
-## Part 5: Limitations, extensions, and wrap-up
-
-### Limitations
+## Part 5: Limitations, alternatives and wrap-up
 
 *Slide #s28: blur. Loupe over original vs reconstruction, and the pixel average of 1 up to all 29,331 training cats.*
 
-- VAEs aren't perfect. The biggest issue is blur. Partly because of MSE. If there are several possible sharp answers, MSE is minimized by averaging them, and an average of sharp images is a blurry image.
-- **Analogy:** if you're not sure whether a friend will arrive from the left door or the right door, the answer with the smallest average squared error is to point at the wall in the middle. Safe on average, right never. *(Slide the averaging slider all the way.)* Average a few cats and you get a soft cat. Average all 29,331 training cats and you get one beige ghost: the safest possible guess, and the opposite of sharp.
-- It's also partly because of the KL term, which caps how much detail can be squeezed into the latent space.
+- The biggest weakness of VAEs is blur.
+- Part of it is MSE. If several sharp answers are possible, MSE's best bet is their average, and an average of sharp images is blurry. **Analogy:** it's like being unsure which door a friend will come through and pointing at the wall between them.
+- *(Drag the averaging slider to the end.)* Average all 29,331 training cats and you get one beige ghost.
+- The other part is KL: the leash limits how much detail each code can carry.
+- → "So is there a way to get sharper images?"
 
-### Extensions
+*Slide #s28b: "GAN as an alternative?". Left: the GAN diagram, noise → generator → fake, a real cat, both into the discriminator → real or fake?, and the "fool me better" arrow back to the generator. Right: nine big samples from Gary, the real GAN trained on our cats, with "new samples".*
 
-*Slide #s29: β-VAE, VQ-VAE, and Stable Diffusion. "Remember this?" opens a note about the KL dial. It does not leave the slide.*
-
-- People have built a lot on top. Briefly:
-- A β-VAE, or beta-VAE, adds a weight called beta to the KL term. A higher beta gives a more disentangled latent space, at the cost of reconstruction quality. (Disentangled means each latent dimension controls one separate feature. Remember the faces: one axis for smile, one for hair. That's the dream a β-VAE chases.)
-- A conditional VAE fixes another limitation: a plain VAE can't take requests. Give the encoder and decoder a label too, and you can ask for a tabby.
-- A VQ-VAE, Vector Quantized VAE, uses a learned dictionary of discrete codes instead of a continuous cloud. **Analogy:** a paint-by-numbers kit with a fixed palette instead of mixing any colour. It's sharper, and a close cousin, the discrete VAE or dVAE, powered the first DALL-E.
-- And VAEs are still inside modern image generation. Stable Diffusion uses a VAE to compress a 512 by 512 image into a 64 by 64 by 4 latent, 48 times fewer numbers.
-- Diffusion runs inside that latent space, which is much faster, so when you generate an image with Stable Diffusion, the very last step is a VAE decoder turning latents back into pixels.
-
-### How VAEs compare to other image generation techniques
+- The main alternative at the time was the GAN, a Generative Adversarial Network. The next presentation covers them properly, so just the idea.
+- Two networks: a generator draws images, and a discriminator tries to tell real from fake. **Analogy:** it's a forger and a detective, each getting better because of the other.
+- There's no reconstruction loss and no averaging. The detective punishes anything that looks fake, including blur, so GAN images come out sharp.
+- The cost: training is unstable, and GANs can mode collapse: the forger finds one painting that fools the detective and paints it forever.
+- → "So how do all three compare?"
 
 *Slide #s30: a comparison table of VAEs, GANs and diffusion, revealed row by row, the trilemma triangle, and real samples from a bigger VAE, a GAN (Gary) and a small diffusion model.*
 
-|  | VAE | GAN | Diffusion |
-| --- | --- | --- | --- |
-| Image quality | Blurry | Sharp | Sharp |
-| Variety of outputs | High | Can suffer mode collapse | High |
-| Generation speed | Fast, one pass | Fast, one pass | Slow, many steps |
-| Training | Stable | Unstable | Stable |
-| Encoder for real images | Yes | No | No (noising process instead) |
+- *(Reveal the rows.)* VAEs: stable training, they cover the whole dataset, they have an encoder, but they're blurry. GANs: sharp in one pass, but unstable and can collapse. Diffusion: sharp and varied, but slow, with many denoising steps per image.
+- *(Point at the triangle.)* **Analogy:** it's fast, good, cheap: pick two. People call it the generative trilemma: quality, variety, speed. Each model gets two.
+- *(Bottom row, "new samples".)* Real samples from three models I trained on the same cats: our VAE, a GAN I call Gary, and a small diffusion model.
+- They're building blocks, not rivals. Stable Diffusion's VAE is trained with a GAN-style discriminator to make it sharper.
+- → "People have also built a lot on top of the basic VAE."
 
-- So how do VAEs compare to the two big alternatives: GANs, which we'll see next, and diffusion models?
-- Without stealing the next presentation: a GAN has a generator that creates images and a discriminator that tries to tell real images from fake ones. **Analogy:** a forger and a detective, each getting better because of the other.
-- Where is the VAE better? First, training is stable. We're minimizing one loss, and it goes down reliably. GANs are famously hard to train, because two networks are competing and the balance can easily break.
-- Second, VAEs cover the whole dataset, because the reconstruction loss makes them represent every training image. GANs can suffer from mode collapse: the forger finds one painting that fools the detective and paints it forever.
-- Third, a VAE has an encoder. We can take any real image and find its point in the latent space, which is what gives us interpolation, compression and anomaly detection. A standard GAN only goes from noise to image.
-- So where is the VAE worse? Mainly image quality. GANs produce much sharper images, because the detective punishes anything that looks fake, including blur.
-- And diffusion models produce both high quality and high variety, but they need many denoising steps, so they're much slower than a VAE or a GAN.
-- *(Bottom row, "new samples".)* These are real samples from three models I trained on the same cats: our bigger VAE, a GAN, and a small diffusion model. The VAE is blurry; the GAN is sharp in one pass; diffusion is sharp and varied, but took 100 denoising steps per image.
-- This GAN is Gary. Our Gary didn't collapse, helped by modern tricks like spectral normalisation, but GANs can, and when they do you get the same few cats over and over.
-- **Analogy:** it's the old "fast, good, cheap: pick two". Researchers call it the generative learning trilemma: quality, variety, speed. VAEs give variety and speed. GANs give quality and speed. Diffusion gives quality and variety.
-- In practice the best systems combine them: the VAE inside Stable Diffusion is trained with a discriminator borrowed from GANs, to make its outputs sharper. They're building blocks, not rivals.
+*Slide #s29: "Variants: conditional VAE, β-VAE, VQ-VAE", and the Stable Diffusion card. "Remember this?" opens a note about the KL dial. It does not leave the slide.*
 
-### Measuring it, and using it well
+- Conditional VAE: a plain VAE can't take requests, you just get a random cat. Feed it a label too, and you can ask for a tabby.
+- β-VAE: that's the KL dial we just turned. A bigger β gives a tidier, more disentangled space, where each axis means one thing, like smile and hair on our faces chart. The cost is blurrier output.
+- VQ-VAE: instead of a smooth cloud, it uses a fixed dictionary of codes. **Analogy:** like paint-by-numbers. It's sharper, and a cousin of it powered the first DALL-E.
+- And Stable Diffusion: its VAE squeezes a 512×512 image down 48 times. Diffusion runs in that small space, and the very last step is a VAE decoder.
+- → "Two last questions for any model: how do you measure it, and should you use it?"
 
 *Slide #s30b: three cards. "How do we measure it?" with live numbers computed in the browser on the 64 held-out cats; "Where it's used"; "Use it responsibly".*
 
-- Two questions for any model: how do you measure it, and should you use it?
-- *(Point at the live numbers.)* For reconstruction: PSNR, peak signal-to-noise ratio, on the 64 cats the models never trained on, computed right now. Higher is better, and it climbs with the size of the code. (Every 3 decibels is roughly half the squared error.) If the VAE scores below a plain autoencoder with fewer numbers, as it does tonight, that's the price of the KL leash: the blur slide in one number. For generation you can't compare to an answer, because there is no answer. The standard metric is FID, the Fréchet Inception Distance: run real and generated images through a pretrained network and compare the two clouds of features. Lower is better. To be honest, this deck shows reconstruction error, not FID.
-- Where it's used: anomaly detection, denoising, compression, synthetic data for small datasets, and Stable Diffusion's latent space.
-- Using it responsibly. A generative model learns its training data, including its biases. Ours only ever saw front-facing, centred cat faces, so a side-on cat looks like an anomaly to it. Swap cats for people and that becomes a fairness problem: an anomaly detector that flags people who weren't in the training set. And the same tools that imagine cats can imagine faces that never existed, so deepfakes, consent for face data and labelling synthetic images all matter.
+- *(Point at the live numbers.)* PSNR: how close the rebuild is, on 64 cats the models never saw, computed live. Higher is better, and it climbs with the size of the code.
+- Generation has no answer key, so instead we compare crowds: FID compares the features of real and generated images. To be honest, this deck shows reconstruction, not FID.
+- Uses: anomaly detection, denoising, compression, synthetic data, and the latent space inside Stable Diffusion.
+- Responsibility: a model learns its data's bias. Ours only saw front-facing cats, so a side-on cat looks "abnormal". With people, that's a fairness problem. And the same tools can make faces that never existed, so consent and deepfakes matter.
+- → "So to wrap up."
 
-### Wrap-up
+*Slide #s31: the wrap-up timeline. Each row is a main point, revealed on the next press.*
 
-*Slide #s31: a timeline in date order. Autoencoder, CNN, VAE, GAN, diffusion. Each row is a main point, revealed on the next press.*
-
-- So to wrap up, as a timeline. *(Press per row.)* We started with CNNs, the judges: they tell images apart, they don't draw them.
-- A plain encoder-decoder would just learn to copy the input, so we added a bottleneck: the carry-on.
-- That gave us the autoencoder, which learns its own chart, like the faces chart, without any labels, by minimizing the reconstruction loss.
-- But its map only has cities and monsters, so sampling from it doesn't give us new images.
-- The VAE fixes this by giving every cat a neighbourhood instead of an address, and putting every neighbourhood on a KL leash, which makes the latent space smooth and continuous.
-- The reparameterization trick, rolling the dice first, is what makes it trainable.
-- And the result is a model we can sample new cats from, which still sits inside today's best generators.
-- Thank you, and I'm happy to take any questions. And the next presenter will show you the forger and the detective properly.
+- *(Press per row.)* CNNs are the judges: they tell images apart, but they can't paint.
+- An autoencoder squeezes a cat through a bottleneck and learns features with no labels, but its map has holes: here be monsters.
+- A VAE gives every cat a cloud instead of a point, puts every cloud on a KL leash, and the reparameterization trick makes it trainable.
+- The result is a model you can sample new cats from, still at the heart of today's best generators.
+- Thank you. The next presentation will show you the forger and the detective properly.
 
 *Slide #s32: Questions. Leave it up during Q&A.*
 
@@ -333,16 +301,15 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 | #s15 | Holes in latent space | An old map: cities, and "here be monsters" |
 | #s17 | Marginals, conditionals | A spreadsheet of grades and ages: column totals and one rescaled row |
 | #s18 | Prior and decoder | A translator between cat photos and a simple invented language |
+| #s20 | KL term in the ELBO | A leash tying every cloud to the middle of the park |
 | #s19 | Encode a distribution | An exact address vs a neighbourhood |
-| #s20 | KL term | A leash tying each dog to the centre of the park |
+| #s25 | Sampling breaks gradients; the trick | You can't ask a dice how to roll higher; so roll the dice first, then stretch by σ and move by μ |
 | #s21 | β dial | A tug of war between rebuilding and packing together |
-| #s23 | Chain rule | A relay of blame, passed back one layer at a time |
-| #s24 | Sampling breaks gradients | You can't ask a dice how to roll higher |
-| #s25 | Reparameterization | Roll the dice first, then stretch by σ and move by μ |
 | #s27 | Interpolation | Crossfade vs morph |
 | #s28 | Blur | Pointing at the wall between two doors |
+| #s28b | GAN | A forger and a detective |
+| #s30 | Trilemma | Fast, good, cheap: pick two |
 | #s29 | VQ-VAE | Paint-by-numbers with a fixed palette |
-| #s30 | GAN / trilemma | A forger and a detective; fast, good, cheap: pick two |
 
 ## Appendix B: how this maps to the subject outline
 

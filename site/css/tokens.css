@@ -41,7 +41,7 @@
   --t-med: 320ms;
 }
 
-@media (max-height: 820px) {
+@media (max-height: 900px) {
   :root {
     --fs-h1: 68px;
     --fs-h2: 48px;

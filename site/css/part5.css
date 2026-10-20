@@ -99,12 +99,18 @@
 .loss-tex .text {
   font-family: var(--font-head);
 }
-/* The ELBO with labelled braces (s16 callout). */
-.callout.elbo .elbo-tex {
-  font-size: 15px;
-  margin-bottom: 8px;
-  overflow-x: auto;
+/* The ELBO with labelled braces: the equation of #s20 (moved from the KL dial). */
+.callout.elbo {
+  width: min(1080px, 100%);
+  padding: 10px 18px;
 }
+.callout.elbo .elbo-tex {
+  font-size: 26px;
+  margin-bottom: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.callout.elbo p { margin: 0; font-size: var(--fs-small); line-height: 1.35; }
 .callout.elbo .katex-display {
   margin: 0;
 }
@@ -575,7 +581,7 @@ svg.rep-graph[data-mode="reparam"] .naive-only {
 
 /* ================================================================ 1366x768 and smaller laptops */
 
-@media (max-height: 820px), (max-width: 1500px) {
+@media (max-height: 900px), (max-width: 1500px) {
   .s11-body,
   .s13-body {
     gap: calc(var(--gap) * 2);
@@ -949,3 +955,37 @@ svg.worlds-svg {
 .interp-row[data-model="pixels"] .row-label { color: var(--text-soft); }
 
 .interp-note { margin: 0; text-align: center; font-size: var(--fs-label); color: var(--text-soft); }
+
+/* #s20 at laptop heights and 110-125% zoom: the ELBO shrinks before the formula bar is pushed off. */
+@media (max-height: 900px), (max-width: 1500px) {
+  .callout.elbo { padding: 6px 14px; }
+  .callout.elbo .elbo-tex { font-size: 19px; }
+  .callout.elbo p { font-size: 14px; }
+  #s20 .gauss-wrap,
+  #s20 svg.gauss { height: min(150px, 20vh); max-height: min(150px, 20vh); }
+  #s20 .s12-body { gap: 8px; }
+}
+@media (max-height: 640px) {
+  .callout.elbo .elbo-tex { font-size: 16px; }
+  .callout.elbo p { display: none; }
+}
+@media (max-width: 760px) {
+  .callout.elbo .elbo-tex { font-size: 11px; }
+  .callout.elbo p { font-size: 12px; }
+}
+/* #s21: with the ELBO gone, the map takes the room. */
+.s13-map { --map-size: min(72vh, 760px); }
+@media (max-height: 900px), (max-width: 1500px) {
+  .s13-map { --map-size: min(66vh, 560px); }
+}
+@media (max-width: 760px) {
+  .s13-map { --map-size: min(84vw, 330px); }
+}
+/* #s25: the lead line sits under the title. */
+.rep-lead { grid-column: 1 / -1; }
+/* #s25 at 1366 zoomed to 125%: the lead line costs a row, so the graph gives it back. */
+@media (max-height: 640px) and (min-width: 761px) {
+  .graph-wrap { width: min(720px, 100%); }
+  .s14-out-fig .cat-canvas { --cat-size: 110px; }
+  .s14-map { --map-size: 150px; }
+}
