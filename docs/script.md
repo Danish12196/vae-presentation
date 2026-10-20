@@ -229,7 +229,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 
 *Slide #s24: plain AE on the left, z = encoder(x). VAE on the right, z sampled from N(μ, σ).*
 
-- In a VAE, the only break is the sampling step. mu and sigma are ordinary numbers; you can differentiate those.
+- *(Point at the two chains.)* In a VAE, the only break is the sampling step. mu and sigma are ordinary numbers; you can differentiate those.
 - **Analogy:** but you can't ask a dice "how should I change you to roll a little higher?" A random draw isn't a smooth function of mu and sigma, so the relay of blame stops at the dice.
 
 *Slide #s25: the computation graph, with z = μ + σ × ε. "Resample ε" animates the trick on the mini map: a white unit blob with ε in it is scaled by σ, then shifted by μ.*
