@@ -975,3 +975,51 @@ svg.num-stage {
 .num-tiny { font-family: var(--font-mono); font-weight: 700; font-size: 17px; fill: var(--text-soft); }
 .num-wire.strong { opacity: 0.6; stroke-width: 2; }
 .num-step.on .num-layer { animation: num-pop var(--t-med) ease-out both; animation-delay: var(--delay); }
+
+/* s08 overcomplete: live loss, the under/overcomplete tag, and the copier's stamps */
+.bn-loss { margin: 0; font-size: var(--fs-body); }
+.bn-loss .readout { display: inline; }
+.bn-loss .readout-value { color: var(--accent); font-weight: 700; }
+.bn-loss-unit { color: var(--text-soft); font-size: var(--fs-label); }
+.bn-kind { margin: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.bn-kind-tag {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+}
+.bn-kind-tag.is-over { background: var(--coral); border-color: var(--line); color: var(--bg); }
+.bn-illus { font-size: var(--fs-label); color: var(--text-soft); font-style: italic; }
+/* The stamps land across the "copy" itself: a perfect score, nothing learned. */
+.bn-stamps {
+  position: absolute;
+  inset: 0 0 auto 0;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14% 0;
+  pointer-events: none;
+}
+.bn-stamp {
+  background: var(--coral);
+  color: var(--bg);
+  white-space: nowrap;
+  transform: rotate(-8deg);
+  box-shadow: 3px 3px 0 var(--line);
+}
+.bn-stamp-2 { transform: rotate(5deg); }
+.bn-stamps:not([hidden]) .bn-stamp { animation: stamp-in 320ms var(--ease) both; }
+.bn-stamps:not([hidden]) .bn-stamp-2 { animation-delay: 180ms; }
+@media (max-height: 820px), (max-width: 1500px) {
+  .bn-copier { bottom: 16px; }
+  .bn-stamp { font-size: var(--fs-label); padding: 4px 10px; }
+}
+@media (max-width: 760px) {
+  .bn-stamp { font-size: 11px; padding: 3px 6px; white-space: normal; text-align: center; max-width: 100%; }
+}

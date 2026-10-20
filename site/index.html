@@ -60,21 +60,11 @@
         <p class="scroll-hint">scroll, swipe or use the arrow keys <span aria-hidden="true">↓</span></p>
       </section>
 
-      <section class="slide" id="s02" data-accent="coral">
-        <header class="slide-head">
-          <p class="part-label">Warm-up</p>
-        </header>
-        <div class="slide-body ice-body">
-          <h2>Cat people <span class="ice-or">or</span> dog people?</h2>
-          <p class="ice-note">Hands up.</p>
-        </div>
-      </section>
-
       <section class="slide" id="s03" data-accent="coral">
         <header class="slide-head">
           <p class="part-label">Part 1 · From classification to generation</p>
           <h2>Discriminative vs generative</h2>
-          <p class="analogy"><span class="analogy-tag">analogy</span>a cat-show judge can tell you which one is the cat, but can&rsquo;t paint one</p>
+          <p class="analogy"><span class="analogy-tag">analogy</span>a pet-show judge can&rsquo;t paint a cat</p>
         </header>
         <div class="slide-body s02-body">
           <div class="panel s02-picker"></div>
@@ -96,37 +86,6 @@
               <span class="sticker dream-sticker" hidden>knows a cat when it sees one. Cannot draw one.</span>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section class="slide" id="s04" data-accent="coral">
-        <header class="slide-head">
-          <p class="part-label">Part 1 · From classification to generation</p>
-          <h2>Encoder and decoder</h2>
-        </header>
-        <div class="slide-body net-body">
-          <div class="net-controls">
-            <div class="net-switch"></div>
-          </div>
-          <div class="net-stage"></div>
-          <p class="net-info mono" aria-live="polite"></p>
-          <p class="net-caption">same encoder, different ending</p>
-        </div>
-      </section>
-
-      <section class="slide" id="s05" data-accent="coral">
-        <header class="slide-head">
-          <p class="part-label">Part 1 · From classification to generation</p>
-          <h2>The identity trap</h2>
-        </header>
-        <div class="slide-body net-body">
-          <div class="net-controls"><div class="s04-toggle"></div></div>
-          <div class="net-stage"></div>
-          <div class="s04-bottom">
-            <div class="s04-mascot"><div data-mascot="happy"></div><span class="sticker stamp" hidden>Photocopier Cat</span></div>
-            <div class="s04-readouts"></div>
-          </div>
-          <p class="net-caption">illustration: with no bottleneck, copying is the easiest solution</p>
         </div>
       </section>
 
@@ -162,13 +121,29 @@
         <p class="slide-caption">two numbers per face; drawing the face back from a point is a decoder's job</p>
       </section>
 
+      <section class="slide" id="s04" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>Encoder and decoder</h2>
+        </header>
+        <div class="slide-body net-body">
+          <div class="net-controls">
+            <div class="net-switch"></div>
+          </div>
+          <div class="net-stage"></div>
+          <p class="net-info mono" aria-live="polite"></p>
+          <p class="net-caption">same encoder, different ending</p>
+        </div>
+      </section>
+
       <section class="slide" id="s07" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
-          <h2>A cat is 12,288 numbers</h2>
+          <h2>Undercomplete: a cat is 12,288 numbers</h2>
+          <p class="analogy"><span class="analogy-tag">analogy</span>packing two weeks of clothes into one carry-on</p>
         </header>
         <div class="slide-body num-body">
-          <p class="num-question">Same idea, but the network has to find its own two numbers. First, what does it see?</p>
+          <p class="num-question">Like the faces chart, but the network has to find its own two numbers. First, what does it see?</p>
           <svg class="num-stage" role="img" aria-label="A cat's pixels become a column of 12,288 numbers; the encoder squeezes them into two neurons, and those two numbers become a point in a 2-D latent space"></svg>
           <div class="num-picker"></div>
         </div>
@@ -177,8 +152,8 @@
       <section class="slide" id="s08" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
-          <h2>The bottleneck</h2>
-          <p class="analogy"><span class="analogy-tag">analogy</span>packing two weeks of clothes into one carry-on</p>
+          <h2>Overcomplete: room to copy</h2>
+          <p class="analogy"><span class="analogy-tag">analogy</span>bringing the whole textbook into the exam</p>
         </header>
         <div class="slide-body s05-body">
           <div class="bn-row">
@@ -193,7 +168,11 @@
             <figure class="bn-img bn-out">
               <canvas class="cat-canvas" width="64" height="64" aria-label="Reconstruction"></canvas>
               <figcaption>output</figcaption>
-              <div class="bn-copier" hidden><div data-mascot="photocopier"></div><span class="sticker tilt-right">Photocopier Cat is back</span></div>
+              <div class="bn-stamps" hidden aria-hidden="true">
+                <span class="sticker bn-stamp">features learned: none</span>
+                <span class="sticker bn-stamp bn-stamp-2">it&rsquo;s just copying</span>
+              </div>
+              <div class="bn-copier" hidden><div data-mascot="photocopier"></div><span class="sticker tilt-right">Photocopier Cat</span></div>
             </figure>
           </div>
           <div class="bn-controls">
@@ -201,23 +180,76 @@
             <div class="bn-readouts">
               <p class="bn-numbers mono">12,288 numbers → <strong class="bn-k">2</strong> numbers</p>
               <p class="bn-ratio"></p>
+              <p class="bn-loss mono">loss <strong class="bn-loss-v">0.0</strong> <span class="bn-loss-unit">(summed squared error)</span></p>
+              <p class="bn-kind"><span class="bn-kind-tag">undercomplete</span> <span class="bn-illus" hidden>illustration: the output is the input</span></p>
             </div>
           </div>
           <div class="bn-picker"></div>
         </div>
       </section>
 
-      <section class="slide" id="s09" data-accent="sunflower">
+      <section class="slide" id="s14" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
-          <h2>More numbers, more room</h2>
-          <p class="analogy"><span class="analogy-tag">analogy</span>a shadow on the wall: from one angle a mug and a donut look alike</p>
+          <h2>Making overcomplete work: add a rule</h2>
+          <p class="kind-lead">Big codes can copy, so each type adds one rule about z.</p>
         </header>
-        <div class="slide-body size-body">
-          <div class="size-grid"></div>
-          <div class="size-picker"></div>
+        <div class="slide-body s09-body">
+          <div class="s09-top">
+            <div class="s09-tabs"></div>
+            <div class="s09-picker"></div>
+          </div>
+
+          <div class="s09-panel" data-tab="sparse">
+            <div class="s09-row">
+              <figure>
+                <canvas class="sp-grid" width="320" height="320" aria-label="The 1024 code neurons as a 32 by 32 grid; brighter means more active"></canvas>
+                <figcaption>1024 code neurons</figcaption>
+              </figure>
+              <div class="s09-side">
+                <div class="sp-toggle"></div>
+                <div class="sp-readouts"></div>
+                <div class="s09-figs">
+                  <figure><canvas class="cat-canvas small sp-input" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
+                  <figure><canvas class="cat-canvas small sp-on" width="64" height="64" aria-label="Rebuilt with the penalty"></canvas><figcaption>penalty on</figcaption></figure>
+                  <figure><canvas class="cat-canvas small sp-off" width="64" height="64" aria-label="Rebuilt without the penalty"></canvas><figcaption>penalty off</figcaption></figure>
+                </div>
+              </div>
+            </div>
+            <p class="s09-caption">A big code is allowed, but a penalty keeps most neurons off. Each one that fires has to earn its place.</p>
+          </div>
+
+          <div class="s09-panel" data-tab="denoise" hidden>
+            <div class="dn-slider"></div>
+            <div class="s09-figs big">
+              <figure><canvas class="cat-canvas dn-noisy" width="64" height="64" aria-label="Noisy input"></canvas><figcaption>noisy input</figcaption></figure>
+              <figure class="dn-dae"><canvas class="cat-canvas" width="64" height="64" aria-label="Denoising autoencoder output"></canvas><figcaption>denoising AE</figcaption></figure>
+              <figure class="dn-ae"><canvas class="cat-canvas" width="64" height="64" aria-label="Plain autoencoder output"></canvas><figcaption>plain AE</figcaption></figure>
+            </div>
+            <p class="s09-caption">Same noisy cat, two models. The denoising AE was trained to predict the clean original. The plain AE was not.</p>
+          </div>
+
+          <div class="s09-panel" data-tab="contract" hidden>
+            <div class="ct-slider"></div>
+            <div class="s09-row">
+              <figure><canvas class="cat-canvas ct-input" width="64" height="64" aria-label="Jiggled input"></canvas><figcaption>jiggled input</figcaption></figure>
+              <div class="ct-bars" aria-live="polite"></div>
+              <div class="s09-figs">
+                <figure class="ct-ae"><canvas class="cat-canvas small" width="64" height="64" aria-label="Plain autoencoder output"></canvas><figcaption>plain AE</figcaption></figure>
+                <figure class="ct-cae"><canvas class="cat-canvas small" width="64" height="64" aria-label="Contractive autoencoder output"></canvas><figcaption>contractive AE</figcaption></figure>
+              </div>
+            </div>
+            <p class="s09-caption">Jiggle the pixels. The bars show how far z moves. The contractive model is punished if a small jiggle moves the code a lot.</p>
+          </div>
+
+          <div class="s09-panel" data-tab="conv" hidden>
+            <div class="net-stage cv-stage"></div>
+            <div class="cv-notes">
+              <span class="sticker">plot twist: you've been watching one all along</span>
+              <p class="cv-note">Every model in this deck is already convolutional. dae_128 is a convolutional denoising autoencoder.</p>
+            </div>
+          </div>
         </div>
-        <p class="slide-caption">more numbers rebuild sharper cats, but a flat picture of a 16-D space shows only a third of it: high-dimensional latent spaces can't be seen directly</p>
       </section>
 
       <section class="slide" id="s10" data-accent="sunflower">
@@ -343,73 +375,9 @@
         </div>
       </section>
 
-      <section class="slide" id="s14" data-accent="mint">
-        <header class="slide-head">
-          <p class="part-label">Part 3 · Other types of autoencoders</p>
-          <h2>Other kinds of autoencoders</h2>
-          <p class="kind-lead">Same job as the last slides: rebuild the cat. Each tab adds one extra rule about the code.</p>
-        </header>
-        <div class="slide-body s09-body">
-          <div class="s09-top">
-            <div class="s09-tabs"></div>
-            <div class="s09-picker"></div>
-          </div>
-
-          <div class="s09-panel" data-tab="sparse">
-            <div class="s09-row">
-              <figure>
-                <canvas class="sp-grid" width="320" height="320" aria-label="The 1024 code neurons as a 32 by 32 grid; brighter means more active"></canvas>
-                <figcaption>1024 code neurons</figcaption>
-              </figure>
-              <div class="s09-side">
-                <div class="sp-toggle"></div>
-                <div class="sp-readouts"></div>
-                <div class="s09-figs">
-                  <figure><canvas class="cat-canvas small sp-input" width="64" height="64" aria-label="Input cat"></canvas><figcaption>input</figcaption></figure>
-                  <figure><canvas class="cat-canvas small sp-on" width="64" height="64" aria-label="Rebuilt with the penalty"></canvas><figcaption>penalty on</figcaption></figure>
-                  <figure><canvas class="cat-canvas small sp-off" width="64" height="64" aria-label="Rebuilt without the penalty"></canvas><figcaption>penalty off</figcaption></figure>
-                </div>
-              </div>
-            </div>
-            <p class="s09-caption">A big code is allowed, but a penalty keeps most neurons off. Each one that fires has to earn its place.</p>
-          </div>
-
-          <div class="s09-panel" data-tab="denoise" hidden>
-            <div class="dn-slider"></div>
-            <div class="s09-figs big">
-              <figure><canvas class="cat-canvas dn-noisy" width="64" height="64" aria-label="Noisy input"></canvas><figcaption>noisy input</figcaption></figure>
-              <figure class="dn-dae"><canvas class="cat-canvas" width="64" height="64" aria-label="Denoising autoencoder output"></canvas><figcaption>denoising AE</figcaption></figure>
-              <figure class="dn-ae"><canvas class="cat-canvas" width="64" height="64" aria-label="Plain autoencoder output"></canvas><figcaption>plain AE</figcaption></figure>
-            </div>
-            <p class="s09-caption">Same noisy cat, two models. The denoising AE was trained to predict the clean original. The plain AE was not.</p>
-          </div>
-
-          <div class="s09-panel" data-tab="contract" hidden>
-            <div class="ct-slider"></div>
-            <div class="s09-row">
-              <figure><canvas class="cat-canvas ct-input" width="64" height="64" aria-label="Jiggled input"></canvas><figcaption>jiggled input</figcaption></figure>
-              <div class="ct-bars" aria-live="polite"></div>
-              <div class="s09-figs">
-                <figure class="ct-ae"><canvas class="cat-canvas small" width="64" height="64" aria-label="Plain autoencoder output"></canvas><figcaption>plain AE</figcaption></figure>
-                <figure class="ct-cae"><canvas class="cat-canvas small" width="64" height="64" aria-label="Contractive autoencoder output"></canvas><figcaption>contractive AE</figcaption></figure>
-              </div>
-            </div>
-            <p class="s09-caption">Jiggle the pixels. The bars show how far z moves. The contractive model is punished if a small jiggle moves the code a lot.</p>
-          </div>
-
-          <div class="s09-panel" data-tab="conv" hidden>
-            <div class="net-stage cv-stage"></div>
-            <div class="cv-notes">
-              <span class="sticker">plot twist: you've been watching one all along</span>
-              <p class="cv-note">Every model in this deck is already convolutional. dae_128 is a convolutional denoising autoencoder.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section class="slide" id="s15" data-accent="sky">
         <header class="slide-head">
-          <p class="part-label">Part 4 · Why autoencoders can't generate</p>
+          <p class="part-label">Part 3 · Why autoencoders can't generate</p>
           <h2>Holes in the latent space</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>an old map: the cities are drawn, the rest is monsters</p>
         </header>
@@ -433,7 +401,7 @@
 
       <section class="slide" id="s16" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Where VAEs come from</h2>
         </header>
         <div class="slide-body">
@@ -447,7 +415,7 @@
 
       <section class="slide" id="s17" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Probability in one minute</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>a table of grades and ages: column totals, and one row rescaled</p>
         </header>
@@ -466,7 +434,7 @@
 
       <section class="slide" id="s18" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Two worlds</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>a translator between cat photos and a language we invented</p>
         </header>
@@ -489,7 +457,7 @@
 
       <section class="slide" id="s19" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Encode a cloud, not a point</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>not an exact address, a neighbourhood</p>
         </header>
@@ -518,7 +486,7 @@
 
       <section class="slide" id="s20" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Loss = reconstruction + KL</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>KL is a leash tying every cloud to the middle of the park</p>
         </header>
@@ -543,7 +511,7 @@
 
       <section class="slide" id="s21" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Turning the KL dial</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>a tug of war: rebuild each cat vs pack everyone together</p>
         </header>
@@ -567,7 +535,7 @@
 
       <section class="slide" id="s22" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Watch a VAE learn</h2>
         </header>
         <div class="slide-body learn-body"></div>
@@ -576,7 +544,7 @@
 
       <section class="slide" id="s23" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Backpropagation, briefly</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>the chain rule is a relay of blame, passed back one layer at a time</p>
         </header>
@@ -601,7 +569,7 @@
 
       <section class="slide" id="s24" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>A dice roll has no gradient</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>you can&rsquo;t ask a dice how to roll a bit higher</p>
         </header>
@@ -626,7 +594,7 @@
 
       <section class="slide" id="s25" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>The reparameterization trick</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>roll the dice first, then stretch it by σ and move it by μ</p>
         </header>
@@ -644,7 +612,7 @@
 
       <section class="slide" id="s26" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Generating cats</h2>
         </header>
         <div class="slide-body s15-body">
@@ -669,7 +637,7 @@
 
       <section class="slide" id="s27" data-accent="lilac">
         <header class="slide-head">
-          <p class="part-label">Part 5 · Variational autoencoders</p>
+          <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>Interpolation</h2>
         </header>
         <div class="slide-body s16-body">
@@ -694,7 +662,7 @@
 
       <section class="slide" id="s28" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
           <h2>Why VAE cats are blurry</h2>
         </header>
         <div class="slide-body s17-body">
@@ -719,7 +687,7 @@
 
       <section class="slide" id="s29" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
           <h2>Extensions</h2>
         </header>
         <div class="slide-body s18-body">
@@ -766,7 +734,7 @@
 
       <section class="slide" id="s30" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
           <h2>VAE vs GAN vs diffusion</h2>
         </header>
         <div class="slide-body s19-body">
@@ -792,7 +760,7 @@
 
       <section class="slide" id="s30b" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
           <h2>Measure it, then use it well</h2>
           <p class="analogy"><span class="analogy-tag">analogy</span>FID compares two crowds, not two faces</p>
         </header>
@@ -825,7 +793,7 @@
 
       <section class="slide" id="s31" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
           <h2>Wrap-up</h2>
         </header>
         <div class="slide-body s20-body">
@@ -842,7 +810,7 @@
 
       <section class="slide" id="s32" data-accent="coral">
         <header class="slide-head">
-          <p class="part-label">Part 6 · Limitations, extensions, wrap-up</p>
+          <p class="part-label">Part 5 · Limitations, extensions, wrap-up</p>
           <h2>Questions?</h2>
         </header>
         <div class="float-cats" aria-hidden="true"></div>

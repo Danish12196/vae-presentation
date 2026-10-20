@@ -657,3 +657,6 @@
     font-weight: 700;
   }
 }
+
+/* #s04: the bottleneck z between the encoder and the transposed convs */
+.layer.block.vector.z { background: var(--text); box-shadow: none; }

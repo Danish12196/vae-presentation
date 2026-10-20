@@ -1,6 +1,6 @@
 {
- "version": "b4b23a086e12",
- "total_bytes": 75139752,
+ "version": "72bdd2647a2c",
+ "total_bytes": 75135281,
  "files": [
   {
    "path": "404.html",
@@ -24,11 +24,11 @@
   },
   {
    "path": "css/part1.css",
-   "bytes": 13869
+   "bytes": 14013
   },
   {
    "path": "css/part2.css",
-   "bytes": 19164
+   "bytes": 20913
   },
   {
    "path": "css/part3.css",
@@ -180,7 +180,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 60464
+   "bytes": 59271
   },
   {
    "path": "js/anim.js",
@@ -196,11 +196,11 @@
   },
   {
    "path": "js/latentmap.js",
-   "bytes": 11332
+   "bytes": 11338
   },
   {
    "path": "js/learnview.js",
-   "bytes": 9038
+   "bytes": 9035
   },
   {
    "path": "js/loader.js",
@@ -224,7 +224,7 @@
   },
   {
    "path": "js/netdiagram.js",
-   "bytes": 6650
+   "bytes": 6967
   },
   {
    "path": "js/offline.js",
@@ -235,20 +235,12 @@
    "bytes": 114
   },
   {
-   "path": "js/slides/s02.js",
-   "bytes": 81
-  },
-  {
    "path": "js/slides/s03.js",
    "bytes": 4463
   },
   {
    "path": "js/slides/s04.js",
    "bytes": 2057
-  },
-  {
-   "path": "js/slides/s05.js",
-   "bytes": 2907
   },
   {
    "path": "js/slides/s06.js",
@@ -264,11 +256,7 @@
   },
   {
    "path": "js/slides/s08.js",
-   "bytes": 2762
-  },
-  {
-   "path": "js/slides/s09.js",
-   "bytes": 3369
+   "bytes": 3628
   },
   {
    "path": "js/slides/s10.js",

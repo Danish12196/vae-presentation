@@ -1,5 +1,5 @@
-// The network diagram shared by slides 3 and 4: the real shapes of our conv trunk,
-// followed by either a classifier head or a decoder.
+// The network diagram for the encoder/decoder slide (#s04) and the conv tab of #s14: the real
+// shapes of our conv trunk, followed by either a classifier head or the bottleneck z and a decoder.
 //
 //   const net = netDiagram(stageEl, { ending: "decoder", onInfo: (text) => ..., note: true })
 //                         (without onInfo the layers are not hoverable)
@@ -17,6 +17,8 @@ const ENCODER = [
   { name: "conv 4", c: 256, s: 4 },
 ];
 const DECODER = [
+  { name: "flatten", n: 4096, vector: true },
+  { name: "bottleneck z", n: 256, vector: true, z: true },
   { name: "transposed conv 1", c: 128, s: 8, decoder: true },
   { name: "transposed conv 2", c: 64, s: 16, decoder: true },
   { name: "transposed conv 3", c: 32, s: 32, decoder: true },
@@ -41,6 +43,7 @@ function numbers(layer) {
 }
 function shapeText(layer) {
   if (layer.labels) return `${layer.n} labels`;
+  if (layer.z) return `z · ${layer.n}`;
   return layer.n ? fmt(layer.n) : `${layer.c}×${layer.s}×${layer.s}`;
 }
 function infoText(layer, wide) {
@@ -78,7 +81,7 @@ export function netDiagram(stage, { ending = "decoder", onInfo = null, built = I
       block.className = "layer labels";
     } else {
       block = document.createElement("div");
-      block.className = `layer block${layer.vector ? " vector" : ""}${layer.decoder ? " dec" : ""}`;
+      block.className = `layer block${layer.vector ? " vector" : ""}${layer.z ? " z" : ""}${layer.decoder ? " dec" : ""}`;
     }
     const label = document.createElement("span");
     label.className = "layer-shape mono";
@@ -101,6 +104,7 @@ export function netDiagram(stage, { ending = "decoder", onInfo = null, built = I
     const { layer, block, label } = c;
     let h, w;
     if (layer.image || layer.labels) [h, w] = [IMAGE, IMAGE];
+    else if (layer.z) [h, w] = [IMAGE * 0.4, 12]; // the narrow neck: 256 numbers vs 4,096
     else if (layer.vector) [h, w] = [IMAGE, 12];
     else if (wide) [h, w] = [IMAGE, 76]; // wide enough that the blocks touch: one straight pipe
     else [h, w] = [heightFor(layer.s), depthFor(layer.c)];

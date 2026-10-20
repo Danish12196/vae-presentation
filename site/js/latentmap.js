@@ -1,4 +1,4 @@
-// A 2D latent space drawn as a scatter of training cats, shared by Part 4 (ae_2) and Part 5 (VAEs).
+// A 2D latent space drawn as a scatter of training cats, shared by Part 3 (ae_2, #s15) and Part 4 (VAEs).
 //
 //   const map = latentMap(container, { points, colours, onPick, onHover })
 //   map.toData(px, py) / map.toScreen([z1, z2])   convert between canvas pixels and latent space

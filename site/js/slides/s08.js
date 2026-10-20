@@ -1,8 +1,9 @@
 // The bottleneck: squeeze the cat through k numbers and rebuild it (ae_2, ae_16, ae_64, ae_256, live).
-// The last stop removes the bottleneck: a perfect copy, and Photocopier Cat is back.
+// The last stop removes the bottleneck (overcomplete): a perfect copy and a loss of 0, Photocopier Cat.
+// Loss is the summed squared error over all 12,288 numbers, the same measure as the reconstruction-loss slide.
 
-import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat } from "../models.js";
-import { catPicker, slider } from "../ui.js";
+import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat, toTensor } from "../models.js";
+import { catPicker, slider, readout } from "../ui.js";
 
 const INPUT = 12288;
 const STOPS = [
@@ -14,7 +15,7 @@ const STOPS = [
 ];
 const fmt = (n) => n.toLocaleString("en-US");
 
-let inCanvas, outCanvas, outSlot, diagram, kEl, ratioEl, copier, picker, stop;
+let inCanvas, outCanvas, outSlot, diagram, kEl, ratioEl, copier, stamps, picker, stop, loss, kindEl, illusEl;
 let cat = 0;
 let request = 0;
 
@@ -25,6 +26,12 @@ export async function init(section) {
   kEl = section.querySelector(".bn-k");
   ratioEl = section.querySelector(".bn-ratio");
   copier = section.querySelector(".bn-copier");
+  stamps = section.querySelector(".bn-stamps");
+  kindEl = section.querySelector(".bn-kind-tag");
+  illusEl = section.querySelector(".bn-illus");
+  const lossEl = section.querySelector(".bn-loss-v");
+  loss = readout(lossEl.parentElement, { format: (v) => (v === 0 ? "0.000" : v.toFixed(1)) });
+  lossEl.replaceWith(loss.el);
 
   await loadShowcase();
   stop = slider(section.querySelector(".bn-slider"), {
@@ -71,15 +78,24 @@ async function update() {
   drawGlass(diagram, open);
   kEl.textContent = fmt(k ?? INPUT);
   ratioEl.textContent = k ? `${fmt(INPUT / k)}× smaller` : "no compression: 1×";
-  copier.hidden = k !== null;
+  copier.hidden = stamps.hidden = k !== null;
+  kindEl.textContent = k ? "undercomplete" : "overcomplete";
+  kindEl.classList.toggle("is-over", !k);
+  illusEl.hidden = k !== null;
 
   if (k === null) {
-    // Nothing to squeeze through: the network can just copy.
+    // Nothing to squeeze through: the network can just copy. A perfect score that means nothing.
     await inSlot(outSlot, async () => drawCat(outCanvas, image));
+    loss.set(0);
     return;
   }
   await inSlot(outSlot, async () => {
     const out = await reconstruct(`ae_${k}`, [image]);
-    if (mine === request) drawCat(outCanvas, out);
+    if (mine !== request) return;
+    drawCat(outCanvas, out);
+    const x = toTensor([image]).data;
+    let sq = 0;
+    for (let i = 0; i < x.length; i++) sq += (out.data[i] - x[i]) ** 2;
+    loss.set(sq);
   });
 }

@@ -2,19 +2,18 @@
 
 Tuesday 20 October 2026, 18:30 · @Danish · MAAI901 Deep Learning for Visual Data · deck: autoencoders.danishali.dev
 
-Expect about 38 minutes of speaking, or about 44 minutes with slide changes, demos and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip. **Analogy** marks an analogy; each slide has at most one main one, and most slides show a short version of it in the top-right corner. The slide ids (#s07, #s06b) match the URL hash, so you can jump with them.
+Expect about 35 minutes of speaking, or about 41 minutes with slide changes, demos and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip. **Analogy** marks an analogy; each slide has at most one main one, and most slides show a short version of it in the top-right corner. The slide ids (#s07, #s06b) match the URL hash, so you can jump with them.
 
 | Part | Approx. words | Approx. time |
 | --- | --- | --- |
-| 1. From classification to generation | 490 | 4 min |
-| 2. Autoencoders | 1,290 | 10 min |
-| 3. Other types of autoencoders | 220 | 1.5 min |
-| 4. Why autoencoders can't generate | 180 | 1.5 min |
-| 5. Variational autoencoders | 1,680 | 13 min |
-| 6. Limitations, extensions, comparison, evaluation, wrap-up | 1,090 | 8.5 min |
-| Total | \~4,950 | \~38 min |
+| 1. From classification to generation | 300 | 2.5 min |
+| 2. Autoencoders (incl. undercomplete, overcomplete and the other types) | 1,320 | 10 min |
+| 3. Why autoencoders can't generate | 180 | 1.5 min |
+| 4. Variational autoencoders | 1,690 | 13 min |
+| 5. Limitations, extensions, comparison, evaluation, wrap-up | 1,100 | 8.5 min |
+| Total | \~4,580 | \~35 min |
 
-Times assume a steady presenting pace of about 130 words per minute. If you need to cut, these are safest, in order: the Extensions slide (keep only Stable Diffusion), Part 3 (one tab, name the rest), "More numbers, more room", the two "Watch it learn" replays (start them and move on), and the "for the maths fans" ELBO lines. Keep "Every face is a point", the comparison and the evaluation slide: the first is the clearest picture of a latent space, and the last two are what a master's audience will ask about.
+Times assume a steady presenting pace of about 130 words per minute. If you need to cut, these are safest, in order: the Extensions slide (keep only Stable Diffusion), "Making overcomplete work" (one tab, name the rest), PCA vs autoencoder (say "nonlinear PCA" and move on), the two "Watch it learn" replays (start them and move on), and the "for the maths fans" ELBO lines. Keep "Every face is a point", the comparison and the evaluation slide: the first is the clearest picture of a latent space, and the last two are what a master's audience will ask about.
 
 ### The story in one breath (say this to yourself before you start)
 
@@ -22,141 +21,134 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 
 ## Part 1: From classification to generation
 
-*Slide #s01: title. No cats on this one.*
+*Slide #s01: title.*
 
-- Hi, I'm Danish. Today: how a network learns to imagine cats.
-- Everything you'll see runs live in this browser. I trained the models in PyTorch on my desktop and exported them to ONNX, so this page is also a small deployment demo: no server, no GPU, nothing leaves the laptop.
-
-*Slide #s02: warm-up. "Cat people or dog people?" Ask the room to raise hands. Count them yourself; the slide does not keep a tally.*
-
-- Cat people, good news: every model today was trained on about 29,800 cat faces. Dog people, there's one dog on the next slide. Be patient.
+- Hi, I'm Danish. Over the last 4 weeks we've been going over different discriminative models like CNNs that can classify images into categories or help you find information about said images. Today we're going to go over generative AI. Our first step into it will be covered over this presentation.
+- Autoencoders and Variational Autoencoders. Teaching a network to imagine cats.
+- I hope there's at least a few cat people here because this presentation is pretty cat heavy.
+- Every model we see today saw about 29,800 cat faces.
+- For the dog people… there are a few dogs on the next slide.
+- Everything runs live in this browser: trained in PyTorch, exported to ONNX. The page itself is a small deployment demo: no server, nothing leaves the laptop.
+- → "Let's see what the networks we know do with a cat."
 
 *Slide #s03: a CNN classifier taking an image and outputting "cat". Flip to Generative, then back, then "ask the classifier to draw a cat".*
 
-- So far in this course, almost everything we've looked at has been about understanding images.
-- We've looked at CNNs, ResNet, MobileNet, Vision Transformers, CvT and a bunch of other transformers. (CvT stands for Convolutional vision Transformer, which mixes convolutions into the transformer.)
-- All of these take in an image and output something about it, like a class label. These are called discriminative models. (A discriminative model learns the probability of a label given an image, p of label given image. In other words, it learns to tell things apart.)
-- But what if we want to go the other way and actually create images?
-- That's what generative models do. (A generative model learns something about the distribution of the images themselves, p of image, so it can produce new ones.)
-- **Analogy:** a discriminative model is a judge at a cat show. It can tell you which one is the cat. A generative model is the artist who can paint a new cat. Being a great judge doesn't make you an artist. *(Click "ask the classifier to draw a cat".)* Here's the judge trying to paint.
-- Today we're going to look at one of the first and most important families of generative models: autoencoders and variational autoencoders.
-
-*Slide #s04: an encoder-decoder diagram. Flipping the switch plays the layers from the input out to the ending. Hover a layer for its real shape.*
-
-- Could we just use the networks we already have? A classification CNN outputs class scores, not an image.
-- But we can keep the convolution layers and swap the ending for a second half that grows the image back up. The first half is the encoder, the second half is the decoder.
-- To grow the image back up, the decoder uses transposed convolutions or upsampling layers. (A transposed convolution is basically a convolution in reverse. Instead of shrinking the image, it makes it bigger.)
-- So now we have a network that takes an image in and gives an image out. Same encoder, different ending.
-
-*Slide #s05: the same diagram, with the toggle that makes every layer as wide as the input.*
-
-- But there's a trap.
-- If every layer in this network is as big as the input or bigger, the network can just learn to copy the input straight to the output.
-- This is called learning the identity function. (The identity function is just a function where the output equals the input.)
-- **Analogy:** meet Photocopier Cat. If you're allowed to bring the whole textbook into the exam, you don't need to understand anything. You just copy. The loss is perfect, and nothing was learned.
-- So how do we tackle this? We need to force the model to learn features.
+- So what is the difference between discriminative models like CNNs and generative models like VAEs?
+- Well, discriminative models learn basically: given an image, what is it? They can assign labels to images.
+- *(Click a thumbnail.)* It tells things apart.
+- Generative models on the other hand do not need labels to learn. They learn the distribution of the images themselves and therefore can produce new ones.
+- *(Flip to Generative.)* p(image): you can produce new ones. This cat is from our VAE (we'll get into the details of it later).
+- **Analogy:** think of it like a judge at a pet show figuring out which animals are cats vs dogs.
+- While the generative models are painters on the sidelines who can draw new cats after seeing the existing pets at the show.
+- *(Flip back, "ask the classifier to draw a cat".)* The judge obviously can NOT paint a cat though. As you can see…
+- → "So how do generative models do this?"
 
 ## Part 2: Autoencoders
 
-*Slide #s06: a short history. 1986 Rumelhart, Hinton & Williams; 2006 Hinton & Salakhutdinov; 2008 Vincent et al. on denoising. Skim it.*
+*Slide #s06: a short history. 1986 Rumelhart, Hinton & Williams; 2006 Hinton & Salakhutdinov; 2008 Vincent et al. on denoising.*
 
-- Quick history: autoencoders go back to Rumelhart, Hinton and Williams in 1986. The deep version used on images is Hinton and Salakhutdinov, Science, 2006, and denoising autoencoders are Vincent and colleagues, 2008.
+- Autoencoders transform complex data into a simpler, more meaningful representation called the latent space.
+- They've existed for almost 40 years, with the first paper published in 1986.
+- 1986 Rumelhart, Hinton & Williams; 2006 Hinton & Salakhutdinov (Science); 2008 Vincent et al. (denoising).
+- Even newer generative models like Stable Diffusion have a VAE inside them, and the first version of DALL-E used a discrete VAE as well.
+- → "Before cats, let's do this with people."
 
 *Slide #s06b: "Every face is a point". An illustration, inspired by Deepia's VAE video: hand-drawn faces, not a trained model. Each press builds one step: one face and its two numbers; a crowd of faces on the chart; a walk along one axis; then the axes lose their names. Drag on the chart to redraw the face.*
 
-- Before any cats, let's do this with people.
-- Imagine I had to describe your face to a friend using only two numbers. I might pick how much you're smiling, and how long your hair is.
-- *(Press.)* So this face is smile 0.8, hair 0.3. Two numbers. You lose a lot of detail, but your friend would still pick you out of a crowd. Probably.
-- *(Press.)* Now do that for everyone in the room. Every face becomes a dot on this chart. Smiley people on the right, long hair at the top. Similar faces end up close together. That chart is a latent space. (Latent just means hidden: the features behind the picture.)
-- *(Press, then drag along the bottom.)* And here's the generative part. Pick any point on the chart and you can draw the face that belongs there. Walk along one axis and only one thing changes: the smile grows, the hair stays. Going from two numbers back to a face is exactly what a decoder does.
-- *(Press.)* Now the twist. I chose "smile" and "hair". A neural network doesn't get to hear those words. Nobody labels the axes, so it invents its own, and they're often a mix of things, like "lighting plus head tilt". Our job today is to make a network find its own chart, for cats.
+- Autoencoders are types of neural networks that learn how to efficiently represent data.
+- This illustration is inspired by a video from Deepia, but I think it explains latent space really well.
+- You can look at any person and use so many classifications to describe who they are: their age, gender, hair colour, height and so on.
+- This chart is a latent space where we use just the smile and the hair length to describe a person.
+- You can see that I can move along the axis to change the characteristics of the person.
+- Autoencoders work on the same principle of finding the fewest features we can use to describe something. It probably isn't the best representation, but it is a very compressed one.
+- This can then help the autoencoder to learn the features that make up that object (it can be a person, or in our case a cat) so it can rebuild one.
+- → "So what does an autoencoder look like?"
 
-*Slide #s07: "A cat is 12,288 numbers". Each press builds one more step: the cat; its pixel grid with one pixel's RGB; pixels flying into a column of 12,288 numbers; the encoder, drawn as its four real conv layers (32×32×32 → 64×16×16 → 128×8×8 → 256×4×4), squeezing them into two neurons with live values; the two neurons turning into the two axes, with the cat landing as a dot; then 600 training cats on the same axes.*
+*Slide #s04: the network diagram. Flipping the switch plays the layers from the input out to the ending: a classifier head, or the bottleneck z (4,096 → z · 256) and the transposed convs. Hover a layer for its real shape.*
 
-- So what does the network actually see?
-- To the network, this cat is a grid of 64 by 64 pixels, and every pixel is three numbers: red, green and blue.
-- Unroll them all into one long column and you get 12,288 numbers. That column is the input layer. (This is the 3Blue1Brown picture: a 28 by 28 digit becomes 784 numbers. Ours is just a bigger, furrier version.)
-- The encoder squeezes that column down, one conv layer at a time: each layer halves the picture and adds channels. Here it squeezes all the way to two neurons, and these are the two numbers it chose for this cat.
-- Now the trick from the faces slide: treat those two activations as coordinates. Neuron one is the x axis, neuron two is the y axis, and the cat becomes a single point.
-- Do that for every training cat and you get this cloud of points. That's the cats' version of the face chart, except the network picked the axes itself.
+- *(Flip classifier head ↔ decoder; hover a layer.)* 3×64×64 → … → 256×4×4 = 4,096.
+- Autoencoders basically have three parts: an encoder, which is very similar to the neural networks we've been looking at; a squished-down area called the bottleneck (written as z); and a decoder, which uses flipped, or transposed, convolutions to grow the image back.
+- → "So what actually goes in, and how small should z be?"
 
-*Slide #s08: the bottleneck. A tapered hourglass whose neck follows the slider: 2, 16, 64, 256, none.*
+*Slide #s07: "Undercomplete: a cat is 12,288 numbers". Each press builds one more step: the cat; its pixel grid with one pixel's RGB; pixels flying into a column of 12,288 numbers; the encoder, drawn as its four real conv layers (32×32×32 → 64×16×16 → 128×8×8 → 256×4×4), squeezing them into two neurons with live values; the two neurons turning into the two axes, with the cat landing as a dot; then 600 training cats on the same axes.*
 
-- Autoencoders force the model to learn features by making the middle narrow. This narrow part is called the bottleneck.
-- The bottleneck is smaller than the input and the output, so the model can't just copy every pixel through. There isn't enough room.
-- **Analogy:** it's packing for a two-week trip with one carry-on. You can't take everything, so you're forced to decide what really matters. The bottleneck is the carry-on.
-- The small set of numbers it keeps is called the latent vector, z, and the space it lives in is the latent space.
-- *(Drag the slider.)* 12,288 numbers down to 2 is 6,144 times smaller, and you get a ghost cat. More room, sharper cat. *(Slide to "none".)* And with no bottleneck at all, Photocopier Cat is back.
-- Because the bottleneck is smaller than the input, this is called an undercomplete autoencoder: the encoder compresses the image to z, and the decoder rebuilds it from z alone.
+- We've got 64×64 pixels, and each has RGB values, so a total of 12,288 numbers.
+- That's our input. So in an undercomplete autoencoder we can have, for example, 4 real convolution layers that each halve the picture and add channels, all the way down to two neurons.
+- These are called latent dimensions. So 2 neurons would be 2 dimensions.
+- Since z, 2 numbers, is smaller than the input, 12,288, this is called undercomplete.
+- **Analogy:** it's like packing two weeks of clothes in a carry-on. It can't take everything. It has to only keep what matters.
+- We can obviously add more dimensions to add more features and get better results, but we'll get into why that can be an issue.
+- As you can see here though, each cat can now be represented in a graph showing the latent space.
 
-*Slide #s09: "More numbers, more room". Four maps of the same 600 training cats: ae_2, ae_16, ae_64 and ae_256, each beside the picked cat rebuilt by that model. Codes wider than two are flattened to their two main PCA axes. Each press reveals one more model.*
+*Slide #s08: "Overcomplete: room to copy". A tapered hourglass whose neck follows the slider: 2, 16, 64, 256 (undercomplete, live, with the summed squared error for the picked cat), then none (overcomplete: loss 0.000, Photocopier Cat, "features learned: none", "it's just copying"; an illustration, since the output is the input).*
 
-- How many numbers should the bottleneck have? That's the latent dimension, one of the most important design choices. More numbers, sharper cats.
-- But look at the maps. Past 2 numbers we can't draw the space anymore, so these are flattened with PCA, and that flat picture keeps only about a third of the spread.
-- **Analogy:** it's like the shadow of a 3-D object on a wall. The shadow is real, but you can't tell a coffee mug from a donut from one angle. A flat picture of a 16-D space is a shadow.
-- So high-dimensional latent spaces work, we just can't see them. That's why today's maps use 2-D models.
+- If you add more and more dimensions, such that the number of dimensions matches your input (or even exceeds it), our model basically becomes useless.
+- Because it hasn't learned anything. The easiest thing to do in this case would just be to copy the input and output it exactly. A photocopier cat, if you will.
+- **Analogy:** bringing the whole textbook into the exam.
+- The loss keeps getting better and at the end it's perfect. But that perfect score is just a lie.
+- This means it also doesn't know what features make up the cat.
+
+*Slide #s14: "Making overcomplete work: add a rule". Four tabs. Same job, one extra rule about z each: sparse, denoising, contractive, convolutional.*
+
+- So how do we make overcomplete autoencoders work? We add rules.
+- We can do this in a few different ways.
+- Sparse means only a few neurons may fire at once.
+- Denoising means we add noise to the input, so it isn't possible to just… copy the input.
+- Contractive means a small change to the input barely moves z.
+- And convolutional just means using conv layers, which is what we've been using the whole time.
+- These rules are what let you use big, overcomplete codes. Our demo models keep z smaller so they run in the browser.
 
 *Slide #s10: input, output, the squared-error heatmap, and the MSE and BCE formulas. Each symbol explains itself on hover or tap.*
 
-- Now how do we train this? We compare the output to the input: the reconstruction loss.
-- The most common choice is MSE. (MSE stands for Mean Squared Error. It's the average of the squared differences between each output pixel and the matching input pixel.) The heatmap shows where the error is: usually the edges and the eyes.
-- Another option is BCE, which works well when pixel values are between 0 and 1. (BCE stands for Binary Cross-Entropy. It treats each pixel as a probability.)
-- Then we train with backpropagation, like any other network. And notice: we don't need any labels. The input is the target.
-- **Analogy:** it's a test where the question sheet is also the answer key. You just have to reproduce it through a very small memory.
-- That makes this self-supervised learning. (Self-supervised means the training signal comes from the data itself, not from human labels.) Labels used: zero. Human annotators harmed: zero.
-- That's a big deal, because unlabelled images are everywhere and labelled ones are expensive.
+- So how do we train this?
+- We compare what comes out with what went in. That difference is the reconstruction loss: how badly the model rebuilt the cat. We saw this loss number previously when looking at overcomplete codes.
+- The heatmap shows the error pixel by pixel. Bright means wrong. It is usually the eyes or nose, because fine details can get lost in the bottleneck.
+- The standard choice is MSE (mean squared error): for every pixel, the difference is squared and then averaged.
+- There's also BCE (binary cross-entropy), which treats each pixel as a probability between 0 and 1. Same job, just a different way of measuring.
+- Then we just go back to normal training: backpropagation pushing the weights to make this number smaller.
+- But do we notice something? No labels. The input IS the target. **Analogy:** it's like a test where the question sheet is also the answer key. That's called self-supervised learning.
+- This matters because unlabelled images are everywhere and labelling them is expensive.
+- → "Let's watch this loss do its job."
 
 *Slide #s11: "Watch it learn". A replay of ae_2's training, snapshotted at log-spaced training steps (0, 8, 16, 32 … 6,870): the loss per step on a log axis, a slider with "replay training", four cats as the model rebuilt them at that point, and the latent map at that point. Arriving with the keys going forward starts the replay.*
 
-- Here's what training actually looks like. This is a replay of the real run of our 2-number autoencoder: 6,870 small steps, 30 passes over the cats.
-- The axis is logarithmic, because most of the visible learning happens in the first few hundred steps.
-- Before training, every cat is the same grey mush and all the codes sit on one spot.
-- **Analogy:** it's a 3Blue1Brown idea: training is a ball rolling downhill on the loss. Each step, the network asks "which small nudge to my weights makes the loss go down fastest?", takes it, and asks again.
-- Within a few hundred steps the cats get their colours and their faces, and the map spreads out and organises itself: dark cats drift to one side, light cats to the other. After that the loss keeps creeping down, but with only two numbers the cats stay blurry.
-- Nobody told it about fur. That's its version of "smile" and "hair".
+- This is a replay of our real 2-number autoencoder being trained.
+- At the start every cat comes out as a grey mush and all the codes sit at one spot.
+- Each step the network asks which small nudge to its weights brings the loss down the fastest, and takes it. And we repeat.
+- Watch the cats and the map together. The cats get their colours and faces back, and the map spreads out and organises itself: dark cats drift towards one side and light cats to the other.
+- Nobody told it about fur colour. With only two numbers, it decided that was the most useful thing to remember. That is its version of smile and hair length from our faces chart.
+- → "So that's how an autoencoder learns. You might have seen something like this before: PCA."
 
 *Slide #s12: PCA versus autoencoder, k = 2, 16, 64, 256.*
 
-- What does "most important features" mean? Whatever is most useful for reconstruction under our loss. There's a nice connection to PCA. (PCA stands for Principal Component Analysis. It's a classic technique that reduces data to the few directions where it varies the most.)
-- If you build an autoencoder with only linear layers and train it with MSE, it learns the same subspace as PCA. (Baldi and Hornik showed this in 1989.)
-- **Analogy:** PCA is a straight ruler: it can only measure along straight lines. An autoencoder is a tape measure: it can follow curves. Cat faces live on a curved surface, so the tape measure fits better.
-- *(Click k = 16.)* Same cats, same 16 numbers: the average error is lower for the autoencoder. So you can think of a deep autoencoder as a nonlinear version of PCA.
+- You may have met PCA, principal component analysis. It's the classic way to compress data: find the few straight directions where the data varies most, and keep only those.
+- Here's the connection: an autoencoder with only linear layers, trained with MSE, learns exactly the same thing as PCA. That was shown back in 1989, by Baldi and Hornik.
+- The difference is the nonlinear activations. **Analogy:** PCA is a straight ruler: it can only measure along straight lines. An autoencoder is a tape measure: it can bend to follow curves. Real cat faces don't sit on straight lines, so the tape measure fits better.
+- *(Click k = 16.)* Same cats, same 16 numbers each. The number under each image is the error, so lower wins. On average the autoencoder rebuilds the cats better.
+- So you can think of a deep autoencoder as nonlinear PCA. The trade-off: PCA is instant and exact, while the autoencoder has to be trained.
+- → "So what are autoencoders actually good for?"
 
 *Slide #s13: four tabs, each one live. Compression, denoising, features, anomaly detection.*
 
-- So what are autoencoders used for? Compression: 12,288 down to 64 is 192 times smaller. Denoising: cleaning up damaged images. Feature extraction: keep the encoder, hand z to another model.
-- And anomaly detection, my favourite. Train only on normal data.
-- **Analogy:** it's a security guard who has only ever seen the regulars. Anyone unfamiliar gets a hard look. The autoencoder can only rebuild what it has seen, so something unusual comes back badly, and a high reconstruction error flags it.
-- *(Draw on the cat, or pick a not-a-cat.)* The error lands on a histogram of normal cats. This is used for spotting defects on a factory line, or odd scans in medical imaging.
-- And an honest blind spot: an upside-down cat still passes. Low error means "cat-ish texture", not "a proper cat".
+- *(Compression tab, drag the slider.)* Compression: the code is a much smaller version of the image. 12,288 numbers down to 64 is 192 times smaller. Smaller codes mean blurrier cats.
+- *(Denoising tab, drag the noise slider.)* Denoising: give it a noisy or damaged image and it rebuilds a clean one, because it only knows how to draw clean cats.
+- *(Features tab.)* Feature extraction: throw away the decoder and hand the code z to another model, for example a classifier. Notice the nearest cats share lighting and pose: that's what the code captured.
+- *(Anomaly tab, my favourite.)* Anomaly detection: train it only on normal data. **Analogy:** it's like a security guard who only knows the regulars. Anything unfamiliar gets rebuilt badly, so a high error flags it. *(Draw on the cat or pick a not-a-cat; point at the histogram.)* This is how you'd spot defects on a factory line or odd medical scans.
+- One honest blind spot: an upside-down cat still passes. Low error means cat-ish texture, not a proper cat.
+- → "So it learns features, compresses, cleans up and spots oddities. But can it make a brand-new cat?"
 
-## Part 3: Other types of autoencoders
-
-*Slide #s14: four tabs. Same job, one extra rule each: sparse, denoising, contractive, convolutional.*
-
-- The bottleneck isn't the only way to force features. These aren't four new jobs, they're four extra rules about the code.
-- A sparse autoencoder can have a large hidden layer, even larger than the input. But we add a penalty that forces most of the neurons to stay switched off for any one image.
-- The penalty is usually L1 on the activations, or a KL term.
-- **Analogy:** it's a big orchestra where only a few players are allowed to play each song. Because so few can play, each player has to become a specialist. *(Toggle L1.)* With the penalty, about 2% of the 1,024 neurons are on. Without it, about two thirds.
-- A denoising autoencoder adds noise to the input image but still asks for the clean original. It can't just copy the input anymore, because the input is corrupted, so it has to learn what a real, clean cat looks like.
-- A contractive autoencoder penalizes the model if small changes in the input cause big changes in the latent vector. That makes the features more stable.
-- And a convolutional autoencoder uses convolution layers in the encoder and transposed convolutions in the decoder. Plot twist: you've been watching convolutional autoencoders all along.
-- And you can combine them: a convolutional denoising autoencoder is very common.
-
-## Part 4: Why autoencoders can't generate images
+## Part 3: Why autoencoders can't generate images
 
 *Slide #s15: ae_2's latent map of 2,000 training cats. Click anywhere to decode that point; "random point" keeps a tally; "what lives here?" covers the map with a grid of decodes.*
 
-- So can we generate with it? Throw away the encoder, pick a random point, decode it. Remember the faces: pick a point, draw the face.
-- *(Click inside the cloud.)* Seen territory: a cat. *(Click a gap, then "random point" a few times.)* But in practice, random points mostly give garbage.
-- Why? The encoder maps each training image to a single point, and those points end up in clusters with big empty gaps.
-- **Analogy:** it's an old map where only the cities are drawn and the rest says "here be monsters". The decoder has only ever been to the cities. Drop it in the countryside and it's lost.
-- And the space is irregular: we don't know where the valid regions are, or what range to sample from.
-- *(Press "what lives here?")* This is the whole map decoded at once. Away from the training cats the decoder only produces washed-out ghosts: it is guessing.
-- So the bottleneck solved the feature learning problem, but it didn't solve the generation problem.
-- We need the latent space to be continuous and organized, so that any point we pick decodes into something meaningful. And that's exactly what variational autoencoders do.
+- So can we generate new cats? The idea: throw away the encoder, pick a random point in the latent space, and decode it. Just like the faces chart: pick a point, draw the face.
+- *(Click inside the cloud.)* Here, in seen territory, we get a cat. *(Click an empty area, then "random point" a few times.)* But random points mostly land in the gaps, and we get something that isn't really a cat.
+- Why? The encoder maps every training cat to one exact point. Those points end up in clusters with big empty gaps between them, and in an irregular shape. We don't know where the good regions are, or what range to sample from.
+- **Analogy:** think of an old map where only the cities are drawn and everything else says "here be monsters". The decoder has only ever visited the cities.
+- *(Press "what lives here?")* This decodes the whole map at once. Near the cats you get cats. Away from them, washed-out ghosts.
+- So the bottleneck solved learning features, but not generating. We need a latent space with no gaps, where any point is a cat. That's what the VAE does.
 
-## Part 5: Variational autoencoders (VAEs)
+## Part 4: Variational autoencoders (VAEs)
 
 *Slide #s16: where VAEs come from. Kingma & Welling 2013, and Rezende, Mohamed & Wierstra 2014. Skim it.*
 
@@ -257,7 +249,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - The plain AE keeps one cat, but look at the middle frames: smears and glitches, because the points between its codes were never trained.
 - The VAE morphs smoothly from one cat to the other. Softer, but every frame is a cat, because KL made the whole region around the codes decodable.
 
-## Part 6: Limitations, extensions, and wrap-up
+## Part 5: Limitations, extensions, and wrap-up
 
 ### Limitations
 
@@ -330,17 +322,14 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 
 | Slide | Idea | Analogy |
 | --- | --- | --- |
-| #s03 | Discriminative vs generative | A cat-show judge vs an artist |
-| #s05 | Identity trap | Bringing the textbook into the exam: you copy, you don't learn |
+| #s03 | Discriminative vs generative | A pet-show judge can't paint a cat; the painters on the sidelines can |
 | #s06b | Latent space | Describe a face with two numbers (smile, hair); everyone becomes a dot on a chart (Deepia) |
-| #s07 | Pixels as input | 3Blue1Brown's 784-number digit, as a 12,288-number cat |
-| #s08 | Bottleneck | Packing for two weeks with one carry-on |
-| #s09 | High-dimensional spaces | A shadow on the wall: you can't tell a mug from a donut |
+| #s07 | Undercomplete | Packing two weeks of clothes into one carry-on |
+| #s08 | Overcomplete | Bringing the whole textbook into the exam: you copy, you don't learn |
 | #s10 | Self-supervised | The question sheet is also the answer key |
 | #s11 | Training | A ball rolling downhill; which nudge helps most (3Blue1Brown) |
 | #s12 | PCA vs AE | A straight ruler vs a tape measure |
 | #s13 | Anomaly detection | A security guard who only knows the regulars |
-| #s14 | Sparse AE | An orchestra where only a few players may play each song |
 | #s15 | Holes in latent space | An old map: cities, and "here be monsters" |
 | #s17 | Marginals, conditionals | A spreadsheet of grades and ages: column totals and one rescaled row |
 | #s18 | Prior and decoder | A translator between cat photos and a simple invented language |

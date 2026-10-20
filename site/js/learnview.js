@@ -104,7 +104,7 @@ export async function learnView(root, name, { kl = false } = {}) {
   const xs = final.map((p) => p[0]), ys = final.map((p) => p[1]);
   const half = Math.max(q(xs, 0.99) - q(xs, 0.01), q(ys, 0.99) - q(ys, 0.01)) * 0.68;
   const view = { cx: (q(xs, 0.99) + q(xs, 0.01)) / 2, cy: (q(ys, 0.99) + q(ys, 0.01)) / 2, half };
-  if (name.startsWith("vae")) Object.assign(view, { cx: 0, cy: 0, half: 4.5 }); // the Part 5 map's view
+  if (name.startsWith("vae")) Object.assign(view, { cx: 0, cy: 0, half: 4.5 }); // the VAE map's view
 
   function drawMap(epoch) {
     const size = canvas.clientWidth || 300;

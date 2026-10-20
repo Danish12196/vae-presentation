@@ -1,5 +1,5 @@
-// The image the audience picked last (on slide 3). Slides 4 and 5 run their
-// diagrams on the same image, so a dog picked on slide 3 stays a dog.
+// The image the audience picked last (on #s03). The encoder/decoder diagram (#s04) runs on
+// the same image, so a dog picked on #s03 stays a dog.
 
 import { loadShowcase, getShowcaseCat } from "./models.js";
 
