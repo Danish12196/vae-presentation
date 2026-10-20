@@ -298,7 +298,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - So where is the VAE worse? Mainly image quality. GANs produce much sharper images, because the detective punishes anything that looks fake, including blur.
 - And diffusion models produce both high quality and high variety, but they need many denoising steps, so they're much slower than a VAE or a GAN.
 - *(Bottom row, "new samples".)* These are real samples from three models I trained on the same cats: our bigger VAE, a GAN, and a small diffusion model. The VAE is blurry; the GAN is sharp in one pass; diffusion is sharp and varied, but took 100 denoising steps per image.
-- This GAN is Gary. Our Gary didn't collapse, thanks to modern tricks like spectral normalisation, but GANs can, and when they do you get the same few cats over and over.
+- This GAN is Gary. Our Gary didn't collapse, helped by modern tricks like spectral normalisation, but GANs can, and when they do you get the same few cats over and over.
 - **Analogy:** it's the old "fast, good, cheap: pick two". Researchers call it the generative learning trilemma: quality, variety, speed. VAEs give variety and speed. GANs give quality and speed. Diffusion gives quality and variety.
 - In practice the best systems combine them: the VAE inside Stable Diffusion is trained with a discriminator borrowed from GANs, to make its outputs sharper. They're building blocks, not rivals.
 
