@@ -1,0 +1,240 @@
+/* Analogy chips in slide headers, and the explainer slides added for the script:
+   s06b (every face is a point), s23 (backprop, 3Blue1Brown style), s30b (measure and use well).
+   Kept in one file so it never collides with the partN.css files. */
+
+/* ================================================================ analogy chip */
+
+/* A short "think of it as" line beside the title. The spoken version is in docs/script.md.
+   Phones hide it: the demos need the room. */
+.slide-head:has(> .analogy) {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  grid-template-areas: "label label" "title chip";
+  align-items: center;
+  column-gap: calc(var(--gap) * 2);
+  row-gap: 8px;
+  max-width: none;
+}
+.slide-head:has(> .analogy) > .part-label { grid-area: label; }
+.slide-head:has(> .analogy) > h2 { grid-area: title; }
+.analogy {
+  grid-area: chip;
+  justify-self: end;
+  max-width: 34ch;
+  margin: 0;
+  padding: 6px 14px 7px;
+  border: 2px dashed var(--accent);
+  background: var(--bg-raised);
+  color: var(--text);
+  font-size: var(--fs-small);
+  line-height: 1.3;
+  transform: rotate(-0.6deg);
+}
+.analogy-tag {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: calc(var(--fs-label) * 0.8);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+@media (max-height: 820px) {
+  .analogy { max-width: 40ch; font-size: calc(var(--fs-small) * 0.85); padding: 4px 12px 5px; }
+}
+@media (max-width: 760px) {
+  .analogy { display: none; }
+  .slide-head:has(> .analogy) { display: flex; }
+}
+
+/* ================================================================ s06b every face is a point */
+
+.faces-body {
+  gap: calc(var(--gap) * 3);
+}
+svg.faces-chart {
+  flex: 0 0 auto;
+  width: min(58vh, 46vw, 600px);
+  height: min(58vh, 46vw, 600px);
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
+  box-shadow: 8px 8px 0 var(--accent);
+  touch-action: none;
+  cursor: crosshair;
+}
+.faces-axes line { stroke: var(--line); stroke-width: 3; }
+.faces-arrow { fill: var(--line); }
+.faces-axis-label {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 26px;
+  fill: var(--accent);
+}
+.faces-crowd { transition: opacity var(--t-med) var(--ease); }
+.faces-walkline {
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-dasharray: 10 8;
+  opacity: 0;
+  transition: opacity var(--t-med) var(--ease);
+}
+.faces-you circle { fill: var(--stamp); stroke: var(--line); stroke-width: 3; }
+.faces-you text { font-family: var(--font-head); font-weight: 700; font-size: 24px; fill: var(--line); }
+
+.faces-side {
+  flex: 0 1 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
+  min-width: 0;
+}
+svg.faces-big {
+  width: min(30vh, 260px);
+  height: min(30vh, 260px);
+  background: var(--bg-raised);
+  border: 3px solid var(--line);
+  box-shadow: 6px 6px 0 var(--line);
+}
+.faces-read {
+  margin: 0;
+  font-size: var(--fs-body);
+}
+.faces-read strong { color: var(--accent); }
+.faces-walk {
+  display: flex;
+  gap: 6px;
+  transition: opacity var(--t-med) var(--ease);
+}
+.faces-walk svg {
+  width: min(9vh, 74px);
+  height: min(9vh, 74px);
+  background: var(--bg-raised);
+  border: 2px solid var(--line);
+}
+.faces-note {
+  margin: 0;
+  max-width: 26ch;
+  text-align: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+  line-height: 1.15;
+  color: var(--accent);
+  transition: opacity var(--t-med) var(--ease);
+}
+
+/* The build: crowd at step 1, walk at step 2, nameless axes at step 3. */
+#s06b[data-step="0"] .faces-crowd { opacity: 0; }
+#s06b:is([data-step="0"], [data-step="1"]) .faces-walk { opacity: 0; }
+#s06b[data-step="2"] .faces-walkline { opacity: 1; }
+#s06b:not([data-step="3"]) .faces-note { opacity: 0; }
+
+@media (max-width: 760px) {
+  .faces-body { flex-direction: column; gap: var(--gap); }
+  svg.faces-chart { width: min(86vw, 44vh); height: min(86vw, 44vh); box-shadow: 5px 5px 0 var(--accent); }
+  .faces-side { flex: 0 0 auto; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px 14px; }
+  svg.faces-big { width: 22vh; height: 22vh; max-width: 120px; max-height: 120px; grid-row: span 2; }
+  .faces-read { font-size: 15px; }
+  .faces-walk { grid-column: 1 / -1; justify-content: center; }
+  .faces-walk svg { width: 12vw; height: 12vw; }
+  .faces-note { font-size: 16px; }
+}
+
+/* ================================================================ s23 backprop, briefly */
+
+.bp2-body {
+  gap: calc(var(--gap) * 2.5);
+  align-items: center;
+}
+.bp2-left {
+  flex: 1 1 auto;
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+svg.bp2-graph {
+  width: 100%;
+  height: auto;
+  max-height: 38vh;
+  overflow: visible;
+}
+.bp2-node rect { fill: var(--bg-raised); stroke: var(--line); stroke-width: 3; }
+.bp2-lossbox rect { fill: color-mix(in srgb, var(--accent) 14%, var(--bg-raised)); }
+.bp2-op circle { fill: var(--bg-sunken); stroke: var(--line); stroke-width: 3; }
+.bp2-name { font-family: var(--font-head); font-weight: 700; font-size: 26px; fill: var(--text); }
+.bp2-val { font-family: var(--font-mono); font-weight: 700; font-size: 24px; fill: var(--accent); }
+.bp2-weight { font-family: var(--font-mono); font-weight: 700; font-size: 22px; fill: var(--text); }
+.bp2-target { font-family: var(--font-mono); font-size: 19px; fill: var(--text-soft); }
+.bp2-fwd { stroke: var(--line); stroke-width: 3; }
+.bp2-fwd-tip { fill: var(--line); }
+.bp2-back { stroke: var(--stamp); stroke-width: 5; }
+.bp2-back-tip { fill: var(--stamp); }
+.bp2-blame, .bp2-grad { font-family: var(--font-mono); font-weight: 700; font-size: 20px; fill: var(--coral); }
+.bp2-why { font-family: var(--font-mono); font-size: 18px; fill: var(--text-soft); }
+.bp2-backrow, .bp2-back-only, .bp2-val, .bp2-lossbox { transition: opacity var(--t-med) var(--ease); }
+
+.bp2-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-small);
+}
+.bp2-steps li {
+  padding: 8px 14px;
+  border: 2px solid var(--line);
+  background: var(--bg-raised);
+  transition: opacity var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
+}
+.bp2-steps strong { color: var(--accent); }
+
+.bp2-right {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.bp2-land {
+  position: relative;
+  width: min(36vh, 340px);
+  height: min(36vh, 340px);
+  border: 3px solid var(--line);
+  box-shadow: 6px 6px 0 var(--accent);
+}
+.bp2-land canvas, .bp2-land svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.bp2-land canvas { image-rendering: auto; }
+.bp2-trail { fill: none; stroke: var(--stamp); stroke-width: 1.4; }
+.bp2-dot { fill: var(--bg-raised); }
+.bp2-ball { fill: var(--stamp); stroke: var(--line); stroke-width: 1.2; }
+.bp2-axes { margin: 0; font-size: 16px; color: var(--text-soft); }
+.bp2-buttons { display: flex; gap: 12px; }
+
+/* The build */
+#s23:is([data-step="0"]) .bp2-val { opacity: 0.35; }
+#s23:is([data-step="0"], [data-step="1"]) .bp2-lossbox { opacity: 0.35; }
+#s23:is([data-step="0"], [data-step="1"], [data-step="2"]) :is(.bp2-backrow, .bp2-back-only) { opacity: 0; }
+#s23 .bp2-steps li { opacity: 0.35; }
+#s23[data-step="1"] .bp2-steps li[data-step="1"],
+#s23[data-step="2"] .bp2-steps li:is([data-step="1"], [data-step="2"]),
+#s23[data-step="3"] .bp2-steps li:not([data-step="4"]),
+#s23[data-step="4"] .bp2-steps li { opacity: 1; }
+#s23[data-step="0"] .bp2-steps li { opacity: 1; }
+
+@media (max-width: 1000px) {
+  .bp2-body { flex-direction: column; gap: var(--gap); }
+  .bp2-steps { grid-template-columns: 1fr; font-size: 14px; gap: 4px; }
+  .bp2-steps li { padding: 4px 10px; }
+  .bp2-land { width: 30vh; height: 30vh; }
+  .bp2-right { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  .bp2-buttons .btn { min-height: 40px; padding: 6px 14px; }
+}

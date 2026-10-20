@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="css/part4.css" />
     <link rel="stylesheet" href="css/part5.css" />
     <link rel="stylesheet" href="css/part6.css" />
+    <link rel="stylesheet" href="css/explainers.css" />
     <script type="module" src="js/main.js"></script>
   </head>
   <body>
@@ -142,13 +143,31 @@
         </div>
       </section>
 
+      <section class="slide" id="s06b" data-accent="sunflower">
+        <header class="slide-head">
+          <p class="part-label">Part 2 · Autoencoders</p>
+          <h2>Every face is a point</h2>
+          <p class="analogy"><span class="analogy-tag">illustration</span>describe a face with two numbers (after Deepia's VAE video)</p>
+        </header>
+        <div class="slide-body faces-body">
+          <svg class="faces-chart interactive" role="img" aria-label="A chart with smile on the x axis and hair length on the y axis; every face in the room is a dot on it"></svg>
+          <div class="faces-side">
+            <svg class="faces-big" viewBox="0 0 100 100" role="img" aria-label="The face drawn from the chosen point"></svg>
+            <p class="faces-read mono">smile <strong data-read="s">0.80</strong> · hair <strong data-read="h">0.30</strong></p>
+            <div class="faces-walk" aria-label="Walking along the smile axis: only the smile changes"></div>
+            <p class="faces-note">a network gets no names for its axes: it invents its own, for cats</p>
+          </div>
+        </div>
+        <p class="slide-caption">two numbers per face; drawing the face back from a point is a decoder's job</p>
+      </section>
+
       <section class="slide" id="s07" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
           <h2>A cat is 12,288 numbers</h2>
         </header>
         <div class="slide-body num-body">
-          <p class="num-question">Describe a stranger with two numbers, like height and hair length? An autoencoder learns its own two.</p>
+          <p class="num-question">Same idea, but the network has to find its own two numbers. First, what does it see?</p>
           <svg class="num-stage" role="img" aria-label="A cat's pixels become a column of 12,288 numbers; the encoder squeezes them into two neurons, and those two numbers become a point in a 2-D latent space"></svg>
           <div class="num-picker"></div>
         </div>
@@ -546,18 +565,25 @@
         <header class="slide-head">
           <p class="part-label">Part 5 · Variational autoencoders</p>
           <h2>Backpropagation, briefly</h2>
+          <p class="analogy"><span class="analogy-tag">analogy</span>the chain rule is a relay of blame, passed back one layer at a time</p>
         </header>
-        <div class="slide-body bp-body">
-          <ol class="bp-steps">
-            <li><strong>Forward.</strong> A conv layer mixes each pixel with its neighbours. Stack them and the image becomes a code, then an output.</li>
-            <li><strong>Loss.</strong> Compare that output with the target. One number: how wrong it was.</li>
-            <li><strong>Backward.</strong> The chain rule hands each layer only the gradient from the layer above it. That layer updates its own weights. A plain autoencoder is a smooth function the whole way, so this works.</li>
-          </ol>
-          <div class="bp-chain" aria-hidden="true">
-            <span>image</span><span>→ conv</span><span>→ conv</span><span>→ output</span>
-            <span class="bp-back">then ∂loss walks back, one layer at a time</span>
+        <div class="slide-body bp2-body">
+          <div class="bp2-left">
+            <svg class="bp2-graph" viewBox="0 20 900 280" role="img" aria-label="A tiny network: x times w1 gives h, h times w2 gives the prediction, compared with the target in the loss; the gradient flows back from the loss to each weight"></svg>
+            <ol class="bp2-steps">
+              <li data-step="1"><strong>Forward.</strong> x goes through w₁ and w₂ and comes out as a guess ŷ.</li>
+              <li data-step="2"><strong>Loss.</strong> One number: how wrong the guess was.</li>
+              <li data-step="3"><strong>Backward.</strong> Each box passes the blame back, times its own local slope.</li>
+              <li data-step="4"><strong>Step.</strong> Every weight moves a little downhill: w ← w − η · ∂L/∂w.</li>
+            </ol>
+          </div>
+          <div class="bp2-right">
+            <div class="bp2-land"><canvas class="bp2-heat" width="120" height="120" aria-hidden="true"></canvas><svg class="bp2-path" viewBox="0 0 100 100" role="img" aria-label="The loss landscape over w1 and w2, with the path of gradient descent rolling into the valley"></svg></div>
+            <p class="bp2-axes mono">loss over (w₁, w₂): dark is low</p>
+            <div class="bp2-buttons"><button type="button" class="btn primary" data-bp-step>take a step</button><button type="button" class="btn" data-bp-reset>reset</button></div>
           </div>
         </div>
+        <p class="slide-caption">a plain autoencoder is smooth the whole way, so the blame reaches every weight</p>
       </section>
 
       <section class="slide" id="s24" data-accent="lilac">
