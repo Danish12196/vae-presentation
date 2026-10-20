@@ -54,7 +54,7 @@ export function init(section) {
   for (let i = 0; i < CROWD; i++) {
     const s = 0.06 + rand() * 0.88;
     const h = 0.06 + rand() * 0.88;
-    const g = el("g", { transform: `translate(${px(s) - 22} ${py(h) - 22}) scale(0.44)` }, crowd);
+    const g = el("g", { transform: `translate(${px(s) - 26} ${py(h) - 26}) scale(0.52)` }, crowd);
     g.innerHTML = faceSVG(s, h, i, { detail: false });
   }
   walkLine = el("line", { class: "faces-walkline" }, chart);
