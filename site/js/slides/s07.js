@@ -3,10 +3,10 @@
 //   0 the cat, and the question: could you describe it with two numbers?
 //   1 a pixel grid: every pixel is 3 numbers (one picked pixel shows its RGB)
 //   2 pixels fly into a column: 64 x 64 x 3 = 12,288 numbers
-//   3 the encoder squeezes the column to 2 neurons, with ae_2's live values
-//   4 the 2 neurons become the axes; the cat lands as a dot at (z1, z2)
+//   3 the encoder squeezes the column to 2 neurons, z1 and z2 (they stay at the end of the encoder)
+//   4 those 2 neurons become the axes; the cat lands as a highlighted dot at (z1, z2)
 //   5 every training cat on the same axes: that is the latent space
-// The values, the dot and the colours are real: the picked cat through ae_2.
+// The dot and the colours are real: the picked cat through ae_2 (no numbers shown on the chart).
 
 import { encode, drawCat, hasModel, renderTraining, loadShowcase, getShowcaseCat, loadJSON, SIZE } from "../models.js";
 import { catPicker } from "../ui.js";
@@ -130,18 +130,17 @@ function build() {
     const g = el("g", {}, els.codeGroup);
     el("line", { x1: 648, y1: 250, x2: CODE.x - CODE.r, y2: y, class: "num-wire strong" }, g);
     const c = el("circle", { cx: CODE.x, cy: y, r: CODE.r, class: "num-code" }, g);
-    const v = text("", { x: CODE.x + 36, y: y + 8, class: "num-mono num-value" }, g);
-    const name = text(`neuron ${i + 1}`, { x: CODE.x, y: i ? y + 52 : y - 36, class: "num-small", "text-anchor": "middle" }, g);
-    return { g, c, v, name, home: [CODE.x, y] };
+    text(i ? "z₂" : "z₁", { x: CODE.x, y: y + 9, class: "num-mono num-zname", "text-anchor": "middle" }, g);
+    return { g, c };
   });
-  els.codeTag = text("z, the code: 2 numbers", { x: CODE.x, y: 372, class: "num-label", "text-anchor": "middle" }, els.codeGroup);
+  els.codeTag = text("z, the code: 2 numbers", { x: CODE.x - 50, y: 372, class: "num-label", "text-anchor": "middle" }, els.codeGroup);
 
   // 4: axes, the two neurons as axis labels, the cat's dot
   els.axes = el("g", { class: "num-step", "data-from": 4 });
   el("line", { x1: PLOT.x0, y1: PLOT.y0, x2: PLOT.x1 + 10, y2: PLOT.y0, class: "num-axis", "marker-end": "url(#num-arrow)" }, els.axes);
   el("line", { x1: PLOT.x0, y1: PLOT.y0, x2: PLOT.x0, y2: PLOT.y1 - 10, class: "num-axis", "marker-end": "url(#num-arrow)" }, els.axes);
-  text("z1 = neuron 1", { x: PLOT.x1, y: PLOT.y0 - 14, class: "num-small", "text-anchor": "end" }, els.axes);
-  text("z2 = neuron 2", { x: PLOT.x0 + 12, y: PLOT.y1 - 16, class: "num-small" }, els.axes);
+  text("z₁", { x: PLOT.x1, y: PLOT.y0 - 14, class: "num-mono", "text-anchor": "end" }, els.axes);
+  text("z₂", { x: PLOT.x0 + 12, y: PLOT.y1 - 6, class: "num-mono" }, els.axes);
 
   // 5: every training cat
   const clip = el("clipPath", { id: "num-plot-clip" }, defs);
@@ -153,7 +152,8 @@ function build() {
     el("circle", { cx: x, cy: y, r: 3.2, fill: colours[i], class: "num-cat" }, dots);
   });
   els.cloudTag = text("600 training cats, each one a point: the latent space", { x: (PLOT.x0 + PLOT.x1) / 2, y: 490, class: "num-small", "text-anchor": "middle" }, els.cloud);
-  els.dot = el("circle", { r: 9, class: "num-dot num-step", "data-from": 4 });
+  els.halo = el("circle", { r: 22, class: "num-halo num-step", "data-from": 4 });
+  els.dot = el("circle", { r: 12, class: "num-dot num-step", "data-from": 4 });
 }
 
 // ---------------------------------------------------------------- one cat
@@ -169,7 +169,9 @@ async function pick(i) {
   const cell = CAT.size / SIZE;
   els.pick.setAttribute("x", CAT.x + px * cell - CAT.size / 32 + cell / 2);
   els.pick.setAttribute("y", CAT.y + py * cell - CAT.size / 32 + cell / 2);
-  els.rgb.textContent = `one pixel = (${image.data[k]}, ${image.data[k + 1]}, ${image.data[k + 2]})`;
+  // two lines, so the label stays above the cat and clear of the column of neurons
+  const lx = CAT.x + CAT.size / 2;
+  els.rgb.innerHTML = `<tspan x="${lx}" dy="-1.2em">one pixel =</tspan><tspan x="${lx}" dy="1.2em">red ${image.data[k]} · green ${image.data[k + 1]} · blue ${image.data[k + 2]}</tspan>`;
   // column colours: real pixels sampled down the image
   els.colDots.forEach((d, j) => {
     const q = (Math.floor(((j + 0.5) / els.colDots.length) * SIZE) * SIZE + 32) * 4;
@@ -177,7 +179,6 @@ async function pick(i) {
   });
   const { z } = await encode(MODEL, [image]);
   code = [z.data[0], z.data[1]];
-  els.code.forEach((n, j) => (n.v.textContent = code[j].toFixed(2)));
   b.redraw();
 }
 
@@ -187,27 +188,10 @@ function show(n, { animate }) {
   const alive = freshToken();
   for (const g of svg.querySelectorAll(".num-step")) g.classList.toggle("on", n >= Number(g.dataset.from));
   const [dx, dy] = toPlot(code);
-  els.dot.setAttribute("cx", dx);
-  els.dot.setAttribute("cy", dy);
-  // step 4 moves the two neuron values next to their axes; earlier steps keep them in the column
-  const target = n >= 4;
-  const place = (t) => {
-    els.code.forEach((nn, j) => {
-      const to = j === 0 ? [dx, PLOT.y0 + 2] : [PLOT.x0 - 2, dy];
-      const [x, y] = [lerp(nn.home[0], to[0], t), lerp(nn.home[1], to[1], t)];
-      nn.c.setAttribute("cx", x);
-      nn.c.setAttribute("cy", y);
-      nn.c.setAttribute("r", lerp(CODE.r, 12, t));
-      // next to the neuron (t = 0), under / left of its axis (t = 1)
-      nn.v.setAttribute("x", x + lerp(36, j === 0 ? -22 : -66, t));
-      nn.v.setAttribute("y", y + lerp(9, j === 0 ? 40 : 8, t));
-      nn.name.setAttribute("opacity", 1 - t);
-      nn.g.querySelector("line").setAttribute("opacity", 1 - t);
-    });
-    els.codeTag.setAttribute("opacity", 1 - t);
-  };
-  if (animate && n === 4) tween(900, (t) => alive() && place(t));
-  else place(target ? 1 : 0);
+  for (const d of [els.dot, els.halo]) {
+    d.setAttribute("cx", dx);
+    d.setAttribute("cy", dy);
+  }
   if (animate && n === 2) flyPixels(alive);
   else els.flyers.replaceChildren();
 }

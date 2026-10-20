@@ -34,8 +34,8 @@ export async function init(section) {
   if (ae?.code_mean) aeStats = { mean: ae.code_mean, std: ae.code_std };
 
   flipSwitch(section.querySelector(".ae-mode"), {
-    left: "naive N(0,1)",
-    right: "fair: its own stats",
+    left: "random from the VAE’s blob",
+    right: "random from its own range",
     label: "Sample the AE with its own code statistics",
     onChange: (on) => {
       fair = on;

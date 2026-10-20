@@ -887,6 +887,7 @@ svg.worlds-svg {
 .worlds-label.pz { color: var(--sky); }
 .worlds-label.dec { color: var(--coral); font-size: 22px; }
 .worlds-label.enc { color: var(--sky); font-size: 22px; }
+.worlds-label .wl-plain { font-family: var(--font-head); font-weight: 700; }
 .worlds-label[data-from] { opacity: 0; transition: opacity var(--t-med) linear; }
 .worlds-label[data-from].on { opacity: 1; }
 .worlds-cat {
@@ -906,8 +907,9 @@ svg.worlds-svg {
 .worlds-hint { font-size: var(--fs-label); color: var(--text-soft); }
 @media (max-width: 760px) {
   .worlds-label { font-size: 15px; }
-  .worlds-label small { display: none; }
-  .worlds-label.dec, .worlds-label.enc { display: none; } /* the arrow colours say which is which */
+  .worlds-label small { font-size: 11px; }
+  .worlds-label.dec, .worlds-label.enc { font-size: 12px; }
+  .worlds-label.dec small, .worlds-label.enc small { display: none; } /* the plain words are enough */
   .worlds-cat { --cat-size: 40px; }
 }
 
@@ -988,4 +990,31 @@ svg.worlds-svg {
   .graph-wrap { width: min(720px, 100%); }
   .s14-out-fig .cat-canvas { --cat-size: 110px; }
   .s14-map { --map-size: 150px; }
+}
+
+/* #s20: the plain sentence above the ELBO, and the short name note under it */
+.callout.elbo p.loss-plain { margin: 0 0 4px; font-family: var(--font-head); font-weight: 700; font-size: var(--fs-body); color: var(--text); text-align: center; }
+.callout.elbo p.elbo-note { font-size: var(--fs-label); color: var(--text-soft); text-align: center; }
+/* #s21: KL spelled out, and what each β stop means */
+.kl-full { margin: -6px 0 0; font-size: var(--fs-label); color: var(--text-soft); text-align: center; }
+.beta-says { margin: 0; min-height: 1.4em; font-family: var(--font-head); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-align: center; }
+@media (max-height: 900px), (max-width: 1500px) {
+  .callout.elbo p.loss-plain { font-size: 19px; }
+}
+@media (max-width: 760px) {
+  .callout.elbo p.loss-plain { font-size: 13px; }
+  .callout.elbo p.elbo-note { font-size: 11px; }
+}
+
+/* #s25: symbol names in words under / over the μ and σ boxes */
+.g-name { font-family: var(--font-mono); font-size: 17px; fill: var(--text-soft); }
+
+/* #s26: one line under the plain AE grid */
+.ae-gaps { margin: 6px 0 0; font-size: var(--fs-label); color: var(--text-soft); text-align: center; }
+/* #s18: the plain world labels sit on one line, clear of the blob and the glow */
+.worlds-label.px, .worlds-label.pz { translate: 0 -14px; }
+.worlds-label.px small, .worlds-label.pz small { white-space: nowrap; }
+@media (max-width: 760px) {
+  .worlds-label.px, .worlds-label.pz { translate: 0 -6px; }
+  .worlds-label.px small, .worlds-label.pz small { display: none; } /* no room beside a phone-sized blob */
 }

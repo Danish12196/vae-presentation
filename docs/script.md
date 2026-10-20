@@ -2,18 +2,18 @@
 
 Tuesday 20 October 2026, 18:30 · @Danish · MAAI901 Deep Learning for Visual Data · deck: autoencoders.danishali.dev
 
-Expect about 28 minutes of speaking, or about 34 minutes with slide changes, demos and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip. **Analogy** marks an analogy; each slide has at most one main one, and most slides show a short version of it in the top-right corner. The slide ids (#s07, #s06b) match the URL hash, so you can jump with them.
+Expect about 27 minutes of speaking, or about 33 minutes with slide changes, demos and pauses, before questions. Lines in italics are slide cues, not things to say. Notes in brackets are short explanations you can say out loud or skip. **Analogy** marks an analogy; each slide has at most one main one, and most slides show a short version of it in the top-right corner. The slide ids (#s07, #s06b) match the URL hash, so you can jump with them.
 
 | Part | Approx. words | Approx. time |
 | --- | --- | --- |
 | 1. From classification to generation | 298 | 2.5 min |
-| 2. Autoencoders (incl. undercomplete, overcomplete and the other types) | 1,319 | 10 min |
+| 2. Autoencoders (incl. undercomplete, overcomplete and the other types) | 1,150 | 9 min |
 | 3. Why autoencoders can't generate | 180 | 1.5 min |
 | 4. Variational autoencoders | 1,168 | 9 min |
-| 5. Limitations, alternatives (GAN), comparison, variants, evaluation, wrap-up | 670 | 5 min |
-| Total | \~3,635 | \~28 min |
+| 5. Limitations, alternatives (GAN), comparison, variants, evaluation, wrap-up | 680 | 5 min |
+| Total | \~3,476 | \~27 min |
 
-Times assume a steady presenting pace of about 130 words per minute. If you need to cut, these are safest, in order: the Variants slide (keep only Stable Diffusion), "Making overcomplete work" (one tab, name the rest), PCA vs autoencoder (say "nonlinear PCA" and move on), the two "Watch it learn" replays (start them and move on), and the "if asked" ELBO line. Keep "Every face is a point", the GAN slide, the comparison and the evaluation slide: the first is the clearest picture of a latent space, and the rest are what a master's audience will ask about.
+Times assume a steady presenting pace of about 130 words per minute. If you need to cut, these are safest, in order: the Variants slide (keep only Stable Diffusion), "Making overcomplete work" (one tab, name the rest), the two "Watch it learn" replays (start them and move on), and the "if asked" ELBO line. Keep "Every face is a point", the GAN slide, the comparison and the evaluation slide: the first is the clearest picture of a latent space, and the rest are what a master's audience will ask about.
 
 ### The story in one breath (say this to yourself before you start)
 
@@ -70,7 +70,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - Autoencoders basically have three parts: an encoder, which is very similar to the neural networks we've been looking at; a squished-down area called the bottleneck (written as z); and a decoder, which uses flipped, or transposed, convolutions to grow the image back.
 - → "So what actually goes in, and how small should z be?"
 
-*Slide #s07: "Undercomplete: a cat is 12,288 numbers". Each press builds one more step: the cat; its pixel grid with one pixel's RGB; pixels flying into a column of 12,288 numbers; the encoder, drawn as its four real conv layers (32×32×32 → 64×16×16 → 128×8×8 → 256×4×4), squeezing them into two neurons with live values; the two neurons turning into the two axes, with the cat landing as a dot; then 600 training cats on the same axes.*
+*Slide #s07: "Undercomplete: a cat is 12,288 numbers". Each press builds one more step: the cat; its pixel grid, with one pixel spelled out (one pixel = red · green · blue, the real values); pixels flying into a column of 12,288 numbers; the encoder, drawn as its four real conv layers (32×32×32 → 64×16×16 → 128×8×8 → 256×4×4), ending in two neurons, z₁ and z₂; those two become the axes of a chart, with the picked cat as a big highlighted dot (no numbers on the chart); then 600 training cats on the same axes.*
 
 - We've got 64×64 pixels, and each has RGB values, so a total of 12,288 numbers.
 - That's our input. So in an undercomplete autoencoder we can have, for example, 4 real convolution layers that each halve the picture and add channels, all the way down to two neurons.
@@ -117,16 +117,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - Each step the network asks which small nudge to its weights brings the loss down the fastest, and takes it. And we repeat.
 - Watch the cats and the map together. The cats get their colours and faces back, and the map spreads out and organises itself: dark cats drift towards one side and light cats to the other.
 - Nobody told it about fur colour. With only two numbers, it decided that was the most useful thing to remember. That is its version of smile and hair length from our faces chart.
-- → "So that's how an autoencoder learns. You might have seen something like this before: PCA."
-
-*Slide #s12: PCA versus autoencoder, k = 2, 16, 64, 256.*
-
-- You may have met PCA, principal component analysis. It's the classic way to compress data: find the few straight directions where the data varies most, and keep only those.
-- Here's the connection: an autoencoder with only linear layers, trained with MSE, learns exactly the same thing as PCA. That was shown back in 1989, by Baldi and Hornik.
-- The difference is the nonlinear activations. **Analogy:** PCA is a straight ruler: it can only measure along straight lines. An autoencoder is a tape measure: it can bend to follow curves. Real cat faces don't sit on straight lines, so the tape measure fits better.
-- *(Click k = 16.)* Same cats, same 16 numbers each. The number under each image is the error, so lower wins. On average the autoencoder rebuilds the cats better.
-- So you can think of a deep autoencoder as nonlinear PCA. The trade-off: PCA is instant and exact, while the autoencoder has to be trained.
-- → "So what are autoencoders actually good for?"
+- → "So that's how an autoencoder learns. So what are autoencoders actually good for?"
 
 *Slide #s13: four tabs, each one live. Compression, denoising, features, anomaly detection.*
 
@@ -158,7 +149,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - There was also a 2014 paper that independently published the same idea, by Rezende, Mohamed & Wierstra at DeepMind.
 - → "Before the idea itself, we need four words from probability."
 
-*Slide #s17: "Probability in one minute". A heatmap of a joint p(x, z), its marginals on the edges, and a crosshair you can drag: the horizontal slice is p(x | z), the vertical slice is p(z | x). The notes build up press by press.*
+*Slide #s17: "Probability in one minute". A heatmap of a joint p(x, z), its marginals on the edges, and a crosshair you can drag. The notes build up press by press, in plain words: joint = how often a cat and a code go together; p(x | z) = code → cat, the decoder; p(z | x) = cat → code, the encoder (the "posterior"); and the catch box.*
 
 - To explain VAEs we need a tiny bit of probability. One picture covers it.
 - *(Press.)* This heatmap is the joint distribution, p of x and z: how likely an image and a code are together. Here x is squashed to one number so we can draw it.
@@ -167,7 +158,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - *(Press.)* The catch: computing the posterior exactly means adding up over every possible code. For 12,288-number cats, nobody can do that.
 - → "So what does a VAE do instead?"
 
-*Slide #s18: "Two worlds". Left: p(x), a lumpy shape made of real training-cat photos. Right: p(z) = N(0, I), a round glow. Press for the decoder arrow, then the encoder arrow. Tap anywhere in p(z) to decode that exact code; pick a cat to see its cloud q(z | x).*
+*Slide #s18: "Two worlds". Left: p(x), "all cat photos: messy, unknown", a lumpy shape of real training-cat photos. Right: p(z) = N(0, I), "a round blob we chose (the prior)". Press for the arrow "decoder: blob → cat", then "encoder: cat → blob". Tap anywhere in p(z) to decode that exact code; pick a cat to see its cloud q(z | x).*
 
 - Picture two worlds. On the left, p of x: real cat photos. It's a strange, lumpy shape that nobody can write down. We only have samples, our 29,800 cats.
 - On the right, p of z: the latent world. Here's the key move: we choose this one, a simple round normal distribution. That's called the prior.
@@ -176,7 +167,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - So generating is easy: sample the round world, decode it into the strange one.
 - → "But how do we train both bridges at once?"
 
-*Slide #s20: "The VAE's loss: the ELBO". The ELBO with labelled braces (data consistency, latent-space regularisation) and loss = −ELBO; below it a Gaussian you can drag against N(0, 1), the live KL and "snap to N(0,1)"; the two terms written out at the bottom.*
+*Slide #s20: "The VAE's loss: the ELBO". A plain line on top: "Loss = how badly it rebuilt the cat + how far its cloud drifted from the round blob"; the ELBO with labelled braces and the note "ELBO (Evidence Lower Bound) = the official name for this combined score"; a Gaussian you can drag against N(0, 1), the live KL and "snap to N(0,1)"; at the bottom, both terms, with KL written out: Kullback–Leibler divergence, how different two distributions are (0 = identical).*
 
 - From Bayes' rule you can derive one training objective, the ELBO, the Evidence Lower Bound. It looks scary, but it's just two parts.
 - Part one, data consistency: encode a real cat, decode it, and check how close it came back. That's our same MSE as before. Rebuild the cat.
@@ -194,7 +185,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - **Analogy:** it's the difference between an exact street address and a neighbourhood. The decoder has to handle the whole neighbourhood, so the gaps start to fill.
 - → "But there's a problem with that sampling step."
 
-*Slide #s25: the computation graph, opening on naive sampling with the lead "Can we backprop through a random sample? No: the gradient stops at the dice." Flip to Reparameterization: z = μ + σ × ε. "Resample ε" animates the trick on the mini map: a white unit blob with ε in it is scaled by σ, then shifted by μ.*
+*Slide #s25: the computation graph, opening on naive sampling with the lead "Can we backprop through a random sample? No: the gradient stops at the dice." Every symbol is named the first time: ε (epsilon), μ (mu), σ (sigma), log σ² (log of sigma squared). Flip to Reparameterization: z = μ + σ × ε. "Resample ε" animates the trick on the mini map: a white unit blob with ε in it is scaled by σ, then shifted by μ.*
 
 - To train, gradients have to flow back through every step. But can we backprop through a random sample? No. **Analogy:** you can't ask a dice how it should change to roll a bit higher.
 - *(Naive sampling showing.)* The gradient stops right here, at the dice. So the encoder never learns.
@@ -211,18 +202,18 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - Meanwhile the reconstruction keeps improving: both parts of the loss, working at the same time.
 - → "So what happens if we change how hard the KL pulls?"
 
-*Slide #s21: the KL dial. β = 0, 0.1, 1, 4 on a big map, the tug of war, and "what lives here?".*
+*Slide #s21: the KL dial (KL = Kullback–Leibler divergence, spelled out). β = 0, 0.1, 1, 4 on a big map, each stop named in plain words (β = 0 "no leash: monsters in the gaps", β = 1 "balanced: cats everywhere", β = 4 "tight leash: blurry"), the tug of war, and "what lives here?".*
 
 - The two parts of the loss fight each other. Reconstruction wants every cat in its own spot. KL wants everyone bunched in the middle. **Analogy:** it's a tug of war.
 - *(Drag β from 0 to 4.)* At β = 0 there's no KL: scattered islands, just like the plain autoencoder. At β = 4 KL wins: everything's squashed and the cats get blurrier. β = 1 is the standard VAE.
 - *(Press "what lives here?" at β = 0, then β = 1.)* Remember the monsters? At β = 0 the gaps still decode to junk. At β = 1, every point in the round region is a cat.
 - → "So now we can finally generate."
 
-*Slide #s26: 24 samples from a bigger VAE (10M weights, trained overnight) beside 24 from a bigger plain AE, naive or "fair" (its own code statistics); re-roll draws new ones from precomputed pools. A small live VAE map on the side.*
+*Slide #s26: 24 samples from a bigger VAE (10M weights, trained overnight) beside 24 from a bigger plain AE, with a toggle: "random from the VAE's blob" or "random from its own range", and the note "either way, the plain AE's gaps were never trained"; re-roll draws new ones from precomputed pools. A small live VAE map on the side.*
 
 - Once it's trained, throw away the encoder. To make a new cat, sample a random point from the normal distribution and decode it. *(Re-roll.)*
 - Every one of these is a new cat that doesn't exist. Soft, but cats.
-- *(Point at the plain-autoencoder grid; try "fair".)* The plain autoencoder sampled the same way gives tiger-stripe texture or collages. Its codes never lived near that round blob.
+- *(Point at the plain-autoencoder grid; flip to "random from its own range".)* The plain autoencoder sampled the same way gives tiger-stripe texture or collages. Its codes never lived near that round blob.
 - These grids come from bigger models I trained on my desktop, too big for the browser, so their samples are precomputed. *(Click the small map.)* This little map is the live VAE: anywhere you click, a cat.
 - → "And because there are no gaps, we can walk between cats."
 
@@ -260,7 +251,7 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - They're building blocks, not rivals. Stable Diffusion's VAE is trained with a GAN-style discriminator to make it sharper.
 - → "People have also built a lot on top of the basic VAE."
 
-*Slide #s29: "Variants: conditional VAE, β-VAE, VQ-VAE", and the Stable Diffusion card. "Remember this?" opens a note about the KL dial. It does not leave the slide.*
+*Slide #s29: "Variants: conditional VAE, β-VAE, VQ-VAE". Four boxes in a 2×2 grid: Conditional VAE; β-VAE ("remember this?" opens a note about the KL dial, without leaving the slide); VQ-VAE (illustration: a codebook mosaic); Stable Diffusion (noise to image).*
 
 - Conditional VAE: a plain VAE can't take requests, you just get a random cat. Feed it a label too, and you can ask for a tabby.
 - β-VAE: that's the KL dial we just turned. A bigger β gives a tidier, more disentangled space, where each axis means one thing, like smile and hair on our faces chart. The cost is blurrier output.
@@ -276,15 +267,16 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - Responsibility: a model learns its data's bias. Ours only saw front-facing cats, so a side-on cat looks "abnormal". With people, that's a fairness problem. And the same tools can make faces that never existed, so consent and deepfakes matter.
 - → "So to wrap up."
 
-*Slide #s31: the wrap-up timeline. Each row is a main point, revealed on the next press.*
+*Slide #s31: the wrap-up, the story of the talk in six rows, one per press: CNNs; autoencoders; undercomplete vs overcomplete; the holes; VAEs; next, GANs and diffusion.*
 
 - *(Press per row.)* CNNs are the judges: they tell images apart, but they can't paint.
-- An autoencoder squeezes a cat through a bottleneck and learns features with no labels, but its map has holes: here be monsters.
-- A VAE gives every cat a cloud instead of a point, puts every cloud on a KL leash, and the reparameterization trick makes it trainable.
-- The result is a model you can sample new cats from, still at the heart of today's best generators.
-- Thank you. The next presentation will show you the forger and the detective properly.
+- An autoencoder squeezes a cat into a small code z and rebuilds it, with no labels.
+- Give it too much room, overcomplete, and it just copies.
+- And its map has holes: random codes give monsters.
+- A VAE gives every cat a cloud and puts every cloud on a KL leash, so there are no gaps and you can sample new cats. The reparameterization trick makes it trainable.
+- Next: GANs and diffusion trade blur for sharpness. Thank you. The next presentation will show you the forger and the detective properly.
 
-*Slide #s32: Questions. Leave it up during Q&A.*
+*Slide #s32: Questions, with the credits and references (3Blue1Brown's neural networks series, Deepia's VAE video, Kingma & Welling 2013). Leave it up during Q&A.*
 
 ## Appendix A: analogy cheat sheet
 
@@ -296,7 +288,6 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 | #s08 | Overcomplete | Bringing the whole textbook into the exam: you copy, you don't learn |
 | #s10 | Self-supervised | The question sheet is also the answer key |
 | #s11 | Training | A ball rolling downhill; which nudge helps most (3Blue1Brown) |
-| #s12 | PCA vs AE | A straight ruler vs a tape measure |
 | #s13 | Anomaly detection | A security guard who only knows the regulars |
 | #s15 | Holes in latent space | An old map: cities, and "here be monsters" |
 | #s17 | Marginals, conditionals | A spreadsheet of grades and ages: column totals and one rescaled row |
@@ -316,6 +307,6 @@ Classifiers can tell cats apart but can't draw one → squeeze a cat through a b
 - LO1 (structure of visual data, suitable approaches): an image as 12,288 numbers (#s07), discriminative vs generative (#s03), and when a reconstruction model suits a task (#s13).
 - LO2 (design and implement CNNs and generative models): the conv encoder and transposed-conv decoder (#s04), the model families trained for this deck (live in the browser), plus a bigger VAE, a GAN and a small diffusion model for the comparisons.
 - LO3 (pre-trained and diffusion models): the VAE inside Stable Diffusion (#s29), and how VAEs, GANs and diffusion fit together (#s30).
-- LO4 (evaluate and compare with appropriate metrics): reconstruction error and PSNR on held-out cats, PCA vs AE (#s12), FID and its caveats (#s30b).
+- LO4 (evaluate and compare with appropriate metrics): reconstruction error and PSNR on held-out cats, FID and its caveats (#s30b).
 - LO5 (generative AI in production): anomaly detection, denoising, compression and synthetic data (#s13, #s30b); the deck itself is a deployed ONNX Runtime Web model (week 10).
 - LO6 (communicate rigorously): cited history (#s06, #s16), honest limitations (blur, blind spots, which samples are live and which are precomputed), and responsible use (#s30b).

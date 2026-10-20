@@ -1023,3 +1023,8 @@ svg.num-stage {
 @media (max-width: 760px) {
   .bn-stamp { font-size: 11px; padding: 3px 6px; white-space: normal; text-align: center; max-width: 100%; }
 }
+
+/* #s07: the two code neurons keep their names, z1 and z2; the picked cat's dot is big and haloed. */
+.num-zname { font-size: 24px; fill: var(--accent); dominant-baseline: auto; }
+.num-dot { stroke-width: 3.5; }
+.num-halo { fill: none; stroke: var(--accent); stroke-width: 3; stroke-opacity: 0.55; }

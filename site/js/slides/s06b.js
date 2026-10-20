@@ -12,7 +12,6 @@ const LAST = 3;
 const W = 600, PAD = 56, SPAN = W - PAD * 2;
 const CROWD = 26;
 const WALK = 6;
-const LOOK = 2; // the colours of "you", the big face
 
 let chart, bigFace, readS, readH, walkEl, walkLine, you, labels, build, note;
 let point = { s: 0.8, h: 0.3 };
@@ -55,7 +54,7 @@ export function init(section) {
     const s = 0.06 + rand() * 0.88;
     const h = 0.06 + rand() * 0.88;
     const g = el("g", { transform: `translate(${px(s) - 26} ${py(h) - 26}) scale(0.52)` }, crowd);
-    g.innerHTML = faceSVG(s, h, i, { detail: false });
+    g.innerHTML = faceSVG(s, h, { detail: false });
   }
   walkLine = el("line", { class: "faces-walkline" }, chart);
   you = el("g", { class: "faces-you" }, chart);
@@ -91,7 +90,7 @@ function setAxisNames(hidden) {
 }
 
 function draw() {
-  bigFace.innerHTML = faceSVG(point.s, point.h, LOOK);
+  bigFace.innerHTML = faceSVG(point.s, point.h);
   readS.textContent = point.s.toFixed(2);
   readH.textContent = point.h.toFixed(2);
   you.setAttribute("transform", `translate(${px(point.s)} ${py(point.h)})`);
@@ -99,7 +98,7 @@ function draw() {
   walkLine.setAttribute("x2", px(1));
   walkLine.setAttribute("y1", py(point.h));
   walkLine.setAttribute("y2", py(point.h));
-  [...walkEl.children].forEach((svg, i) => (svg.innerHTML = faceSVG(i / (WALK - 1), point.h, LOOK)));
+  [...walkEl.children].forEach((svg, i) => (svg.innerHTML = faceSVG(i / (WALK - 1), point.h)));
 }
 
 function show(n, { animate }) {

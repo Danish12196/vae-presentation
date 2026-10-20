@@ -9,10 +9,10 @@ import { slider } from "../ui.js";
 import { latentMap } from "../latentmap.js";
 
 const BETAS = [
-  { beta: "0", key: "vae_2d_b0", pull: -0.85 },
-  { beta: "0.1", key: "vae_2d_b0.1", pull: -0.45 },
-  { beta: "1", key: "vae_2d_b1", pull: 0.05 },
-  { beta: "4", key: "vae_2d_b4", pull: 0.6 },
+  { beta: "0", key: "vae_2d_b0", pull: -0.85, says: "no leash: monsters in the gaps" },
+  { beta: "0.1", key: "vae_2d_b0.1", pull: -0.45, says: "a loose leash: the gaps start to close" },
+  { beta: "1", key: "vae_2d_b1", pull: 0.05, says: "balanced: cats everywhere" },
+  { beta: "4", key: "vae_2d_b4", pull: 0.6, says: "tight leash: blurry" },
 ];
 
 let map, tug, grid, beta = 0;
@@ -33,6 +33,8 @@ export async function init(section) {
   });
   map.overlay = drawPrior;
   tug = section.querySelector(".tug");
+  const says = section.querySelector(".beta-says");
+  says.textContent = BETAS[0].says;
 
   slider(section.querySelector(".s13-slider"), {
     label: "KL weight β",
@@ -47,6 +49,7 @@ export async function init(section) {
       map.setPoints(data.maps[BETAS[i].key]);
       grid?.refresh();
       tug.style.setProperty("--pull", BETAS[i].pull);
+      says.textContent = BETAS[i].says;
     },
   });
   tug.style.setProperty("--pull", BETAS[0].pull);

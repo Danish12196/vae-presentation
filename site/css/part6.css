@@ -765,3 +765,38 @@ svg.tri {
 .s17-more { order: 99; grid-column: 1 / -1; text-align: center; font-size: var(--fs-label); color: var(--text-soft); white-space: nowrap; }
 .trio-side { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; max-width: 30ch; }
 .trio-side .gary-caption { margin: 0; font-size: var(--fs-label); }
+
+/* #s29 variants: four boxes in a 2x2 grid, a title and a line or two each */
+.var-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+  gap: calc(var(--gap) * 1.2);
+  width: min(1400px, 100%);
+  margin-inline: auto;
+}
+.var-grid .card.ext { gap: 10px; justify-content: flex-start; }
+.var-grid .card.ext p { margin: 0; line-height: 1.4; }
+.var-row { display: flex; align-items: center; gap: 18px; }
+.var-row > p { flex: 1 1 auto; }
+.sd-strip { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.sd-strip .sd-step { width: 56px; height: 56px; image-rendering: pixelated; border: 2px solid var(--line); }
+.sd-strip .arrow { color: var(--text-soft); font-size: 22px; }
+.sd-strip .sd-final.cat-canvas.small { --cat-size: 72px; }
+@media (max-height: 900px), (max-width: 1500px) {
+  .var-grid .card.ext { padding: 14px 18px; }
+  .var-grid .card.ext h3 { font-size: 22px; }
+  .vq-codebook { width: 72px; height: 72px; }
+  .vq-mosaic.cat-canvas.small { --cat-size: 72px; }
+  .sd-strip .sd-step { width: 44px; height: 44px; }
+  .sd-strip .sd-final.cat-canvas.small { --cat-size: 60px; }
+}
+@media (max-width: 760px) {
+  .var-grid { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 10px; }
+  .var-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .var-grid .card.ext p { font-size: 14px; }
+  .sd-strip .sd-step { width: 40px; height: 40px; }
+}
+
+/* #s32: the references under the credits */
+.credits .refs-head { margin-top: 6px; font-family: var(--font-head); font-weight: 700; color: var(--accent); }

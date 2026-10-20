@@ -293,23 +293,6 @@
         <p class="slide-caption">a replay of ae_2's training: the loss falls, the cats sharpen, and the latent space organises itself</p>
       </section>
 
-      <section class="slide" id="s12" data-accent="sunflower">
-        <header class="slide-head">
-          <p class="part-label">Part 2 · Autoencoders</p>
-          <h2>PCA vs autoencoder</h2>
-          <p class="analogy"><span class="analogy-tag">analogy</span>PCA is a straight ruler; an autoencoder is a tape measure</p>
-        </header>
-        <div class="slide-body s07-body">
-          <div class="pca-grid" role="table" aria-label="Original, PCA and autoencoder reconstructions"></div>
-          <div class="panel s07-side">
-            <div class="k-tabs"></div>
-            <p class="pca-key">numbers: squared error, <span class="better-key">lower wins</span></p>
-            <p class="pca-avg mono" aria-live="polite"></p>
-            <p class="callout"><strong>linear layers + MSE learn the same subspace as PCA.</strong> The axes can still rotate. Add nonlinearity and it is a deep autoencoder: nonlinear PCA.</p>
-          </div>
-        </div>
-      </section>
-
       <section class="slide" id="s13" data-accent="sunflower">
         <header class="slide-head">
           <p class="part-label">Part 2 · Autoencoders</p>
@@ -422,11 +405,11 @@
         <div class="slide-body prob-body">
           <svg class="prob-stage" role="img" aria-label="A joint distribution of an image x and a code z as a heatmap, with its marginals on the edges and two conditional slices you can drag"></svg>
           <div class="prob-notes">
-            <p data-step="0"><span data-tex="p(x, z)"></span> <strong>joint:</strong> how likely an image and a code are together.</p>
+            <p data-step="0"><span data-tex="p(x, z)"></span> <strong>joint:</strong> how often a cat and a code go together.</p>
             <p data-step="1"><span class="px-ink" data-tex="p(x)"></span>, <span class="pz-ink" data-tex="p(z)"></span> <strong>marginals:</strong> add up the other variable, <span data-tex="p(x) = \int p(x, z)\, dz"></span>.</p>
-            <p data-step="2"><span data-tex="p(x \mid z) = \dfrac{p(x, z)}{p(z)}"></span> <strong>a slice, rescaled:</strong> the images one code can make. That is the decoder.</p>
-            <p data-step="3"><span data-tex="p(z \mid x) = \dfrac{p(x, z)}{p(x)}"></span> <strong>the posterior:</strong> which codes explain this image. That is the encoder's job.</p>
-            <p data-step="4" class="prob-punch">For real cats, <span data-tex="p(x)"></span> is an integral over every possible code in 12,288-D: no one can compute it. So the VAE <strong>approximates</strong> the posterior with a Gaussian <span data-tex="q(z \mid x)"></span>. That approximation is the <em>variational</em> in VAE.</p>
+            <p data-step="2"><span data-tex="p(x \mid z) = \dfrac{p(x, z)}{p(z)}"></span> <strong>code → cat:</strong> the decoder.</p>
+            <p data-step="3"><span data-tex="p(z \mid x) = \dfrac{p(x, z)}{p(x)}"></span> <strong>cat → code:</strong> the encoder (the &lsquo;posterior&rsquo;).</p>
+            <p data-step="4" class="prob-punch">Doing this exactly is impossible, so the VAE <strong>guesses</strong> it with a simple bell curve. That guess is the &lsquo;<em>variational</em>&rsquo; part.</p>
           </div>
         </div>
         <p class="slide-caption">drag across the heatmap: the horizontal slice is p(x | z), the vertical slice is p(z | x)</p>
@@ -441,10 +424,10 @@
         <div class="slide-body worlds-body">
           <div class="worlds-stage">
             <svg class="worlds-svg" role="img" aria-label="Left: the data distribution p(x), a lumpy shape of cat photos. Right: the latent distribution p(z), a round Gaussian glow. The decoder maps a code to a cat; the encoder maps a cat to a small cloud of codes."></svg>
-            <div class="worlds-label px" style="left: 24.5%; top: 0%"><span data-tex="p(x)"></span><small>cat photos, 12,288-D</small></div>
-            <div class="worlds-label pz" style="left: 75%; top: 0%"><span data-tex="p(z) = \mathcal{N}(0, I)"></span><small>codes: a shape we choose</small></div>
-            <div class="worlds-label dec" data-from="1" style="left: 49%; top: 86%"><span data-tex="\text{decoder}\; p(x \mid z)"></span></div>
-            <div class="worlds-label enc" data-from="2" style="left: 49%; top: 6%"><span data-tex="\text{encoder}\; q(z \mid x) \approx p(z \mid x)"></span></div>
+            <div class="worlds-label px" style="left: 24.5%; top: 0%"><span data-tex="p(x)"></span><small>all cat photos: messy, unknown</small></div>
+            <div class="worlds-label pz" style="left: 75%; top: 0%"><span data-tex="p(z) = \mathcal{N}(0, I)"></span><small>a round blob we chose (the prior)</small></div>
+            <div class="worlds-label dec" data-from="1" style="left: 49%; top: 86%"><span class="wl-plain">decoder: blob → cat</span><small><span data-tex="p(x \mid z)"></span></small></div>
+            <div class="worlds-label enc" data-from="2" style="left: 49%; top: 6%"><span class="wl-plain">encoder: cat → blob</span><small><span data-tex="q(z \mid x) \approx p(z \mid x)"></span></small></div>
           </div>
           <div class="worlds-controls">
             <button type="button" class="btn primary" data-sample>sample z ~ N(0, I)</button>
@@ -463,8 +446,9 @@
         </header>
         <div class="slide-body s12-body">
           <div class="callout elbo">
+            <p class="loss-plain">Loss = how badly it rebuilt the cat + how far its cloud drifted from the round blob</p>
             <div class="elbo-tex" data-display data-tex="\mathcal{L}(x) = \underbrace{\htmlClass{recon}{\mathbb{E}_{q(z \mid x)}\big[\log p(x \mid z)\big]}}_{\displaystyle\text{data consistency (our L2)}} - \overbrace{\htmlClass{kl}{\mathrm{KL}\big(q(z \mid x) \,\Vert\, p(z)\big)}}^{\displaystyle\text{latent-space regularisation}}"></div>
-            <p><strong>loss = −ELBO</strong> (Evidence Lower BOund): rebuild the cat, and keep each cloud near <span data-tex="\mathcal{N}(0, 1)"></span>. The true likelihood is intractable, so we maximise this lower bound instead. With a fixed-variance Gaussian decoder, the first term is our L2 up to a constant and a scale.</p>
+            <p class="elbo-note">ELBO (Evidence Lower Bound) = the official name for this combined score. Loss = −ELBO.</p>
           </div>
           <div class="gauss-wrap">
             <svg class="gauss interactive" viewBox="0 0 800 300" role="group" aria-label="A Gaussian you can drag, drawn against N(0,1)"></svg>
@@ -477,7 +461,7 @@
         </div>
         <div class="formula-bar">
           <p class="formula"><span data-tex="\htmlClass{recon}{\lVert x - \hat{x} \rVert^2}"></span> reconstruction: how far the rebuilt cat is from the input</p>
-          <p class="formula"><span data-tex="\htmlClass{kl}{\mathrm{KL}} = \tfrac{1}{2}\left(\mu^2 + \sigma^2 - 1 - \ln \sigma^2\right)"></span> per dimension, summed over the code. Zero only when <span data-tex="\mu = 0,\ \sigma = 1"></span></p>
+          <p class="formula"><span data-tex="\htmlClass{kl}{\mathrm{KL}}"></span> = Kullback&ndash;Leibler divergence: how different two distributions are (0 = identical). Here <span data-tex="\tfrac{1}{2}\left(\mu^2 + \sigma^2 - 1 - \ln \sigma^2\right)"></span> per dimension, 0 only when <span data-tex="\mu = 0,\ \sigma = 1"></span></p>
         </div>
       </section>
 
@@ -514,18 +498,18 @@
         <header class="slide-head">
           <p class="part-label">Part 4 · Variational autoencoders</p>
           <h2>The reparameterization trick</h2>
-          <p class="analogy"><span class="analogy-tag">analogy</span>roll the dice first, then stretch it by σ and move it by μ</p>
+          <p class="analogy"><span class="analogy-tag">analogy</span>roll the dice first, then stretch it by σ (sigma) and move it by μ (mu)</p>
           <p class="kind-lead rep-lead">Can we backprop through a random sample? No: the gradient stops at the dice.</p>
         </header>
         <div class="slide-body s14-body">
           <div class="s14-switch"></div>
           <div class="graph-wrap"><svg class="rep-graph" viewBox="0 0 1200 290" role="img" aria-label="Computation graph from x through the encoder, mu and sigma, z and the decoder to the loss, with the gradient flowing back"></svg></div>
           <div class="s14-demo">
-            <div class="s14-sliders"><button type="button" class="btn" data-eps>resample ε</button></div>
+            <div class="s14-sliders"><button type="button" class="btn" data-eps>resample ε (epsilon)</button></div>
             <figure class="s14-out-fig"><canvas class="cat-canvas s14-out" width="64" height="64" aria-label="Decoded z"></canvas><figcaption class="mono s14-z"></figcaption></figure>
             <div class="s14-map map-host"></div>
           </div>
-          <p class="s14-note">the encoder really outputs log σ², for numerical stability</p>
+          <p class="s14-note">the encoder really outputs log σ² (log of sigma squared), for numerical stability</p>
         </div>
       </section>
 
@@ -552,7 +536,9 @@
               <span class="tug-rope"><span class="tug-knot"></span></span>
               <span class="tug-team kl">KL</span>
             </div>
+            <p class="kl-full">KL = Kullback&ndash;Leibler divergence</p>
             <div class="s13-slider"></div>
+            <p class="beta-says" aria-live="polite"></p>
             <button type="button" class="btn grid-toggle" aria-pressed="false" data-grid>what lives here?</button>
           </div>
         </div>
@@ -572,6 +558,7 @@
             <figure class="gen gen-ae">
               <figcaption><strong>plain AE</strong> <span class="ae-mode"></span></figcaption>
               <canvas class="gen-canvas" width="408" height="272" aria-label="24 samples from the plain autoencoder"></canvas>
+              <p class="ae-gaps">either way, the plain AE&rsquo;s gaps were never trained</p>
             </figure>
           </div>
           <div class="panel s15-side">
@@ -689,44 +676,39 @@
           <h2>Variants: conditional VAE, β-VAE, VQ-VAE</h2>
         </header>
         <div class="slide-body s18-body">
-          <div class="s18-top">
+          <div class="var-grid">
+            <article class="card ext cvae">
+              <h3>Conditional VAE</h3>
+              <p>Feed in a label too, then ask for <em>a tabby</em>. A plain VAE can&rsquo;t take requests: you get a random cat.</p>
+            </article>
             <article class="card ext beta">
               <h3>β-VAE</h3>
-              <p>a bigger KL weight: a tidier, more disentangled latent space, and blurrier cats</p>
+              <p>A bigger KL weight: a tidier, more disentangled latent space, where each axis means one thing. The cost: blurrier cats.</p>
               <button type="button" class="btn" data-remember>remember this?</button>
-              <p class="cvae"><strong>Conditional VAE:</strong> feed in a label too, then ask for <em>a tabby</em>. A plain VAE can't take requests.</p>
             </article>
             <article class="card ext vq">
               <h3>VQ-VAE <span class="tag">illustration</span></h3>
-              <div class="vq-row">
-                <canvas class="vq-codebook" width="4" height="4" aria-label="A codebook of 16 colours"></canvas>
-                <span class="arrow" aria-hidden="true">→</span>
-                <canvas class="cat-canvas small vq-mosaic" width="16" height="16" aria-label="A cat rebuilt from the 16 codes"></canvas>
+              <div class="var-row">
+                <p>A fixed dictionary of codes instead of a cloud, like paint-by-numbers. A close cousin (dVAE) powered the first DALL-E.</p>
+                <div class="vq-row">
+                  <canvas class="vq-codebook" width="4" height="4" aria-label="A codebook of 16 colours"></canvas>
+                  <span class="arrow" aria-hidden="true">→</span>
+                  <canvas class="cat-canvas small vq-mosaic" width="16" height="16" aria-label="A cat rebuilt from the 16 codes"></canvas>
+                </div>
               </div>
-              <p>discrete codes instead of a cloud. A close cousin (dVAE) powered the first DALL-E.</p>
+            </article>
+            <article class="card ext sd">
+              <h3>Stable Diffusion</h3>
+              <div class="var-row">
+                <p>Its VAE squeezes a 512×512 image into a latent 48× smaller. Diffusion denoises there, and a VAE decoder paints the final image.</p>
+                <div class="sd-strip" aria-label="Denoising in the latent space, then the VAE decoder's image">
+                  <canvas class="sd-step" width="64" height="64"></canvas><canvas class="sd-step" width="64" height="64"></canvas><canvas class="sd-step" width="64" height="64"></canvas>
+                  <span class="arrow" aria-hidden="true">→</span>
+                  <canvas class="cat-canvas small sd-final" width="64" height="64" aria-label="The final image"></canvas>
+                </div>
+              </div>
             </article>
           </div>
-          <article class="card ext sd">
-            <h3>Stable Diffusion</h3>
-            <div class="sd-flow" aria-label="Stable Diffusion: photo, VAE encoder, latent, denoising steps, VAE decoder, image">
-              <div class="sd-node photo"><span class="sd-box big"></span><span class="mono">512×512×3</span><span class="mono soft">786,432</span></div>
-              <span class="sd-arrow">VAE encoder →</span>
-              <div class="sd-node latent"><span class="sd-box small"></span><span class="mono">64×64×4</span><span class="mono soft">16,384 · 48× smaller</span></div>
-              <span class="sd-arrow">→</span>
-              <div class="sd-node steps"><canvas class="sd-step" width="64" height="64"></canvas><canvas class="sd-step" width="64" height="64"></canvas><canvas class="sd-step" width="64" height="64"></canvas><span class="mono soft">denoising</span></div>
-              <span class="sd-arrow">→ VAE decoder</span>
-              <div class="sd-node out"><canvas class="cat-canvas small sd-final" width="64" height="64" aria-label="The final image"></canvas><span class="mono soft">image</span></div>
-            </div>
-            <div class="sd-foot">
-            <p class="sd-caption">the VAE compresses; diffusion does the imagining</p>
-            <div class="sd-tiny">
-              <span>same idea, tiny scale:</span>
-              <canvas class="cat-canvas small sd-tiny-in" width="64" height="64" aria-label="Our cat"></canvas>
-              <span class="mono">12,288 → 128 → 12,288</span>
-              <figure><canvas class="cat-canvas small sd-tiny-out" width="64" height="64" aria-label="Our VAE's round trip"></canvas></figure>
-            </div>
-            </div>
-          </article>
         </div>
       </section>
 
@@ -770,11 +752,12 @@
         </header>
         <div class="slide-body s20-body">
           <ol class="wrap-rows">
-            <li class="wrap-row" data-step="1"><span class="wrap-year mono">1986</span><span class="wrap-model">Autoencoder</span><span class="wrap-result">Rumelhart, Hinton &amp; Williams. A bottleneck code. Deep ones in 2006. Denoising in 2008.</span></li>
-            <li class="wrap-row" data-step="2"><span class="wrap-year mono">1989</span><span class="wrap-model">CNN</span><span class="wrap-result">LeCun et al. 1989 and 1998, then AlexNet in 2012. Tells images apart. Does not draw them.</span></li>
-            <li class="wrap-row" data-step="3"><span class="wrap-year mono">2013</span><span class="wrap-model">VAE</span><span class="wrap-result">Kingma &amp; Welling, and Rezende, Mohamed &amp; Wierstra. A cloud you can sample.</span></li>
-            <li class="wrap-row" data-step="4"><span class="wrap-year mono">2014</span><span class="wrap-model">GAN</span><span class="wrap-result">Goodfellow et al. Sharp, and it can collapse to one picture.</span></li>
-            <li class="wrap-row" data-step="5"><span class="wrap-year mono">2015</span><span class="wrap-model">Diffusion</span><span class="wrap-result">Sohl-Dickstein et al. 2015, then Ho, Jain &amp; Abbeel’s DDPM in 2020. Many steps, high quality.</span></li>
+            <li class="wrap-row" data-step="1"><span class="wrap-year mono">1</span><span class="wrap-model">CNNs</span><span class="wrap-result">Judges: they tell images apart, but can&rsquo;t paint.</span></li>
+            <li class="wrap-row" data-step="2"><span class="wrap-year mono">2</span><span class="wrap-model">Autoencoders</span><span class="wrap-result">Squeeze a cat into a small code z and rebuild it. No labels needed.</span></li>
+            <li class="wrap-row" data-step="3"><span class="wrap-year mono">3</span><span class="wrap-model">Under vs overcomplete</span><span class="wrap-result">Too much room, and it just copies.</span></li>
+            <li class="wrap-row" data-step="4"><span class="wrap-year mono">4</span><span class="wrap-model">The holes</span><span class="wrap-result">A plain autoencoder&rsquo;s map has gaps, so random codes give monsters.</span></li>
+            <li class="wrap-row" data-step="5"><span class="wrap-year mono">5</span><span class="wrap-model">VAEs</span><span class="wrap-result">A cloud per cat plus a KL leash: no gaps, so you can sample new cats.</span></li>
+            <li class="wrap-row" data-step="6"><span class="wrap-year mono">6</span><span class="wrap-model">Next</span><span class="wrap-result">GANs and diffusion trade blur for sharpness.</span></li>
           </ol>
           <div class="wrap-dots" aria-hidden="true"></div>
         </div>
@@ -795,6 +778,10 @@
             <p>Cat faces: <a href="https://github.com/fferlito/Cat-faces-dataset" target="_blank" rel="noopener">fferlito/Cat-faces-dataset</a> on GitHub</p>
             <p>AFHQ: Choi et al., StarGAN v2 (CVPR 2020)</p>
             <p>Built with PyTorch and ONNX Runtime Web</p>
+            <p class="refs-head">References</p>
+            <p>3Blue1Brown, <em>Neural networks</em> series (YouTube)</p>
+            <p>Deepia, <em>Variational Autoencoders | Generative AI Animated</em> (YouTube)</p>
+            <p>Kingma &amp; Welling, <a href="https://arxiv.org/abs/1312.6114" target="_blank" rel="noopener"><em>Auto-Encoding Variational Bayes</em></a> (2013)</p>
             <p><a href="https://autoencoders.danishali.dev" target="_blank" rel="noopener">autoencoders.danishali.dev</a> · <a href="https://github.com/Danish12196/vae-presentation" target="_blank" rel="noopener">github.com/Danish12196/vae-presentation</a></p>
           </div>
         </div>

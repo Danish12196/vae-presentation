@@ -58,9 +58,9 @@ export async function init(section) {
   const resample = sliders.querySelector("[data-eps]");
   const make = (label, min, max, value, set) =>
     slider(sliders, { label, min, max, step: 0.01, value, format: (v) => v.toFixed(2), onInput: (v) => (set(v), update()) });
-  make("μ1", -3, 3, mu[0], (v) => (mu[0] = v));
-  make("μ2", -3, 3, mu[1], (v) => (mu[1] = v));
-  make("σ", 0.05, 1.5, sigma, (v) => (sigma = v));
+  make("μ1 (mu 1)", -3, 3, mu[0], (v) => (mu[0] = v));
+  make("μ2 (mu 2)", -3, 3, mu[1], (v) => (mu[1] = v));
+  make("σ (sigma)", 0.05, 1.5, sigma, (v) => (sigma = v));
   sliders.append(resample); // keep the button under the sliders
   resample.addEventListener("click", async () => {
     eps = Array.from(randn(2));
@@ -124,6 +124,13 @@ function box(name, label, cls = "") {
   return `<g class="g-node ${cls}"><rect x="${cx - hx}" y="${cy - hy}" width="${2 * hx}" height="${2 * hy}" rx="12" /><text x="${cx}" y="${cy + 7}" text-anchor="middle">${label}</text></g>`;
 }
 
+/** A symbol's name in words, just above (side = -1) or below (side = 1) its box. */
+function symName(name, words, side) {
+  const [cx, cy] = layout.at[name];
+  const hy = HALF[name][1];
+  return `<text class="g-name" x="${cx}" y="${side < 0 ? cy - hy - 10 : cy + hy + 24}" text-anchor="middle">${words}</text>`;
+}
+
 /** The encoder narrows along the flow, the decoder widens. */
 function trapezoid(name, label, narrowing) {
   const [cx, cy] = layout.at[name];
@@ -145,7 +152,7 @@ function drawGraph() {
   const stuck = v ? [sx, sy + 46] : [sx + 46, sy];
   const blockLabel = v
     ? `<text class="block-label" x="${sx + 42}" y="${sy + 70}"><tspan x="${sx + 42}">can't differentiate</tspan><tspan x="${sx + 42}" dy="26">a dice roll</tspan></text>`
-    : `<text class="block-label" x="${sx + 20}" y="${sy + 92}" text-anchor="middle">can't differentiate a dice roll</text>`;
+    : `<text class="block-label" x="${sx + 70}" y="${sy + 92}" text-anchor="middle">can't differentiate a dice roll</text>`; // clear of "(sigma)"
   const epsEdge = v ? [ex - 72, ey, sx + 66, sy] : [ex, ey - 10, sx, sy + 34];
   svg.innerHTML = `
     <defs><marker id="rep-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" /></marker></defs>
@@ -154,6 +161,7 @@ function drawGraph() {
     ${box("x", "x")}
     ${trapezoid("enc", "Encoder", true)}
     ${box("mu", "μ", "param")}${box("sigma", "σ", "param")}
+    ${symName("mu", "(mu)", v ? 1 : -1)}${symName("sigma", "(sigma)", 1)}
     <g class="sampler naive-only">
       <rect class="dice-body" x="${sx - 38}" y="${sy - 38}" width="76" height="76" rx="14" />
       ${[[-18, -18], [18, -18], [0, 0], [-18, 18], [18, 18]].map(([dx, dy]) => `<circle class="dice-pip" cx="${sx + dx}" cy="${sy + dy}" r="6" />`).join("")}
@@ -161,7 +169,7 @@ function drawGraph() {
     <g class="reparam-only">
       ${box("sampler", "μ + σ·ε", "formula")}
       <line class="g-edge eps-edge" x1="${epsEdge[0]}" y1="${epsEdge[1]}" x2="${epsEdge[2]}" y2="${epsEdge[3]}" marker-end="url(#rep-arrow)" />
-      <text class="g-eps" x="${ex}" y="${v ? ey + 6 : ey + 16}" text-anchor="middle">ε ~ N(0, 1)</text>
+      <text class="g-eps" x="${ex}" y="${v ? ey + 6 : ey + 16}" text-anchor="middle">ε (epsilon) ~ N(0, 1)</text>
     </g>
     ${box("z", "z", "param")}
     ${trapezoid("dec", "Decoder", false)}
@@ -244,7 +252,7 @@ function tick(now) {
 async function update() {
   const mine = ++request;
   const z = [mu[0] + sigma * eps[0], mu[1] + sigma * eps[1]];
-  zLabel.textContent = `z = μ + σ·ε = (${z[0].toFixed(2)}, ${z[1].toFixed(2)})`;
+  zLabel.textContent = `z = μ (mu) + σ (sigma) · ε (epsilon) = (${z[0].toFixed(2)}, ${z[1].toFixed(2)})`;
   map.draw();
   const image = await decode(MODEL, z);
   if (mine === request) drawCat(outCanvas, image);

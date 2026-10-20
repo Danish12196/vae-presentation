@@ -1,19 +1,19 @@
-// Extensions.
+// Variants, four boxes in a 2x2 grid.
+//   Conditional VAE: text only.
 //   beta-VAE: "remember this?" opens an overlay. It does not leave the slide.
 //   VQ-VAE (an illustration, not a trained model): a codebook of 16 colours found with k-means on
 //   one cat, and that cat rebuilt as a 16x16 mosaic where every block is one of the 16 codes.
-//   Stable Diffusion (no live model): the pipeline with its real sizes. A highlight walks along it and
-//   the denoising steps show noise turning into an image. Beside it, our own vae_128 round trip:
-//   the same compress-then-decode idea at a tiny scale.
+//   Stable Diffusion (no live model): three denoising snapshots, then the image; fresh noise every
+//   couple of seconds while the slide is showing.
 
-import { drawCat, reconstruct, inSlot, loadShowcase, getShowcaseCat, SIZE } from "../models.js";
+import { drawCat, loadShowcase, getShowcaseCat, SIZE } from "../models.js";
 
 const CODES = 16;
 const MOSAIC = 16;          // 16x16 blocks of 4x4 pixels
-const STEP_MS = 900;        // highlight moves to the next pipeline stage
+const STEP_MS = 1800;       // fresh noise for the denoising snapshots
 const NOISE = [0.85, 0.5, 0.18];
 
-let nodes = [], stepCanvases = [], finalCanvas, timer = 0, stage = 0, sdCat;
+let stepCanvases = [], finalCanvas, timer = 0, sdCat;
 
 export async function init(section) {
   const popup = document.querySelector("#remember");
@@ -27,33 +27,21 @@ export async function init(section) {
   await loadShowcase();
   drawVQ(section, mostColourful());
 
-  nodes = [...section.querySelectorAll(".sd-node")];
   stepCanvases = [...section.querySelectorAll(".sd-step")];
   finalCanvas = section.querySelector(".sd-final");
   sdCat = getShowcaseCat(11);
   drawCat(finalCanvas, sdCat);
   drawSteps();
-
-  const tinyIn = section.querySelector(".sd-tiny-in");
-  const tinyOut = section.querySelector(".sd-tiny-out");
-  const cat = getShowcaseCat(4);
-  drawCat(tinyIn, cat);
-  await inSlot(tinyOut.closest("figure"), async () => drawCat(tinyOut, await reconstruct("vae_128", [cat])));
 }
 
 export function enter() {
   clearInterval(timer);
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  timer = setInterval(() => {
-    stage = (stage + 1) % nodes.length;
-    nodes.forEach((n, i) => n.classList.toggle("lit", i === stage));
-    if (stage === 2) drawSteps(); // fresh noise each time the highlight reaches the denoising steps
-  }, STEP_MS);
+  timer = setInterval(drawSteps, STEP_MS);
 }
 
 export function leave() {
   clearInterval(timer);
-  nodes.forEach((n) => n.classList.remove("lit"));
 }
 
 /** The showcase cat with the most colour in it, so the codebook isn't 16 greys. */

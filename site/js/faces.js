@@ -1,24 +1,26 @@
 // A hand-written "decoder" for the faces slide (s06b): two numbers in, a face out.
 // It is an illustration, drawn with plain SVG, not a trained model.
-//   smile: 0 (frown) .. 1 (big grin)    hair: 0 (buzz cut) .. 1 (long hair)
+//   smile: 0 (frown) .. 1 (big grin)    hair: 0 (short crop) .. 1 (past the shoulders)
+// Every face has the same skin and hair colour, so only the two numbers change.
 
-const SKIN = ["#f1c9a5", "#d9a07a", "#b97a52", "#8a5a3b", "#f3d6bd", "#c98e64"];
-const HAIR = ["#24170f", "#5c3a1e", "#94500f", "#3b2a20", "#6b3050", "#1e3f66"];
+const SKIN = "#e8b98f";
+const HC = "#5c3a1e";
 
-/** A face as an SVG string, in a 100 x 100 box. `look` picks the skin and hair colours. */
-export function faceSVG(smile, hair, look = 0, { detail = true } = {}) {
-  const skin = SKIN[look % SKIN.length];
-  const hc = HAIR[(look * 5 + 1) % HAIR.length];
+/** A face as an SVG string, in a 100 x 100 box. */
+export function faceSVG(smile, hair, { detail = true } = {}) {
+  const skin = SKIN, hc = HC;
   const cx = 50, cy = 46, r = 30;
   const parts = [];
 
-  // Long hair falls behind the head and grows down past the chin.
-  if (hair > 0.25) {
-    const len = 46 + (hair - 0.25) * 64; // bottom of the hair, in y
-    const w = r + 6;
+  // The back hair grows continuously with `hair`: at 0 it hides behind the head (a short crop),
+  // at 1 it is wider than the head and falls past the shoulders. No jumps, so a walk morphs smoothly.
+  if (hair > 0) {
+    const len = cy + hair * 52; // bottom of the hair, in y: from the middle of the head to below the shoulders
+    const w = r - 4 + hair * 10; // half-width: inside the head at 0, wider than it at 1
+    const top = cy - r - hair * 10; // the crown gains volume too
     parts.push(
-      `<path d="M ${cx - w} ${cy} Q ${cx - w} ${cy - r - 10} ${cx} ${cy - r - 10} Q ${cx + w} ${cy - r - 10} ${cx + w} ${cy}
-        L ${cx + w + 2} ${len} Q ${cx} ${len + 6} ${cx - w - 2} ${len} Z" fill="${hc}"/>`,
+      `<path d="M ${cx - w} ${cy} Q ${cx - w} ${top} ${cx} ${top} Q ${cx + w} ${top} ${cx + w} ${cy}
+        L ${cx + w + 2 * hair} ${len} Q ${cx} ${len + 6 * hair} ${cx - w - 2 * hair} ${len} Z" fill="${hc}"/>`,
     );
   }
   // Neck and shoulders.
