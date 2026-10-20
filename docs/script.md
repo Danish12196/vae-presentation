@@ -62,13 +62,13 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - The deep version that people actually used on images is Hinton and Salakhutdinov, Science, 2006.
 - Denoising autoencoders are Vincent, Larochelle, Bengio and Manzagol, 2008.
 
-*Slide: "A cat is 12,288 numbers". Each press builds one more step: the cat; its pixel grid with one pixel's RGB; pixels flying into a column of 12,288 numbers; the encoder squeezing them into two neurons with live values; the two neurons turning into the two axes, with the cat landing as a dot; then 600 training cats on the same axes.*
+*Slide: "A cat is 12,288 numbers". Each press builds one more step: the cat; its pixel grid with one pixel's RGB; pixels flying into a column of 12,288 numbers; the encoder, drawn as its four real conv layers (32×32×32 → 64×16×16 → 128×8×8 → 256×4×4), squeezing them into two neurons with live values; the two neurons turning into the two axes, with the cat landing as a dot; then 600 training cats on the same axes.*
 
 - Before we squeeze anything, what does the network actually see?
 - Imagine describing a stranger to a friend using just two numbers, say their height and their hair length. You lose a lot of detail, but you keep what matters most. An autoencoder learns to do that for images, and it picks its own two numbers.
 - To the network, this cat is a grid of 64 by 64 pixels, and every pixel is three numbers: red, green and blue.
 - Unroll them all into one long column and you get 12,288 numbers. That column is the input layer.
-- The encoder squeezes that column down. Here it squeezes it all the way to two neurons, and these are the two numbers it chose for this cat.
+- The encoder squeezes that column down, one conv layer at a time: each layer halves the picture and adds channels. Here it squeezes all the way to two neurons, and these are the two numbers it chose for this cat.
 - Now the trick: treat those two activations as coordinates. Neuron one is the x axis, neuron two is the y axis, and the cat becomes a single point.
 - Do that for every training cat and you get this cloud of points. That space is the latent space. (Latent just means hidden: nobody labelled these axes, the network invented them.)
 
@@ -104,11 +104,12 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - That makes this self-supervised learning. (Self-supervised means the training signal comes from the data itself, not from human labels.)
 - That's a big deal, because unlabelled images are everywhere and labelled ones are expensive.
 
-*Slide: "Watch it learn". A replay of ae_2's training: the loss curve per epoch, an epoch slider with "replay training", four cats as the model rebuilt them at that epoch, and the latent map at that epoch. Arriving with the keys going forward starts the replay.*
+*Slide: "Watch it learn". A replay of ae_2's training, snapshotted at log-spaced training steps (0, 8, 16, 32 … 6,870): the loss per step on a log axis, a slider with "replay training", four cats as the model rebuilt them at that point, and the latent map at that point. Arriving with the keys going forward starts the replay.*
 
-- Here's what training actually looks like. This is a replay of the real run of our 2-number autoencoder, 30 passes over the cats.
+- Here's what training actually looks like. This is a replay of the real run of our 2-number autoencoder, 6,870 small steps, 30 passes over the cats.
+- The axis is logarithmic, because most of the visible learning happens in the first few hundred steps.
 - Before training, every cat comes out as the same grey mush, and all the codes sit on top of each other.
-- Epoch by epoch the loss falls, the rebuilt cats get their colours and their faces, and the map spreads out and organises itself: dark cats drift to one side, light cats to the other.
+- Within a few hundred steps the cats get their colours and their faces, and the map spreads out and organises itself: dark cats drift to one side, light cats to the other. After that, the loss keeps creeping down, but with only two numbers the cats stay blurry.
 - Nobody told it about dark or light fur. It found that this was the most useful thing to remember with only two numbers.
 
 *Slide: PCA versus autoencoder.*
@@ -242,7 +243,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 - *(Press "what lives here?" at β = 0, then at β = 1.)* Decode a grid over the whole map. With no KL the gaps still decode to junk; with KL, every point in the round region is a cat.
 
-*Slide: "Watch a VAE learn". A replay of vae_2d_b1's training: reconstruction and KL curves on a log scale, four cats per epoch, and the latent map per epoch.*
+*Slide: "Watch a VAE learn". A replay of vae_2d_b1's training at the same log-spaced steps: reconstruction and KL per step, four cats and the latent map per snapshot.*
 
 - Same replay as before, but for a VAE.
 - In the first epochs the KL weight is ramped up slowly. That's called KL warm-up: it lets the decoder learn to draw cats before the latent space gets squeezed.
@@ -278,15 +279,20 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 ### Generating new images
 
-*Slide: a grid of generated digits or faces, plus an interpolation strip between two images.*
+*Slide: 24 samples from a bigger VAE (10M weights, trained overnight) beside 24 from a bigger plain AE, naive or "fair" (its own code statistics); re-roll draws new ones from precomputed pools. A small live VAE map on the side.*
 
 - Once the VAE is trained, we can throw away the encoder.
 - To generate a new image, we sample a random z from the standard normal distribution and pass it through the decoder.
-- Because the KL term organized the latent space around that distribution, the output is a plausible new image.
-- We can also interpolate.
-- That means taking two images, encoding them, and walking along the straight line between their two latent points.
-- The decoder produces the frames along that line.
-- A straight walk between two real codes stays near the data even for a plain autoencoder, so those two rows look similar. The plain autoencoder's failure was the random samples we just saw, not this walk.
+- Because the KL term organized the latent space around that distribution, the output is a plausible new cat. Soft, but a cat.
+- The plain autoencoder, sampled the same way, gives tiger-stripe texture: its codes don't live anywhere near N of zero and one. Even with its own mean and spread, you get collages, because the space between its codes was never trained to be cats.
+- These two models are bigger than the ones running live, so their samples are precomputed. The tiny live map on the right is the small VAE.
+
+*Slide: interpolation. Pick A and B; three rows of 8 frames: a pixel crossfade, the bigger plain AE's walk, the bigger VAE's walk; a scrubber with a big frame per model.*
+
+- We can also interpolate: encode two cats and walk the straight line between their two codes, decoding as we go.
+- Top row: just fading the pixels stacks two ghost cats on top of each other. That's why we walk the code, not the pixels.
+- The plain AE keeps one cat, but look at the middle frames: smears and glitches, because the points between its codes were never trained.
+- The VAE morphs smoothly from one cat to the other. Softer, but every frame is a cat, because KL made the whole region around the codes decodable.
 
 ## Part 6: Limitations, extensions, and wrap-up
 
@@ -296,6 +302,7 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 
 - VAEs aren't perfect. The biggest issue is that their outputs tend to be blurry.
 - This is partly because of MSE. If there are several possible sharp answers, MSE is minimized by averaging them, and an average of sharp images is a blurry image.
+- *(Slide the averaging slider all the way.)* Average a few cats and you get a soft cat. Average all 29,331 training cats and you get one beige ghost: the safest possible guess, and the opposite of sharp.
 - It's also partly because of the trade-off with the KL term, which limits how much detail can be squeezed into the latent space.
 
 ### Extensions
@@ -344,7 +351,8 @@ Times assume a steady presenting pace of about 130 words per minute. If you need
 - And diffusion models go even further, producing both high quality and high variety.
 - But diffusion has its own cost. It generates an image over many denoising steps, so it's much slower than a VAE or a GAN, which each need just one pass.
 - The triangle keeps all three labels up at once: who is strong on quality, who on variety, who on speed.
-- Gary is not a GAN photo. The repo has no GAN model. Those nine pictures are our VAE decoding one code, to show mode collapse. Say that. A real GAN would be sharper.
+- *(Bottom row.)* These are real samples from three models I trained on the same cats: our bigger VAE, a GAN, and a small diffusion model. The VAE is blurry; the GAN is sharp in one pass; diffusion is sharp and varied, but took 100 denoising steps per image.
+- This GAN is Gary. Our Gary didn't collapse, which happens with modern tricks like spectral normalisation, but GANs can, and when they do you get the same few cats over and over.
 - Researchers sometimes call this the generative learning trilemma. (A trilemma is a choice between three options where you can only fully get two.)
 - The three things we want are high quality, high variety, and fast generation.
 - VAEs give us variety and speed. GANs give us quality and speed. Diffusion gives us quality and variety.
