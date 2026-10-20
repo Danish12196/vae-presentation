@@ -5,6 +5,8 @@
 site/data/gen_pool.jpg + .json      slide 26: a pool of VAE samples and plain-AE samples (naive and
                                     with its own code statistics), re-rolled in the browser
 site/data/compare_pool.jpg + .json  slide 30: samples from the VAE, the GAN and the diffusion model
+site/data/interp_v2.jpg + .json     slide 27: AE and VAE walks between every pair of the first 8
+                                    showcase cats (8 frames each)
 Prints how varied each GAN checkpoint's samples are (a mode-collapse check).
 export.py clears site/data, so run this AFTER export.py. It adds its files to data/files.json
 itself and re-stamps the site (tools/stamp_site.py).
@@ -22,7 +24,7 @@ import data
 from export import OUT, SITE, hashed_name, save_sprite, to_tensor, to_uint8, write_json
 from train_v2 import LATENT, OUT as RUNS_V2, Generator, ProAE, ProVAE
 
-POOL = {"vae": 240, "ae_naive": 120, "ae_fair": 120}
+POOL = {"vae": 120, "ae_naive": 60, "ae_fair": 60}
 COMPARE = 45  # per model: five 3x3 grids
 SEED = 0
 
@@ -41,7 +43,7 @@ def decode(model, z, device):
 def save(name, images, cols, meta):
     """Write a sprite with a content-hashed name and its JSON next to it."""
     tmp = OUT / f"{name}.jpg"
-    info = save_sprite(images, tmp, cols=cols, quality=88)
+    info = save_sprite(images, tmp, cols=cols, quality=84)
     final = OUT / hashed_name(f"{name}.jpg", tmp.read_bytes())
     tmp.replace(final)
     js = {"file": f"{name}.jpg", **info, **meta}
@@ -67,7 +69,7 @@ def register(*paths):
 
 
 def main():
-    for old in list(OUT.glob("gen_pool.*")) + list(OUT.glob("compare_pool.*")):
+    for old in list(OUT.glob("gen_pool.*")) + list(OUT.glob("compare_pool.*")) + list(OUT.glob("interp_v2.*")):
         old.unlink()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     g = torch.Generator().manual_seed(SEED)
@@ -91,6 +93,24 @@ def main():
         start += POOL[k]
     save("gen_pool", to_uint8(torch.cat([vae_s, ae_naive, ae_fair])), 20,
          {"parts": parts, "note": "train_v2.py vae_pro / ae_pro, latent 128"})
+
+    # ---------------------------------------------------------- slide 27: interpolation, AE vs VAE
+    _, held_out = data.split(data.load_cats())
+    x8 = to_tensor(held_out[:8], device)
+    t = torch.linspace(0, 1, 8, device=device)[:, None]
+    pairs, tiles27 = [], []
+    with torch.no_grad():
+        za = ae.encode(x8).float()
+        mu, _ = vae.encode(x8)
+        mu = mu.float()
+        for a in range(8):
+            for b in range(a + 1, 8):
+                pairs.append([a, b])
+                tiles27.append(ae.decode(za[a] * (1 - t) + za[b] * t).float().cpu())
+                tiles27.append(vae.decode(mu[a] * (1 - t) + mu[b] * t).float().cpu())
+    save("interp_v2", to_uint8(torch.cat(tiles27)), 8,
+         {"pairs": pairs, "frames": 8, "rows": ["ae", "vae"],
+          "note": "row 2k: ae_pro walk for pairs[k], row 2k+1: vae_pro walk (mu); frames from A to B"})
 
     # ---------------------------------------------------------- slide 30: VAE vs GAN vs diffusion
     G = Generator().to(device)

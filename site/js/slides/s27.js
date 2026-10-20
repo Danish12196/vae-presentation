@@ -3,7 +3,7 @@
 // two ghost cats stacked, which is why we interpolate codes, not pixels. Strips of 8 frames, and a
 // scrubber with a big live frame per model at the current t.
 
-import { encode, decode, drawCat, drawTiles, inSlot, loadShowcase, getShowcaseCat } from "../models.js";
+import { encode, decode, drawCat, drawTiles, inSlot, loadShowcase, getShowcaseCat, loadJSON, loadSprite } from "../models.js";
 import { catPicker, slider } from "../ui.js";
 
 const MODELS = ["ae_128", "vae_128"];
@@ -11,12 +11,20 @@ const FRAMES = 8, TILE = 64, GAP = 4;
 
 let section, scrub;
 let picked = { a: 0, b: 5 };
+// The bigger AE and VAE (training/train_v2.py): every pair of the first 8 cats, precomputed.
+let v2 = null; // { pairs, sprite }
 const codes = {}; // model -> { a: Float32Array, b: Float32Array }
 let request = 0;
 
 export async function init(el) {
   section = el;
   await loadShowcase();
+  const meta = await loadJSON("data/interp_v2.json").catch(() => null);
+  if (meta) {
+    v2 = { pairs: meta.pairs, sprite: await loadSprite(`data/${meta.file}`, meta) };
+    picked = { a: 1, b: 7 }; // the pair where pixels, AE and VAE differ most clearly
+    el.querySelector(".interp-note").hidden = false;
+  }
   for (const ab of ["a", "b"]) {
     await catPicker(el.querySelector(`.ab-picker[data-ab="${ab}"]`), {
       selected: picked[ab],
@@ -54,10 +62,33 @@ function drawPixels(a, b) {
   }
 }
 
+/** Precomputed frames for the picked pair: { ae: [8 ImageData], vae: [...] }, A to B. */
+function v2Frames() {
+  const { a, b } = picked;
+  if (a === b) return null;
+  const [lo, hi] = a < b ? [a, b] : [b, a];
+  const k = v2.pairs.findIndex(([x, y]) => x === lo && y === hi);
+  const row = (r) => {
+    const f = Array.from({ length: FRAMES }, (_, i) => v2.sprite.get((2 * k + r) * FRAMES + i));
+    return a < b ? f : f.reverse();
+  };
+  return { ae_128: row(0), vae_128: row(1) };
+}
+
 async function refresh() {
   const mine = ++request;
   const images = [getShowcaseCat(picked.a), getShowcaseCat(picked.b)];
   drawPixels(...images);
+  if (v2) {
+    const frames = v2Frames();
+    for (const model of MODELS) {
+      const canvas = section.querySelector(`.interp-row[data-model="${model}"] canvas`);
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let f = 0; f < FRAMES; f++) ctx.putImageData(frames ? frames[model][f] : images[0], f * (TILE + GAP), 0);
+    }
+    return showFrame();
+  }
   for (const model of MODELS) {
     const row = section.querySelector(`.interp-row[data-model="${model}"]`);
     await inSlot(row.querySelector(".strip-wrap"), async () => {
@@ -82,6 +113,15 @@ async function showFrame() {
   const width = FRAMES * (TILE + GAP) - GAP;
   const centre = (TILE / 2 + t * (FRAMES - 1) * (TILE + GAP)) / width;
   for (const m of section.querySelectorAll(".strip-marker")) m.style.left = `${centre * 100}%`;
+  if (v2) {
+    const frames = v2Frames();
+    const i = Math.round(t * (FRAMES - 1));
+    for (const model of MODELS) {
+      const fig = section.querySelector(`.s16-live figure[data-model="${model}"]`);
+      drawCat(fig.querySelector("canvas"), frames ? frames[model][i] : getShowcaseCat(picked.a));
+    }
+    return;
+  }
   for (const model of MODELS) {
     const fig = section.querySelector(`.s16-live figure[data-model="${model}"]`);
     await inSlot(fig, async () => {

@@ -1,6 +1,6 @@
 {
- "version": "80a810e6dc85",
- "total_bytes": 74337700,
+ "version": "f7ad5f494fe3",
+ "total_bytes": 75099205,
  "files": [
   {
    "path": "404.html",
@@ -36,11 +36,11 @@
   },
   {
    "path": "css/part5.css",
-   "bytes": 20478
+   "bytes": 20552
   },
   {
    "path": "css/part6.css",
-   "bytes": 15207
+   "bytes": 15348
   },
   {
    "path": "css/tokens.css",
@@ -75,8 +75,32 @@
    "bytes": 253782
   },
   {
+   "path": "data/compare_pool.86e3ff.json",
+   "bytes": 116
+  },
+  {
+   "path": "data/compare_pool.fb6f10.jpg",
+   "bytes": 137776
+  },
+  {
    "path": "data/files.json",
-   "bytes": 4489
+   "bytes": 4974
+  },
+  {
+   "path": "data/gen_pool.5568a3.json",
+   "bytes": 168
+  },
+  {
+   "path": "data/gen_pool.893fc2.jpg",
+   "bytes": 227290
+  },
+  {
+   "path": "data/interp_v2.00de30.json",
+   "bytes": 355
+  },
+  {
+   "path": "data/interp_v2.df0048.jpg",
+   "bytes": 393986
   },
   {
    "path": "data/latent_maps.061a28.json",
@@ -152,7 +176,7 @@
   },
   {
    "path": "index.html",
-   "bytes": 51260
+   "bytes": 51503
   },
   {
    "path": "js/anim.js",
@@ -304,11 +328,11 @@
   },
   {
    "path": "js/slides/s27.js",
-   "bytes": 2891
+   "bytes": 3575
   },
   {
    "path": "js/slides/s28.js",
-   "bytes": 4450
+   "bytes": 4637
   },
   {
    "path": "js/slides/s29.js",

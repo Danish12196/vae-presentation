@@ -763,3 +763,5 @@ svg.tri {
 @media (max-width: 760px) { .trio-grid { width: 104px; } }
 
 .s17-more { order: 99; grid-column: 1 / -1; text-align: center; font-size: var(--fs-label); color: var(--text-soft); white-space: nowrap; }
+.trio-side { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; max-width: 30ch; }
+.trio-side .gary-caption { margin: 0; font-size: var(--fs-label); }

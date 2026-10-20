@@ -947,3 +947,5 @@ svg.worlds-svg {
 .gen-note { margin: 0; max-width: 26ch; font-size: var(--fs-label); color: var(--text-soft); text-align: center; }
 
 .interp-row[data-model="pixels"] .row-label { color: var(--text-soft); }
+
+.interp-note { margin: 0; text-align: center; font-size: var(--fs-label); color: var(--text-soft); }
