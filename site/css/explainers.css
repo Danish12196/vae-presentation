@@ -9,7 +9,7 @@
 .slide-head:has(> .analogy) {
   display: grid;
   grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-  grid-template-areas: "label label" "title chip";
+  grid-template-areas: "label chip" "title chip";
   align-items: center;
   column-gap: calc(var(--gap) * 2);
   row-gap: 8px;
