@@ -238,3 +238,53 @@ svg.bp2-graph {
   .bp2-right { flex-direction: row; flex-wrap: wrap; justify-content: center; }
   .bp2-buttons .btn { min-height: 40px; padding: 6px 14px; }
 }
+
+/* ================================================================ s30b measure it, then use it well */
+
+.eval-body {
+  align-items: flex-start;
+  gap: calc(var(--gap) * 1.5);
+}
+.eval-card {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 22px;
+  border: 3px solid var(--line);
+  background: var(--bg-raised);
+  box-shadow: 6px 6px 0 var(--accent);
+  font-size: var(--fs-small);
+}
+.eval-card:first-child { flex-grow: 1.4; }
+.eval-card h3 { margin: 0; color: var(--accent); }
+.eval-card ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 10px; }
+.eval-card strong { color: var(--accent); }
+.eval-sub { margin: 0; line-height: 1.35; }
+.eval-bars { display: flex; flex-direction: column; gap: 8px; }
+.eval-row { display: grid; grid-template-columns: 9.5em 1fr 5.5em; align-items: center; gap: 10px; }
+.eval-name { font-family: var(--font-mono); font-size: 0.85em; }
+.eval-track { height: 18px; border: 2px solid var(--line); background: var(--bg-sunken); }
+.eval-fill { display: block; height: 100%; width: 0; background: var(--accent); transition: width 600ms var(--ease); }
+.eval-row[data-model^="vae"] .eval-fill { background: var(--lilac); }
+.eval-db { text-align: right; font-weight: 700; }
+
+@media (max-height: 820px) {
+  .eval-card { padding: 12px 16px; gap: 8px; font-size: calc(var(--fs-small) * 0.9); }
+}
+@media (max-width: 1000px) {
+  .eval-body { flex-direction: column; gap: 10px; overflow: auto; }
+  .eval-card { padding: 10px 14px; gap: 6px; font-size: 14px; box-shadow: 4px 4px 0 var(--accent); }
+  .eval-card ul { gap: 4px; }
+  .eval-row { grid-template-columns: 8em 1fr 4.5em; }
+  .eval-track { height: 12px; }
+}
+@media (max-width: 760px) {
+  .eval-body { overflow: visible; }
+  .eval-card { font-size: 13px; }
+  .eval-card h3 { font-size: 18px; }
+  .eval-card .eval-sub:last-child { display: none; }
+  .eval-row { gap: 6px; }
+  .eval-db { font-size: 13px; }
+}
